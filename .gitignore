@@ -4,3 +4,7 @@ node_modules/
 .claude/
 dist/
 *.log
+frontend/planner/release/
+planner-app/desktop/dist-installer-v2/
+*.exe
+*.zip
