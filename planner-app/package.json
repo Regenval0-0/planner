@@ -1,0 +1,15 @@
+{
+  "name": "planner-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "desktop"
+  ],
+  "scripts": {
+    "dev:desktop": "npm run dev -w desktop",
+    "build:shared": "npm run build -w shared",
+    "build:desktop": "npm run build -w desktop"
+  }
+}

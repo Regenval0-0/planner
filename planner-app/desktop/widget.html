@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Виджет Планнера</title>
+  <script>
+    window.onerror = function(msg, url, line, col, err) {
+      console.error('[GLOBAL ERROR]', msg, 'at', url + ':' + line + ':' + col, err);
+      return false;
+    };
+    window.onunhandledrejection = function(e) {
+      console.error('[UNHANDLED REJECTION]', e.reason);
+    };
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/widget-main.tsx"></script>
+</body>
+</html>

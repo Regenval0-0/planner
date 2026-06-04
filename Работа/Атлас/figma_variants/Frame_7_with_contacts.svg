@@ -1,0 +1,192 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1340" viewBox="0 0 2000 1340">
+  <defs>
+    <linearGradient id="yellowGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#F3DB57"/>
+      <stop offset="100%" stop-color="#FFEB3B"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ===== BACKGROUND ===== -->
+  <rect width="2000" height="1340" fill="#FFFFFF"/>
+
+  <!-- ===== HEADER ===== -->
+  <g id="Header">
+    <rect width="2000" height="170" fill="url(#yellowGrad)"/>
+    <text x="60" y="75" font-family="Arial, sans-serif" font-size="44" font-weight="800" fill="#111111">ГПОУ «Кузбасский транспортно-технологический техникум»</text>
+    <text x="60" y="125" font-family="Arial, sans-serif" font-size="24" fill="#333333">Субъект Российской Федерации: Кемеровская область — Кузбасс</text>
+    <rect x="1780" y="40" width="120" height="90" fill="#FFFFFF" rx="12" stroke="#111111" stroke-width="3"/>
+    <text x="1840" y="95" font-family="Arial, sans-serif" font-size="36" font-weight="800" fill="#111111" text-anchor="middle">КТТТ</text>
+  </g>
+
+  <!-- ===== YELLOW CURVE ===== -->
+  <g id="Yellow_Curve">
+    <path d="M 1500 170 Q 1750 400 2000 400 L 2000 1100 Q 1600 1050 1500 1340 Z" fill="#F3DB57"/>
+    <path d="M 1450 170 Q 1680 380 1900 380 L 1900 1050 Q 1550 1000 1450 1280 Z" fill="#FFFFFF" opacity="0.3"/>
+  </g>
+
+  <!-- ===== PHOTO BUILDING ===== -->
+  <g id="Photo_Building">
+    <rect x="1480" y="200" width="460" height="620" fill="#EEEEEE" rx="20" stroke="#111111" stroke-width="4"/>
+    <text x="1710" y="510" font-family="Arial, sans-serif" font-size="24" font-weight="600" fill="#999999" text-anchor="middle">[ Фото учреждения ]</text>
+    <text x="1710" y="540" font-family="Arial, sans-serif" font-size="18" fill="#AAAAAA" text-anchor="middle">Замените в Figma</text>
+  </g>
+
+  <!-- ===== ACCESSIBILITY STATS ===== -->
+  <g id="Accessibility_Stats">
+    <text x="60" y="210" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#111111">Доступность организации:</text>
+    <g id="Stat_1">
+      <circle cx="140" cy="300" r="70" fill="#FFFFFF" stroke="#111111" stroke-width="4"/>
+      <text x="140" y="290" font-family="Arial, sans-serif" font-size="28" font-weight="800" fill="#111111" text-anchor="middle">88,67%</text>
+      <text x="140" y="315" font-family="Arial, sans-serif" font-size="14" fill="#555555" text-anchor="middle">по зрению</text>
+    </g>
+    <g id="Stat_2">
+      <circle cx="310" cy="300" r="70" fill="#FFFFFF" stroke="#111111" stroke-width="4"/>
+      <text x="310" y="290" font-family="Arial, sans-serif" font-size="28" font-weight="800" fill="#111111" text-anchor="middle">86,67%</text>
+      <text x="310" y="315" font-family="Arial, sans-serif" font-size="14" fill="#555555" text-anchor="middle">по слуху</text>
+    </g>
+    <g id="Stat_3">
+      <circle cx="480" cy="300" r="70" fill="#FFFFFF" stroke="#111111" stroke-width="4"/>
+      <text x="480" y="290" font-family="Arial, sans-serif" font-size="28" font-weight="800" fill="#111111" text-anchor="middle">93,2%</text>
+      <text x="480" y="315" font-family="Arial, sans-serif" font-size="14" fill="#555555" text-anchor="middle">НОДА (мобильные)</text>
+    </g>
+    <g id="Stat_4">
+      <circle cx="650" cy="300" r="70" fill="#FFFFFF" stroke="#111111" stroke-width="4"/>
+      <text x="650" y="290" font-family="Arial, sans-serif" font-size="28" font-weight="800" fill="#111111" text-anchor="middle">85,67%</text>
+      <text x="650" y="315" font-family="Arial, sans-serif" font-size="14" fill="#555555" text-anchor="middle">НОДА (на коляске)</text>
+    </g>
+    <g id="Stat_5">
+      <circle cx="820" cy="300" r="70" fill="#FFFFFF" stroke="#111111" stroke-width="4"/>
+      <text x="820" y="290" font-family="Arial, sans-serif" font-size="28" font-weight="800" fill="#111111" text-anchor="middle">93,34%</text>
+      <text x="820" y="315" font-family="Arial, sans-serif" font-size="14" fill="#555555" text-anchor="middle">УО</text>
+    </g>
+  </g>
+
+  <!-- ===== SPECIALTIES TABLE (12 rows) ===== -->
+  <g id="Specialties_Table">
+    <text x="60" y="400" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#111111">Профессии/Специальности:</text>
+    <!-- Headers -->
+    <rect x="60" y="420" width="140" height="36" fill="#F3DB57" rx="6"/><text x="75" y="444" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#111111">Код</text>
+    <rect x="206" y="420" width="660" height="36" fill="#F3DB57" rx="6"/><text x="220" y="444" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#111111">Наименование профессии/специальности</text>
+    <rect x="872" y="420" width="180" height="36" fill="#F3DB57" rx="6"/><text x="886" y="444" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#111111">Срок обучения</text>
+    <rect x="1058" y="420" width="200" height="36" fill="#F3DB57" rx="6"/><text x="1072" y="444" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#111111">Примечание</text>
+
+    <!-- Row 1 -->
+    <rect x="60" y="460" width="140" height="34" fill="#FFFDE7" rx="4"/><text x="75" y="482" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#111111">38.02.08</text>
+    <rect x="206" y="460" width="660" height="34" fill="#FFFDE7" rx="4"/><text x="220" y="482" font-family="Arial, sans-serif" font-size="16" fill="#333333">Торговое дело</text>
+    <rect x="872" y="460" width="180" height="34" fill="#FFFDE7" rx="4"/><text x="886" y="482" font-family="Arial, sans-serif" font-size="16" fill="#333333">2 года 10 мес</text>
+    <rect x="1058" y="460" width="200" height="34" fill="#FFFDE7" rx="4"/><text x="1072" y="482" font-family="Arial, sans-serif" font-size="16" fill="#333333">Дистанционное</text>
+
+    <!-- Row 2 -->
+    <rect x="60" y="498" width="140" height="34" fill="#FFFFFF" rx="4"/><text x="75" y="520" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#111111">23.02.07</text>
+    <rect x="206" y="498" width="660" height="34" fill="#FFFFFF" rx="4"/><text x="220" y="520" font-family="Arial, sans-serif" font-size="16" fill="#333333">Техническое обслуживание и ремонт автотранспортных средств</text>
+    <rect x="872" y="498" width="180" height="34" fill="#FFFFFF" rx="4"/><text x="886" y="520" font-family="Arial, sans-serif" font-size="16" fill="#333333">2 года 10 мес</text>
+    <rect x="1058" y="498" width="200" height="34" fill="#FFFFFF" rx="4"/>
+
+    <!-- Row 3 -->
+    <rect x="60" y="536" width="140" height="34" fill="#FFFDE7" rx="4"/><text x="75" y="558" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#111111">23.02.01</text>
+    <rect x="206" y="536" width="660" height="34" fill="#FFFDE7" rx="4"/><text x="220" y="558" font-family="Arial, sans-serif" font-size="16" fill="#333333">Организация перевозок и управление на транспорте (по видам)</text>
+    <rect x="872" y="536" width="180" height="34" fill="#FFFDE7" rx="4"/><text x="886" y="558" font-family="Arial, sans-serif" font-size="16" fill="#333333">2 года 10 мес</text>
+    <rect x="1058" y="536" width="200" height="34" fill="#FFFDE7" rx="4"/><text x="1072" y="558" font-family="Arial, sans-serif" font-size="16" fill="#333333">Дистанционное</text>
+
+    <!-- Row 4 -->
+    <rect x="60" y="574" width="140" height="34" fill="#FFFFFF" rx="4"/><text x="75" y="596" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#111111">23.02.04</text>
+    <rect x="206" y="574" width="660" height="34" fill="#FFFFFF" rx="4"/><text x="220" y="596" font-family="Arial, sans-serif" font-size="16" fill="#333333">Техническая эксплуатация подъемно-транспортных машин</text>
+    <rect x="872" y="574" width="180" height="34" fill="#FFFFFF" rx="4"/><text x="886" y="596" font-family="Arial, sans-serif" font-size="16" fill="#333333">2 года 10 мес</text>
+    <rect x="1058" y="574" width="200" height="34" fill="#FFFFFF" rx="4"/>
+
+    <!-- Row 5 -->
+    <rect x="60" y="612" width="140" height="34" fill="#FFFDE7" rx="4"/><text x="75" y="634" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#111111">25.02.08</text>
+    <rect x="206" y="612" width="660" height="34" fill="#FFFDE7" rx="4"/><text x="220" y="634" font-family="Arial, sans-serif" font-size="16" fill="#333333">Эксплуатация беспилотных авиационных систем</text>
+    <rect x="872" y="612" width="180" height="34" fill="#FFFDE7" rx="4"/><text x="886" y="634" font-family="Arial, sans-serif" font-size="16" fill="#333333">3 года 10 мес</text>
+    <rect x="1058" y="612" width="200" height="34" fill="#FFFDE7" rx="4"/>
+
+    <!-- Row 6 -->
+    <rect x="60" y="650" width="140" height="34" fill="#FFFFFF" rx="4"/><text x="75" y="672" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#111111">43.02.17</text>
+    <rect x="206" y="650" width="660" height="34" fill="#FFFFFF" rx="4"/><text x="220" y="672" font-family="Arial, sans-serif" font-size="16" fill="#333333">Технология индустрии красоты</text>
+    <rect x="872" y="650" width="180" height="34" fill="#FFFFFF" rx="4"/><text x="886" y="672" font-family="Arial, sans-serif" font-size="16" fill="#333333">2 года 10 мес</text>
+    <rect x="1058" y="650" width="200" height="34" fill="#FFFFFF" rx="4"/>
+
+    <!-- Row 7 -->
+    <rect x="60" y="688" width="140" height="34" fill="#FFFDE7" rx="4"/><text x="75" y="710" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#111111">23.01.17</text>
+    <rect x="206" y="688" width="660" height="34" fill="#FFFDE7" rx="4"/><text x="220" y="710" font-family="Arial, sans-serif" font-size="16" fill="#333333">Мастер по ремонту и обслуживанию автомобилей</text>
+    <rect x="872" y="688" width="180" height="34" fill="#FFFDE7" rx="4"/><text x="886" y="710" font-family="Arial, sans-serif" font-size="16" fill="#333333">1 год 10 мес</text>
+    <rect x="1058" y="688" width="200" height="34" fill="#FFFDE7" rx="4"/>
+
+    <!-- Row 8 -->
+    <rect x="60" y="726" width="140" height="34" fill="#FFFFFF" rx="4"/><text x="75" y="748" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#111111">—</text>
+    <rect x="206" y="726" width="660" height="34" fill="#FFFFFF" rx="4"/><text x="220" y="748" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA\">—</text>
+    <rect x="872" y="726" width="180" height="34" fill="#FFFFFF" rx="4"/><text x="886" y="748" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA">—</text>
+    <rect x="1058" y="726" width="200" height="34" fill="#FFFFFF" rx="4"/><text x="1072" y="748" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA">—</text>
+
+    <!-- Row 9 -->
+    <rect x="60" y="764" width="140" height="34" fill="#FFFDE7" rx="4"/><text x="75" y="786" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#111111">—</text>
+    <rect x="206" y="764" width="660" height="34" fill="#FFFDE7" rx="4"/><text x="220" y="786" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA">—</text>
+    <rect x="872" y="764" width="180" height="34" fill="#FFFDE7" rx="4"/><text x="886" y="786" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA">—</text>
+    <rect x="1058" y="764" width="200" height="34" fill="#FFFDE7" rx="4"/><text x="1072" y="786" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA">—</text>
+
+    <!-- Row 10 -->
+    <rect x="60" y="802" width="140" height="34" fill="#FFFFFF" rx="4"/><text x="75" y="824" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#111111">—</text>
+    <rect x="206" y="802" width="660" height="34" fill="#FFFFFF" rx="4"/><text x="220" y="824" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA">—</text>
+    <rect x="872" y="802" width="180" height="34" fill="#FFFFFF" rx="4"/><text x="886" y="824" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA">—</text>
+    <rect x="1058" y="802" width="200" height="34" fill="#FFFFFF" rx="4"/><text x="1072" y="824" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA">—</text>
+
+    <!-- Row 11 -->
+    <rect x="60" y="840" width="140" height="34" fill="#FFFDE7" rx="4"/><text x="75" y="862" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#111111">—</text>
+    <rect x="206" y="840" width="660" height="34" fill="#FFFDE7" rx="4"/><text x="220" y="862" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA">—</text>
+    <rect x="872" y="840" width="180" height="34" fill="#FFFDE7" rx="4"/><text x="886" y="862" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA">—</text>
+    <rect x="1058" y="840" width="200" height="34" fill="#FFFDE7" rx="4"/><text x="1072" y="862" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA">—</text>
+
+    <!-- Row 12 -->
+    <rect x="60" y="878" width="140" height="34" fill="#FFFFFF" rx="4"/><text x="75" y="900" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#111111">—</text>
+    <rect x="206" y="878" width="660" height="34" fill="#FFFFFF" rx="4"/><text x="220" y="900" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA">—</text>
+    <rect x="872" y="878" width="180" height="34" fill="#FFFFFF" rx="4"/><text x="886" y="900" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA">—</text>
+    <rect x="1058" y="878" width="200" height="34" fill="#FFFFFF" rx="4"/><text x="1072" y="900" font-family="Arial, sans-serif" font-size="16" fill="#AAAAAA">—</text>
+  </g>
+
+  <!-- ===== ADMISSION BANNER ===== -->
+  <g id="Admission_Banner">
+    <rect x="60" y="940" width="1880" height="80" rx="12" fill="#111111"/>
+    <text x="80" y="970" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#FFEB3B">Приёмная кампания 2026</text>
+    <text x="440" y="970" font-family="Arial, sans-serif" font-size="22" fill="#FFFFFF">·  Общий набор: 20.06.2026 — 15.08.2026</text>
+    <text x="900" y="970" font-family="Arial, sans-serif" font-size="22" fill="#FFFFFF">·  Доп. набор до 25.11.2026</text>
+    <text x="80" y="1000" font-family="Arial, sans-serif" font-size="22" fill="#FFFFFF">Общежитие: г. Киселёвск, ул. Дружбы, д. 13</text>
+  </g>
+
+  <!-- ===== CONTACTS BLOCK ===== -->
+  <g id="Contacts_Block">
+    <rect x="60" y="1040" width="600" height="220" rx="14" fill="#111111"/>
+    <text x="80" y="1075" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#FFEB3B">Наши контакты</text>
+    <text x="80" y="1115" font-family="Arial, sans-serif" font-size="20" fill="#FFFFFF">Адрес: г. Киселёвск, ул. Дружбы, 11</text>
+    <text x="80" y="1145" font-family="Arial, sans-serif" font-size="20" fill="#AAAAAA">       г. Прокопьевск, ул. Союзная, 70</text>
+    <text x="80" y="1185" font-family="Arial, sans-serif" font-size="20" fill="#FFFFFF">Тел:  8(939)-273-24-03</text>
+    <text x="80" y="1215" font-family="Arial, sans-serif" font-size="20" fill="#AAAAAA">Гор:  8(38464)2-41-34, 8(38464)2-37-46</text>
+    <text x="80" y="1245" font-family="Arial, sans-serif" font-size="20" fill="#FFFFFF">Mail: kttt.kis@yandex.ru</text>
+  </g>
+
+  <!-- ===== QR BLOCK ===== -->
+  <g id="QR_Block">
+    <rect x="680" y="1040" width="260" height="220" rx="12" fill="#FFFFFF" stroke="#111111" stroke-width="3"/>
+    <rect x="720" y="1070" width="180" height="180" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>
+    <text x="810" y="1270" font-family="Arial, sans-serif" font-size="18" fill="#999999" text-anchor="middle">QR  kttt42.ru</text>
+  </g>
+
+  <!-- ===== SOCIAL LINKS ===== -->
+  <g id="Social_Links">
+    <rect x="960" y="1040" width="980" height="220" rx="14" fill="#FFEB3B"/>
+    <text x="980" y="1075" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#111111">Мы в соцсетях</text>
+    <rect x="980" y="1095" width="940" height="46" rx="23" fill="#111111"/>
+    <text x="1000" y="1125" font-family="Arial, sans-serif" font-size="22" fill="#FFEB3B">🌐   kttt42.ru</text>
+    <rect x="980" y="1155" width="940" height="46" rx="23" fill="#111111"/>
+    <text x="1000" y="1185" font-family="Arial, sans-serif" font-size="22" fill="#FFEB3B">📱   vk.com/club185</text>
+    <rect x="980" y="1215" width="940" height="46" rx="23" fill="#111111"/>
+    <text x="1000" y="1245" font-family="Arial, sans-serif" font-size="22" fill="#FFEB3B">✉️   kttt.kis@yandex.ru</text>
+  </g>
+
+  <!-- ===== FOOTER ===== -->
+  <g id="Footer">
+    <rect x="0" y="1290" width="2000" height="50" fill="#111111"/>
+    <text x="60" y="1322" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#FFEB3B">ГПОУ «КТТТ» — инклюзивное образование в Кузбассе</text>
+    <text x="1600" y="1322" font-family="Arial, sans-serif" font-size="22" fill="#FFFFFF">📞  8(939)-273-24-03</text>
+  </g>
+
+</svg>

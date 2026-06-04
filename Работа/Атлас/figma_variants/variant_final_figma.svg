@@ -1,0 +1,207 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="790" viewBox="0 0 1120 790">
+  <defs>
+    <linearGradient id="yellowGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FFEB3B"/>
+      <stop offset="100%" stop-color="#FDD835"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ===== BACKGROUND ===== -->
+  <rect width="1120" height="790" fill="#FFFFFF"/>
+
+  <!-- ===== LAYER: HEADER ===== -->
+  <g id="Header">
+    <rect width="1120" height="110" fill="url(#yellowGrad)"/>
+    <text x="40" y="50" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="800" fill="#111111">ГПОУ «Кузбасский транспортно-технологический техникум»</text>
+    <text x="40" y="78" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#333333">Субъект Российской Федерации: Кемеровская область — Кузбасс</text>
+
+    <rect x="940" y="25" width="50" height="50" fill="#FFFFFF" rx="8" stroke="#111111" stroke-width="2"/>
+    <text x="965" y="55" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="800" fill="#111111" text-anchor="middle">КТТТ</text>
+  </g>
+
+  <!-- ===== LAYER: ACCESSIBILITY STATS ===== -->
+  <g id="Accessibility_Stats">
+    <text x="40" y="140" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#111111">Доступность организации:</text>
+
+    <g id="Circle_1">
+      <circle cx="100" cy="185" r="40" fill="#FFFFFF" stroke="#111111" stroke-width="3"/>
+      <text x="100" y="180" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" fill="#111111" text-anchor="middle">88,67%</text>
+      <text x="100" y="195" font-family="Segoe UI, Arial, sans-serif" font-size="9" fill="#555555" text-anchor="middle">по зрению</text>
+    </g>
+    <g id="Circle_2">
+      <circle cx="210" cy="185" r="40" fill="#FFFFFF" stroke="#111111" stroke-width="3"/>
+      <text x="210" y="180" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" fill="#111111" text-anchor="middle">86,67%</text>
+      <text x="210" y="195" font-family="Segoe UI, Arial, sans-serif" font-size="9" fill="#555555" text-anchor="middle">по слуху</text>
+    </g>
+    <g id="Circle_3">
+      <circle cx="320" cy="185" r="40" fill="#FFFFFF" stroke="#111111" stroke-width="3"/>
+      <text x="320" y="180" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" fill="#111111" text-anchor="middle">93,2%</text>
+      <text x="320" y="195" font-family="Segoe UI, Arial, sans-serif" font-size="9" fill="#555555" text-anchor="middle">НОДА (мобильные)</text>
+    </g>
+    <g id="Circle_4">
+      <circle cx="430" cy="185" r="40" fill="#FFFFFF" stroke="#111111" stroke-width="3"/>
+      <text x="430" y="180" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" fill="#111111" text-anchor="middle">85,67%</text>
+      <text x="430" y="195" font-family="Segoe UI, Arial, sans-serif" font-size="9" fill="#555555" text-anchor="middle">НОДА (на коляске)</text>
+    </g>
+    <g id="Circle_5">
+      <circle cx="540" cy="185" r="40" fill="#FFFFFF" stroke="#111111" stroke-width="3"/>
+      <text x="540" y="180" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" fill="#111111" text-anchor="middle">93,34%</text>
+      <text x="540" y="195" font-family="Segoe UI, Arial, sans-serif" font-size="9" fill="#555555" text-anchor="middle">УО</text>
+    </g>
+  </g>
+
+  <!-- ===== LAYER: YELLOW CURVE ===== -->
+  <g id="Yellow_Curve">
+    <path d="M 820 110 Q 950 250 1120 250 L 1120 700 Q 900 650 820 790 Z" fill="#FFEB3B"/>
+    <path d="M 820 110 Q 950 250 1120 250 L 1120 700 Q 900 650 820 790 Z" fill="none" stroke="#FDD835" stroke-width="2"/>
+  </g>
+
+  <!-- ===== LAYER: PHOTO ===== -->
+  <g id="Photo_Building">
+    <rect x="730" y="140" width="360" height="420" fill="#EEEEEE" rx="14" stroke="#111111" stroke-width="3"/>
+    <text x="910" y="350" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" fill="#999999" text-anchor="middle">[ Фото учреждения ]</text>
+    <text x="910" y="370" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#AAAAAA" text-anchor="middle">Замените в Figma</text>
+  </g>
+
+  <!-- ===== LAYER: SPECIALTIES TITLE ===== -->
+  <g id="Specialties_Title">
+    <text x="40" y="255" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#111111">Профессии/Специальности:</text>
+  </g>
+
+  <!-- ===== LAYER: SPECIALTIES TABLE (12 ROWS) ===== -->
+  <g id="Specialties_Table">
+    <!-- Headers -->
+    <rect x="40" y="270" width="80" height="22" fill="#FFEB3B" rx="4"/>
+    <text x="55" y="285" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#111111">Код</text>
+    <rect x="124" y="270" width="340" height="22" fill="#FFEB3B" rx="4"/>
+    <text x="136" y="285" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#111111">Наименование профессии/специальности</text>
+    <rect x="468" y="270" width="100" height="22" fill="#FFEB3B" rx="4"/>
+    <text x="480" y="285" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#111111">Срок обучения</text>
+    <rect x="574" y="270" width="110" height="22" fill="#FFEB3B" rx="4"/>
+    <text x="586" y="285" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#111111">Примечание</text>
+
+    <!-- Row 1 -->
+    <rect x="40" y="296" width="80" height="22" fill="#FFFDE7" rx="3"/><text x="55" y="310" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#111111">38.02.08</text>
+    <rect x="124" y="296" width="340" height="22" fill="#FFFDE7" rx="3"/><text x="136" y="310" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">Торговое дело</text>
+    <rect x="468" y="296" width="100" height="22" fill="#FFFDE7" rx="3"/><text x="480" y="310" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">2 года 10 мес</text>
+    <rect x="574" y="296" width="110" height="22" fill="#FFFDE7" rx="3"/><text x="586" y="310" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">Дистанционное</text>
+
+    <!-- Row 2 -->
+    <rect x="40" y="320" width="80" height="22" fill="#FFFFFF" rx="3"/><text x="55" y="334" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#111111">23.02.07</text>
+    <rect x="124" y="320" width="340" height="22" fill="#FFFFFF" rx="3"/><text x="136" y="334" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">Техническое обслуживание и ремонт автотранспортных средств</text>
+    <rect x="468" y="320" width="100" height="22" fill="#FFFFFF" rx="3"/><text x="480" y="334" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">2 года 10 мес</text>
+    <rect x="574" y="320" width="110" height="22" fill="#FFFFFF" rx="3"/>
+
+    <!-- Row 3 -->
+    <rect x="40" y="344" width="80" height="22" fill="#FFFDE7" rx="3"/><text x="55" y="358" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#111111">23.02.01</text>
+    <rect x="124" y="344" width="340" height="22" fill="#FFFDE7" rx="3"/><text x="136" y="358" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">Организация перевозок и управление на транспорте (по видам)</text>
+    <rect x="468" y="344" width="100" height="22" fill="#FFFDE7" rx="3"/><text x="480" y="358" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">2 года 10 мес</text>
+    <rect x="574" y="344" width="110" height="22" fill="#FFFDE7" rx="3"/><text x="586" y="358" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">Дистанционное</text>
+
+    <!-- Row 4 -->
+    <rect x="40" y="368" width="80" height="22" fill="#FFFFFF" rx="3"/><text x="55" y="382" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#111111">23.02.04</text>
+    <rect x="124" y="368" width="340" height="22" fill="#FFFFFF" rx="3"/><text x="136" y="382" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">Техническая эксплуатация подъемно-транспортных машин</text>
+    <rect x="468" y="368" width="100" height="22" fill="#FFFFFF" rx="3"/><text x="480" y="382" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">2 года 10 мес</text>
+    <rect x="574" y="368" width="110" height="22" fill="#FFFFFF" rx="3"/>
+
+    <!-- Row 5 -->
+    <rect x="40" y="392" width="80" height="22" fill="#FFFDE7" rx="3"/><text x="55" y="406" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#111111">25.02.08</text>
+    <rect x="124" y="392" width="340" height="22" fill="#FFFDE7" rx="3"/><text x="136" y="406" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">Эксплуатация беспилотных авиационных систем</text>
+    <rect x="468" y="392" width="100" height="22" fill="#FFFDE7" rx="3"/><text x="480" y="406" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">3 года 10 мес</text>
+    <rect x="574" y="392" width="110" height="22" fill="#FFFDE7" rx="3"/>
+
+    <!-- Row 6 -->
+    <rect x="40" y="416" width="80" height="22" fill="#FFFFFF" rx="3"/><text x="55" y="430" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#111111">43.02.17</text>
+    <rect x="124" y="416" width="340" height="22" fill="#FFFFFF" rx="3"/><text x="136" y="430" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">Технология индустрии красоты</text>
+    <rect x="468" y="416" width="100" height="22" fill="#FFFFFF" rx="3"/><text x="480" y="430" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">2 года 10 мес</text>
+    <rect x="574" y="416" width="110" height="22" fill="#FFFFFF" rx="3"/>
+
+    <!-- Row 7 -->
+    <rect x="40" y="440" width="80" height="22" fill="#FFFDE7" rx="3"/><text x="55" y="454" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="700" fill="#111111">23.01.17</text>
+    <rect x="124" y="440" width="340" height="22" fill="#FFFDE7" rx="3"/><text x="136" y="454" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">Мастер по ремонту и обслуживанию автомобилей</text>
+    <rect x="468" y="440" width="100" height="22" fill="#FFFDE7" rx="3"/><text x="480" y="454" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#333333">1 год 10 мес</text>
+    <rect x="574" y="440" width="110" height="22" fill="#FFFDE7" rx="3"/>
+
+    <!-- Row 8 (empty) -->
+    <rect x="40" y="464" width="80" height="22" fill="#FFFFFF" rx="3"/><text x="55" y="478" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="124" y="464" width="340" height="22" fill="#FFFFFF" rx="3"/><text x="136" y="478" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="468" y="464" width="100" height="22" fill="#FFFFFF" rx="3"/><text x="480" y="478" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="574" y="464" width="110" height="22" fill="#FFFFFF" rx="3"/><text x="586" y="478" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+
+    <!-- Row 9 (empty) -->
+    <rect x="40" y="488" width="80" height="22" fill="#FFFDE7" rx="3"/><text x="55" y="502" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="124" y="488" width="340" height="22" fill="#FFFDE7" rx="3"/><text x="136" y="502" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="468" y="488" width="100" height="22" fill="#FFFDE7" rx="3"/><text x="480" y="502" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="574" y="488" width="110" height="22" fill="#FFFDE7" rx="3"/><text x="586" y="502" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+
+    <!-- Row 10 (empty) -->
+    <rect x="40" y="512" width="80" height="22" fill="#FFFFFF" rx="3"/><text x="55" y="526" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="124" y="512" width="340" height="22" fill="#FFFFFF" rx="3"/><text x="136" y="526" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="468" y="512" width="100" height="22" fill="#FFFFFF" rx="3"/><text x="480" y="526" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="574" y="512" width="110" height="22" fill="#FFFFFF" rx="3"/><text x="586" y="526" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+
+    <!-- Row 11 (empty) -->
+    <rect x="40" y="536" width="80" height="22" fill="#FFFDE7" rx="3"/><text x="55" y="550" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="124" y="536" width="340" height="22" fill="#FFFDE7" rx="3"/><text x="136" y="550" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="468" y="536" width="100" height="22" fill="#FFFDE7" rx="3"/><text x="480" y="550" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="574" y="536" width="110" height="22" fill="#FFFDE7" rx="3"/><text x="586" y="550" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+
+    <!-- Row 12 (empty) -->
+    <rect x="40" y="560" width="80" height="22" fill="#FFFFFF" rx="3"/><text x="55" y="574" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="124" y="560" width="340" height="22" fill="#FFFFFF" rx="3"/><text x="136" y="574" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="468" y="560" width="100" height="22" fill="#FFFFFF" rx="3"/><text x="480" y="574" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+    <rect x="574" y="560" width="110" height="22" fill="#FFFFFF" rx="3"/><text x="586" y="574" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#AAAAAA">—</text>
+  </g>
+
+  <!-- ===== LAYER: ADMISSION BANNER ===== -->
+  <g id="Admission_Info">
+    <rect x="40" y="595" width="666" height="45" fill="#111111" rx="8"/>
+    <text x="55" y="615" font-family="Segoe UI, Arial, sans-serif" font-size="11.5" fill="#FFFFFF"><tspan font-weight="700" fill="#FFEB3B">Приёмная кампания 2026:</tspan> общий набор с 20.06.2026 г. до 15.08.2026 г., дополнительный набор до 25.11.2026 г.</text>
+    <text x="55" y="631" font-family="Segoe UI, Arial, sans-serif" font-size="11.5" fill="#FFFFFF"><tspan font-weight="700" fill="#FFEB3B">Общежитие:</tspan> г. Киселёвск, ул. Дружбы, д. 13</text>
+  </g>
+
+  <!-- ===== LAYER: BOTTOM CONTACTS BLOCK ===== -->
+  <g id="Bottom_Contacts">
+    <g id="Contacts_Address">
+      <rect x="40" y="655" width="320" height="110" fill="#FFFFFF" rx="10" stroke="#EEEEEE" stroke-width="1"/>
+      <text x="55" y="680" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#111111">Наши контакты</text>
+      <text x="55" y="705" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#444444"><tspan font-weight="700" fill="#111111">Адрес БПОО:</tspan> г. Киселёвск, ул. Дружбы, 11</text>
+      <text x="55" y="720" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#444444">г. Прокопьевск, ул. Союзная, 70</text>
+      <text x="55" y="740" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#444444"><tspan font-weight="700" fill="#111111">Телефон:</tspan> 8(939)-273-24-03</text>
+      <text x="55" y="755" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#444444"><tspan font-weight="700" fill="#111111">Горячая линия:</tspan> 8(38464)2-41-34, 8(38464)2-37-46</text>
+    </g>
+
+    <g id="QR_Block">
+      <rect x="370" y="655" width="120" height="110" fill="#FFFFFF" rx="10" stroke="#EEEEEE" stroke-width="1"/>
+      <rect x="390" y="670" width="80" height="80" fill="#FFFFFF" stroke="#111111" stroke-width="2" rx="4"/>
+      <g fill="#111111">
+        <rect x="396" y="676" width="5" height="5"/><rect x="401" y="676" width="5" height="5"/><rect x="406" y="676" width="5" height="5"/><rect x="411" y="676" width="5" height="5"/><rect x="416" y="676" width="5" height="5"/><rect x="421" y="676" width="5" height="5"/><rect x="426" y="676" width="5" height="5"/>
+        <rect x="396" y="681" width="5" height="5"/><rect x="406" y="681" width="5" height="5"/><rect x="426" y="681" width="5" height="5"/>
+        <rect x="396" y="686" width="5" height="5"/><rect x="401" y="686" width="5" height="5"/><rect x="406" y="686" width="5" height="5"/><rect x="411" y="686" width="5" height="5"/><rect x="421" y="686" width="5" height="5"/><rect x="426" y="686" width="5" height="5"/>
+        <rect x="396" y="691" width="5" height="5"/><rect x="406" y="691" width="5" height="5"/><rect x="416" y="691" width="5" height="5"/><rect x="426" y="691" width="5" height="5"/>
+        <rect x="396" y="696" width="5" height="5"/><rect x="406" y="696" width="5" height="5"/><rect x="411" y="696" width="5" height="5"/><rect x="426" y="696" width="5" height="5"/>
+        <rect x="396" y="701" width="5" height="5"/><rect x="401" y="701" width="5" height="5"/><rect x="406" y="701" width="5" height="5"/><rect x="416" y="701" width="5" height="5"/><rect x="421" y="701" width="5" height="5"/><rect x="426" y="701" width="5" height="5"/>
+        <rect x="411" y="706" width="5" height="5"/><rect x="421" y="706" width="5" height="5"/>
+        <rect x="396" y="706" width="5" height="5"/><rect x="401" y="706" width="5" height="5"/><rect x="406" y="706" width="5" height="5"/><rect x="416" y="706" width="5" height="5"/><rect x="426" y="706" width="5" height="5"/>
+      </g>
+      <text x="430" y="765" font-family="Segoe UI, Arial, sans-serif" font-size="9" fill="#777777" text-anchor="middle">kttt42.ru</text>
+    </g>
+
+    <g id="Social_Links">
+      <rect x="500" y="655" width="206" height="110" fill="#FFEB3B" rx="10" stroke="#FDD835" stroke-width="1"/>
+      <text x="514" y="680" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#111111">Мы в соцсетях</text>
+      <rect x="514" y="690" width="178" height="24" fill="#111111" rx="12"/>
+      <text x="603" y="706" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" fill="#FFEB3B" text-anchor="middle">🌐  kttt42.ru</text>
+      <rect x="514" y="720" width="178" height="24" fill="#111111" rx="12"/>
+      <text x="603" y="736" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" fill="#FFEB3B" text-anchor="middle">📱  vk.com/club185</text>
+      <rect x="514" y="750" width="178" height="24" fill="#111111" rx="12"/>
+      <text x="603" y="766" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" fill="#FFEB3B" text-anchor="middle">✉️  kttt.kis@yandex.ru</text>
+    </g>
+  </g>
+
+  <!-- ===== LAYER: FOOTER STRIP ===== -->
+  <g id="Footer">
+    <rect x="0" y="778" width="1120" height="12" fill="#111111"/>
+  </g>
+
+</svg>

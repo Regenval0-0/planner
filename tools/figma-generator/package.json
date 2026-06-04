@@ -1,0 +1,22 @@
+{
+  "name": "figma-generator",
+  "version": "1.0.0",
+  "description": "Generate .fig files programmatically using openfig-core",
+  "main": "index.js",
+  "scripts": {
+    "generate": "tsx src/generate.ts",
+    "verify": "tsx src/verify.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["figma", "fig", "generator"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@mongodb-js/zstd": "^7.0.0",
+    "@types/node": "^25.9.1",
+    "openfig-core": "^0.3.7",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}

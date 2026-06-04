@@ -1,0 +1,13 @@
+{
+  "tasks": [
+    {
+      "id": "19a7dec9",
+      "cron": "0 21 * * 6",
+      "prompt": "Автоочистка ноутбука. Выполни следующее без лишних вопросов:\n1. Удали все файлы из %TEMP% (C:\\Users\\dasha\\AppData\\Local\\Temp), кроме занятых запущенными процессами.\n2. Очисти pip cache: python -m pip cache purge.\n3. Очисти npm cache: npm cache clean --force.\n4. В папке Downloads удали установщики (.exe, .msi, .msix), если они старше 7 дней.\n5. Удали .tmp, .log, .bak файлы в Downloads, Desktop, Documents старше 7 дней.\n6. Удали пустые папки и дублирующиеся файлы (например, file (1).exe).\n7. Проверь .claude на мусорные сессии (например C--WINDOWS-system32) и удали их.\n8. Выведи итог: сколько удалено файлов и сколько места освобождено.",
+      "createdAt": 1780325185939,
+      "recurring": true,
+      "createdBySessionId": "7ff0ae67-7c10-46ac-8a53-8833ad462f90",
+      "createdByPid": 10256
+    }
+  ]
+}

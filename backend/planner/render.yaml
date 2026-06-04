@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: planner-app
+    env: node
+    plan: free
+    buildCommand: cp prisma/schema.prod.prisma prisma/schema.prisma && npm install && npm run db:generate && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: RESEND_API_KEY
+        sync: false
+      - key: APP_URL
+        value: https://planner-app.onrender.com
+    healthCheckPath: /health

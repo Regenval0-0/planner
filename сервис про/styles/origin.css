@@ -1,0 +1,11 @@
+@font-face {
+	font-family: 'Gothic Std Regular';
+	src: local('Gothic Std Regular'),
+		url('../fonts/Century Gothic Std Regular.otf');
+}
+
+* {
+	font-family: 'Gothic Std Regular', sans-serif;
+	margin: 0;
+	padding: 0;
+}

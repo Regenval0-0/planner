@@ -1,0 +1,38 @@
+header {
+	background-color: rgba(186, 166, 47, 0.7);
+	height: 1vw;
+	padding: 2vw;
+	display: flex;
+	align-items: center;
+	position: sticky;
+}
+
+.logo {
+	width: 9vw;
+	margin-top: 1vw;
+}
+
+nav {
+	margin-left: 9vw;
+}
+
+ul {
+	display: flex ;
+	list-style: none;
+	gap: 2.5vw;
+
+}
+
+a {
+	text-decoration: none;
+	color: #2e2802;
+	font-weight: 600;
+	font-size: 1.3vw;
+}
+
+.kak_svizatsz {
+	margin-left: 9vw;
+	border: 2px dotted #2e2802;
+	border-radius: 0.4vw;
+	padding: 0.3vw;
+}

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "C:\\Ren",
+      "C:\\tmp",
+      "C:\\Users\\dasha\\AppData",
+      "*"
+    ],
+    "dangerouslySkipPermissions": true
+  }
+}

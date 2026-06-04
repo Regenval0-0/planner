@@ -1,0 +1,14 @@
+{
+  "name": "@planner/desktop",
+  "version": "1.0.0",
+  "description": "Персональный планировщик задач, событий и встреч",
+  "author": "Planner Team",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@planner/shared": "1.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "main": "dist-electron/main.js"
+}

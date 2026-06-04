@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Визитки для печати</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #eee;
+        }
+        .page {
+            width: 210mm;
+            height: 297mm;
+            padding: 17.5mm 15mm;
+            background: white;
+            page-break-after: always;
+            display: grid;
+            grid-template-columns: repeat(2, 90mm);
+            grid-template-rows: repeat(5, 50mm);
+            gap: 3mm;
+            justify-content: center;
+            align-content: center;
+        }
+        .page:last-child {
+            page-break-after: auto;
+        }
+        .card {
+            width: 90mm;
+            height: 50mm;
+            border: 0.3mm dashed #bbb;
+            overflow: hidden;
+            position: relative;
+        }
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            display: block;
+        }
+        .back img {
+            transform: scaleX(-1);
+        }
+        @media print {
+            body { background: none; }
+            .page {
+                box-shadow: none;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Страница 1: Лицевая сторона (10 шт, сетка 2×5) -->
+    <div class="page front">
+        <div class="card"><img src="vizitka_front.png" alt="Лицевая сторона"></div>
+        <div class="card"><img src="vizitka_front.png" alt="Лицевая сторона"></div>
+        <div class="card"><img src="vizitka_front.png" alt="Лицевая сторона"></div>
+        <div class="card"><img src="vizitka_front.png" alt="Лицевая сторона"></div>
+        <div class="card"><img src="vizitka_front.png" alt="Лицевая сторона"></div>
+        <div class="card"><img src="vizitka_front.png" alt="Лицевая сторона"></div>
+        <div class="card"><img src="vizitka_front.png" alt="Лицевая сторона"></div>
+        <div class="card"><img src="vizitka_front.png" alt="Лицевая сторона"></div>
+        <div class="card"><img src="vizitka_front.png" alt="Лицевая сторона"></div>
+        <div class="card"><img src="vizitka_front.png" alt="Лицевая сторона"></div>
+    </div>
+
+    <!-- Страница 2: Оборотная сторона (зеркально для двусторонней печати) -->
+    <div class="page back">
+        <div class="card"><img src="vizitka_back.png" alt="Оборотная сторона"></div>
+        <div class="card"><img src="vizitka_back.png" alt="Оборотная сторона"></div>
+        <div class="card"><img src="vizitka_back.png" alt="Оборотная сторона"></div>
+        <div class="card"><img src="vizitka_back.png" alt="Оборотная сторона"></div>
+        <div class="card"><img src="vizitka_back.png" alt="Оборотная сторона"></div>
+        <div class="card"><img src="vizitka_back.png" alt="Оборотная сторона"></div>
+        <div class="card"><img src="vizitka_back.png" alt="Оборотная сторона"></div>
+        <div class="card"><img src="vizitka_back.png" alt="Оборотная сторона"></div>
+        <div class="card"><img src="vizitka_back.png" alt="Оборотная сторона"></div>
+        <div class="card"><img src="vizitka_back.png" alt="Оборотная сторона"></div>
+    </div>
+</body>
+</html>

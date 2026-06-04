@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                      String    @id @default(uuid())
+  email                   String    @unique
+  passwordHash            String    @map("password_hash")
+  emailVerified           Boolean   @default(false) @map("email_verified")
+  verificationCode        String?   @map("verification_code")
+  verificationCodeExpires DateTime? @map("verification_code_expires")
+  resetCode               String?   @map("reset_code")
+  resetCodeExpires        DateTime? @map("reset_code_expires")
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
+
+  events Event[]
+
+  @@map("users")
+}
+
+model Event {
+  id                 String    @id @default(uuid())
+  userId             String    @map("user_id")
+  title              String
+  description        String?
+  startDate          DateTime  @map("start_date")
+  endDate            DateTime? @map("end_date")
+  type               String    @default("event")
+  recurrence         String?   @map("recurrence")
+  recurrenceEnd      DateTime? @map("recurrence_end")
+  recurrenceInterval Int?      @map("recurrence_interval")
+  amount             Float?    @map("amount")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startDate])
+  @@map("events")
+}

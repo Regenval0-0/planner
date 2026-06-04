@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>КТТТ — Вариант 2 (Карточки)</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+.poster {
+  width: 1120px;
+  height: 790px;
+  background: #ffffff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+}
+
+/* Top gradient bar */
+.top-bar {
+  height: 120px;
+  background: linear-gradient(90deg, #FFEB3B 0%, #FDD835 50%, #FBC02D 100%);
+  display: flex;
+  align-items: center;
+  padding: 0 42px;
+  gap: 24px;
+  position: relative;
+}
+.logo-circle {
+  width: 70px; height: 70px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 20px;
+  color: #1a1a1a;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  flex-shrink: 0;
+}
+.top-text h1 {
+  font-size: 22px;
+  color: #1a1a1a;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.top-text p {
+  font-size: 13px;
+  color: #1a1a1a;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+/* Content - two columns */
+.content {
+  padding: 20px 42px;
+  display: flex;
+  gap: 24px;
+  height: calc(100% - 120px - 44px);
+}
+.left-col { flex: 1; display: flex; flex-direction: column; }
+.right-col { width: 340px; display: flex; flex-direction: column; gap: 14px; }
+
+/* Stats */
+.stats-line {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.stat-circle {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid #FBC02D;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+.stat-circle .pct { font-size: 15px; font-weight: 800; color: #1a1a1a; }
+.stat-circle .lbl { font-size: 9px; color: #555; text-align: center; line-height: 1.1; margin-top: 2px; max-width: 65px; }
+
+.access-note {
+  font-size: 11.5px;
+  color: #555;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.section-heading {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-heading::before {
+  content: '';
+  width: 5px; height: 22px;
+  background: #FBC02D;
+  border-radius: 3px;
+}
+
+/* Cards */
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  border-left: 4px solid #FFD54F;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.card-code {
+  background: #FFF9C4;
+  color: #1a1a1a;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.card-duration {
+  font-size: 10px;
+  color: #777;
+  white-space: nowrap;
+}
+.card-title { font-size: 11.5px; color: #333; font-weight: 600; line-height: 1.25; }
+.card-tag {
+  align-self: flex-start;
+  background: #FFF9C4;
+  color: #1a1a1a;
+  font-size: 9px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  margin-top: 2px;
+}
+
+/* Big photo on right */
+.photo-big {
+  width: 100%;
+  flex: 1;
+  min-height: 300px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  border: 4px solid #FBC02D;
+  position: relative;
+}
+.photo-big img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.photo-big::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+}
+
+/* Right bottom block */
+.right-bottom {
+  background: #111;
+  border-radius: 12px;
+  padding: 14px;
+  color: #fff;
+}
+.right-bottom-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #FFEB3B;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.contact-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+  color: #ddd;
+}
+.contact-mini div { line-height: 1.3; }
+.contact-mini strong { color: #fff; }
+
+/* Bottom area */
+.bottom {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  margin-top: auto;
+}
+.info-panel {
+  flex: 1;
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  border: 1px solid #f0f0f0;
+}
+.info-title { font-size: 12px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
+.info-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.info-item { display: flex; align-items: flex-start; gap: 6px; font-size: 10.5px; color: #444; line-height: 1.35; }
+.info-item svg { width: 14px; height: 14px; fill: #FBC02D; flex-shrink: 0; margin-top: 1px; }
+
+.qr-panel {
+  width: 120px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #f0f0f0;
+}
+.qr-panel img { width: 85px; height: 85px; }
+.qr-panel span { font-size: 9px; color: #777; margin-top: 4px; }
+
+/* Footer strip */
+.footer-strip {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 44px;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 42px;
+  color: #fff;
+  font-size: 12px;
+}
+.footer-strip a { color: #FFEB3B; text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="poster">
+
+  <div class="top-bar">
+    <div class="logo-circle">КТТТ</div>
+    <div class="top-text">
+      <h1>ГПОУ «Кузбасский транспортно-технологический техникум»</h1>
+      <p>Субъект Российской Федерации: Кемеровская область — Кузбасс</p>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="left-col">
+      <div class="stats-line">
+        <div class="stat-circle"><div class="pct">88,67%</div><div class="lbl">по зрению</div></div>
+        <div class="stat-circle"><div class="pct">86,67%</div><div class="lbl">по слуху</div></div>
+        <div class="stat-circle"><div class="pct">93,2%</div><div class="lbl">НОДА<br>(мобильные)</div></div>
+        <div class="stat-circle"><div class="pct">85,67%</div><div class="lbl">НОДА<br>(на коляске)</div></div>
+        <div class="stat-circle"><div class="pct">93,34%</div><div class="lbl">УО</div></div>
+      </div>
+
+      <div class="access-note">
+        <strong>Доступность организации</strong> для лиц с ОВЗ и инвалидностью. ВК — верхние конечности, НК — нижние конечности (коляска, ходунки).
+      </div>
+
+      <div class="section-heading">Профессии/Специальности для лиц с ОВЗ и инвалидностью</div>
+
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-header"><span class="card-code">38.02.08</span><span class="card-duration">2 года 10 мес</span></div>
+          <div class="card-title">Торговое дело</div>
+          <span class="card-tag">Дистанционное образование</span>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-code">23.02.07</span><span class="card-duration">2 года 10 мес</span></div>
+          <div class="card-title">Техническое обслуживание и ремонт автотранспортных средств</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-code">23.02.01</span><span class="card-duration">2 года 10 мес</span></div>
+          <div class="card-title">Организация перевозок и управление на транспорте (по видам)</div>
+          <span class="card-tag">Дистанционное образование</span>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-code">23.02.04</span><span class="card-duration">2 года 10 мес</span></div>
+          <div class="card-title">Техническая эксплуатация подъемно-транспортных, строительных, дорожных машин и оборудования (по отраслям)</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-code">25.02.08</span><span class="card-duration">3 года 10 мес</span></div>
+          <div class="card-title">Эксплуатация беспилотных авиационных систем</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-code">43.02.17</span><span class="card-duration">2 года 10 мес</span></div>
+          <div class="card-title">Технология индустрии красоты</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-code">23.01.17</span><span class="card-duration">1 год 10 мес</span></div>
+          <div class="card-title">Мастер по ремонту и обслуживанию автомобилей</div>
+        </div>
+        <div class="card" style="justify-content:center; align-items:center; background: linear-gradient(135deg,#FFF9C4,#FFFDE7);">
+          <div style="font-size:11px; color:#1a1a1a; font-weight:700; text-align:center;">
+            Приёмная кампания 2026<br>
+            <span style="font-size:10px; color:#555; font-weight:400;">С 20.06.2026 по 15.08.2026<br>Доп. набор до 25.11.2026</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom">
+        <div class="info-panel">
+          <div class="info-title">Наши контакты</div>
+          <div class="info-row">
+            <div class="info-item">
+              <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+              <div><strong>Адрес:</strong><br>г. Киселёвск, ул. Дружбы, 11<br>г. Прокопьевск, ул. Союзная, 70<br><strong>Общежитие:</strong> ул. Дружбы, д. 13</div>
+            </div>
+            <div class="info-item">
+              <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+              <div><strong>Тел.:</strong> 8(939)-273-24-03<br><strong>Гор. линия:</strong> 8(38464)2-41-34, 8(38464)2-37-46</div>
+            </div>
+            <div class="info-item">
+              <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+              <div><strong>E-mail:</strong> kttt.kis@yandex.ru</div>
+            </div>
+          </div>
+        </div>
+        <div class="qr-panel">
+          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQgAAAEIAQAAAACLjVdSAAABjUlEQVR4nO1awa7CMAyzK/7/l/3kpGnHiRNV9cImutJFIjNO4gYofDjGJwP8LP4vHlARRBLi9IC9eoun44jFy8/sCUHIAyCKa/UaT8c5C9IwADQxjAkfq1d5etRCAYd5ocs9PWNBE8SYxPitT7k/f2A+vSAwkoceq23rC97Pun2Lp+OIBR+RQTmRmiPP5Xb8UGiOeotJjlxRQ37Q16QE9VzOV7t8qiotCAQWOqKsyxryQ6lNUaLUFaYUKvrlU+ZUAYRRKJBCnN3i6ThnocicNCkk+lqJpF28jFQeFTFKYGb0NNy/vCpkZs5g3Vg1t6FepyOkMJiTlUn61VsmDjIsS6knaS7ydJyy4Hvvw0cgMbd1F3l6TI9x798YZ4RLirSO+1vliNk4rZCJatN2f8tIHynCds1pWG8RR7Bjw7OEa796K0+sPVT9sfb6A5E5GFDs3x166o91MEkytVhA066+jD1l9spykk2Afvu5F3ZvEJU6khqzz94PD845Q6LORlCi0S5/8Pd/hyu/l3GJxR+o2tHWVDQ7kgAAAABJRU5ErkJggg==" alt="QR">
+          <span>Отсканируйте — узнайте больше</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div class="photo-big">
+        <img src="../2.jpg" alt="Фото учреждения">
+      </div>
+      <div class="right-bottom">
+        <div class="right-bottom-title">Контакты</div>
+        <div class="contact-mini">
+          <div><strong>Телефон:</strong> 8(939)-273-24-03</div>
+          <div><strong>Горячая линия:</strong><br>8(38464)2-41-34, 8(38464)2-37-46</div>
+          <div><strong>E-mail:</strong> kttt.kis@yandex.ru</div>
+          <div><strong>Сайт:</strong> kttt42.ru</div>
+          <div><strong>VK:</strong> vk.com/club185</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-strip">
+    <span>ГПОУ «КТТТ» — инклюзивное образование в Кузбассе</span>
+    <div style="display:flex; gap:18px;">
+      <a href="#">kttt42.ru</a>
+      <a href="#">vk.com/club185</a>
+      <a href="#">kttt.kis@yandex.ru</a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

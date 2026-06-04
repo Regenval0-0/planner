@@ -1,0 +1,53 @@
+body {
+	margin: 0;
+}
+
+.cezon {
+	background-image: url('../images/gl.izobr3.png');
+	background-size: cover;
+	height: 48vw;
+	margin-top: -5vw;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+
+.cezon_text {
+	color: white;
+	font-size: 2vw;
+	margin-right: 5vw;
+}
+
+.cezon_text h3{
+	color: wheat;
+	font-weight: normal;
+}
+
+.cezon_text1 {
+	font-weight: normal;
+	font-style: italic;
+}
+
+.lib {
+    text-align: right;
+    font-size: 1.5vw;
+    display: flex;
+    flex-direction: column;
+
+}
+
+.lib h3:nth-child(2) {
+    margin-left: 25vw;
+    margin-right: auto;
+}
+
+
+.m {
+	width: 30vw;
+	margin-left: 15vw;
+}
+
+.cezon_bottom {
+	background-color: #baa62f;
+}
