@@ -1,5 +1,5 @@
 # Автоматический мониторинг сайта
-# Запускает backend, туннель localhost.run, и следит за их работой
+# Запускает backend, туннель serveo.net, и следит за их работой
 
 $backendDir = "C:\Ren\backend\planner"
 $frontendDir = "C:\Ren\frontend\planner"
@@ -28,10 +28,10 @@ function Start-Backend {
 }
 
 function Start-Tunnel {
-    Write-Log "Starting localhost.run tunnel..."
+    Write-Log "Starting serveo tunnel..."
     $psi = New-Object System.Diagnostics.ProcessStartInfo
     $psi.FileName = "ssh"
-    $psi.Arguments = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=nul -o ServerAliveInterval=60 -R 80:localhost:3001 localhost.run"
+    $psi.Arguments = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=nul -o ServerAliveInterval=60 -R 80:localhost:3001 serveo.net"
     $psi.WorkingDirectory = $gitDir
     $psi.RedirectStandardOutput = $true
     $psi.RedirectStandardError = $true
@@ -39,11 +39,11 @@ function Start-Tunnel {
     $psi.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
 
     $proc = [System.Diagnostics.Process]::Start($psi)
-    Start-Sleep -Seconds 12
+    Start-Sleep -Seconds 10
 
     # Read output to find URL
     $output = $proc.StandardOutput.ReadToEnd()
-    $urlMatch = [regex]::Match($output, 'https://[a-z0-9]+\.lhr\.life')
+    $urlMatch = [regex]::Match($output, 'https://[a-z0-9-]+\.serveousercontent\.com')
     if ($urlMatch.Success) {
         $url = $urlMatch.Value
         Write-Log "Tunnel started: $url"
@@ -59,8 +59,8 @@ function Update-FrontendURL($newURL) {
     $clientFile = "$frontendDir\src\api\client.ts"
     $content = Get-Content $clientFile -Raw
 
-    # Replace the lhr.life URL
-    $newContent = $content -replace 'https://[a-z0-9]+\.lhr\.life/api', "$newURL/api"
+    # Replace the serveo URL
+    $newContent = $content -replace 'https://[a-z0-9-]+-188-162-14-149\.serveousercontent\.com/api', "$newURL/api"
 
     if ($newContent -ne $content) {
         Set-Content $clientFile $newContent -NoNewline
@@ -72,7 +72,7 @@ function Update-FrontendURL($newURL) {
         # Push to GitHub
         Set-Location $gitDir
         git add . 2>&1 | Out-Null
-        git commit -m "Auto-update backend URL to $newURL" 2>&1 | Out-Null
+        git commit -m "Auto-update backend URL" 2>&1 | Out-Null
         git push origin main 2>&1 | Out-Null
 
         Write-Log "Frontend updated and pushed"

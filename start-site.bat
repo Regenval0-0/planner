@@ -12,11 +12,11 @@ start /min "Backend" cmd /c "npx tsx src/server.ts > backend.log 2>&1"
 timeout /t 5 /nobreak >nul
 
 echo [2/3] Запуск туннеля (дает сайту интернет-адрес)...
-start /min "Tunnel" cmd /c "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=nul -o ServerAliveInterval=60 -R 80:localhost:3001 localhost.run > tunnel.log 2>&1"
-timeout /t 12 /nobreak >nul
+start /min "Tunnel" cmd /c "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=nul -o ServerAliveInterval=60 -R 80:localhost:3001 serveo.net > tunnel.log 2>&1"
+timeout /t 10 /nobreak >nul
 
 echo [3/3] Получение URL...
-findstr "lhr.life" tunnel.log > url.txt 2>nul
+findstr "serveousercontent.com" tunnel.log > url.txt 2>nul
 for /f "tokens=*" %%a in (url.txt) do (
     echo.
     echo =========================================
@@ -25,7 +25,7 @@ for /f "tokens=*" %%a in (url.txt) do (
     echo  Фронтенд (постоянный):
     echo  https://regenval0-0.github.io/planner/
     echo.
-    echo  Backend (временный, меняется):
+    echo  Backend (временный):
     echo  %%a
     echo =========================================
 )
