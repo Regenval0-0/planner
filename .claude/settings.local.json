@@ -52,7 +52,8 @@
       "Bash(C:/Users/dasha/AppData/Local/Temp/bin/gh.exe api *)",
       "Bash(git stash *)",
       "Bash(git push *)",
-      "Bash(C:/Users/dasha/AppData/Local/Temp/bin/gh.exe run *)"
+      "Bash(C:/Users/dasha/AppData/Local/Temp/bin/gh.exe run *)",
+      "Bash(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=60 -R 80:localhost:3001 serveo.net)"
     ]
   }
 }
