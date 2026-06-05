@@ -6,7 +6,7 @@ const isGitHubPages = window.location.hostname.includes('github.io');
 const baseURL = isDev
   ? 'http://localhost:3001/api'
   : isGitHubPages
-    ? 'https://dd00ceca54069a62-188-162-14-149.serveousercontent.com/api'
+    ? 'https://c8736ba346851511-188-162-14-149.serveousercontent.com/api'
     : '/api';
 
 export const api = axios.create({
