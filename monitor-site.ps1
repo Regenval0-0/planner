@@ -1,5 +1,5 @@
 # Автоматический мониторинг сайта
-# Запускает backend, туннель, и следит за их работой
+# Запускает backend, туннель localhost.run, и следит за их работой
 
 $backendDir = "C:\Ren\backend\planner"
 $frontendDir = "C:\Ren\frontend\planner"
@@ -28,10 +28,10 @@ function Start-Backend {
 }
 
 function Start-Tunnel {
-    Write-Log "Starting serveo tunnel..."
+    Write-Log "Starting localhost.run tunnel..."
     $psi = New-Object System.Diagnostics.ProcessStartInfo
     $psi.FileName = "ssh"
-    $psi.Arguments = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=nul -o ServerAliveInterval=60 -R 80:localhost:3001 serveo.net"
+    $psi.Arguments = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=nul -o ServerAliveInterval=60 -R 80:localhost:3001 localhost.run"
     $psi.WorkingDirectory = $gitDir
     $psi.RedirectStandardOutput = $true
     $psi.RedirectStandardError = $true
@@ -39,11 +39,11 @@ function Start-Tunnel {
     $psi.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
 
     $proc = [System.Diagnostics.Process]::Start($psi)
-    Start-Sleep -Seconds 8
+    Start-Sleep -Seconds 12
 
     # Read output to find URL
     $output = $proc.StandardOutput.ReadToEnd()
-    $urlMatch = [regex]::Match($output, 'https://[a-z0-9-]+\.serveousercontent\.com')
+    $urlMatch = [regex]::Match($output, 'https://[a-z0-9]+\.lhr\.life')
     if ($urlMatch.Success) {
         $url = $urlMatch.Value
         Write-Log "Tunnel started: $url"
@@ -59,8 +59,8 @@ function Update-FrontendURL($newURL) {
     $clientFile = "$frontendDir\src\api\client.ts"
     $content = Get-Content $clientFile -Raw
 
-    # Replace the serveo URL
-    $newContent = $content -replace 'https://[a-z0-9-]+-188-162-14-149\.serveousercontent\.com/api', "$newURL/api"
+    # Replace the lhr.life URL
+    $newContent = $content -replace 'https://[a-z0-9]+\.lhr\.life/api', "$newURL/api"
 
     if ($newContent -ne $content) {
         Set-Content $clientFile $newContent -NoNewline
