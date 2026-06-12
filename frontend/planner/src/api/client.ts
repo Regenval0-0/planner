@@ -1,13 +1,20 @@
 import axios from 'axios';
 
 const isDev = import.meta.env.DEV;
-const isGitHubPages = window.location.hostname.includes('github.io');
+const envUrl = import.meta.env.VITE_BACKEND_URL;
 
-const baseURL = isDev
-  ? 'http://localhost:3001/api'
-  : isGitHubPages
-    ? 'https://4e9dc880e8e8bd62-188-162-14-149.serveousercontent.com/api'
-    : '/api';
+// Priority:
+// 1. Explicit VITE_BACKEND_URL env var (for GitHub Pages / cloud)
+// 2. Dev mode → localhost:3001
+// 3. Production with same-origin (Electron bundled mode) → /api
+// 4. Fallback to localhost for safety
+const baseURL = envUrl
+  ? `${envUrl}/api`
+  : isDev
+    ? 'http://localhost:3001/api'
+    : window.location.origin.includes('localhost')
+      ? 'http://localhost:3001/api'
+      : '/api';
 
 export const api = axios.create({
   baseURL,
@@ -29,7 +36,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      window.location.hash = '#/login';
     }
     return Promise.reject(error);
   }

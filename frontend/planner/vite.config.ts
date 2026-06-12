@@ -8,22 +8,19 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Планер',
         short_name: 'Планер',
         description: 'Персональный планер событий, задач и платежей',
         theme_color: '#4f46e5',
-        background_color: '#f8fafc',
+        background_color: '#ffffff',
         display: 'standalone',
-        orientation: 'portrait',
-        start_url: '/',
+        start_url: './',
         icons: [
           {
-            src: 'favicon.svg',
-            sizes: '48x48 72x72 96x96 128x128 192x192 256x256 512x512',
+            src: './favicon.svg',
+            sizes: 'any',
             type: 'image/svg+xml',
-            purpose: 'any maskable',
           },
         ],
       },

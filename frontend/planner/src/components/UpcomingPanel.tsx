@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { EventItem } from '../api/events.ts';
+import { isSameDay, pad, toDateInput } from '../utils/date.ts';
 
 interface Props {
   events: EventItem[];
@@ -20,18 +21,6 @@ const recurrenceLabels: Record<string, string> = {
   yearly: 'Каждый год',
   custom: 'Каждые N дней',
 };
-
-function toDateInput(iso: string): string {
-  return iso.slice(0, 10);
-}
-
-function isSameDay(a: Date, b: Date) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
 
 function openPicker(e: React.MouseEvent<HTMLInputElement>) {
   e.currentTarget.showPicker?.();
@@ -64,8 +53,6 @@ export default function UpcomingPanel({ events, onSelectEvent }: Props) {
       const bKey = b.type === 'task' && b.endDate ? new Date(b.endDate).getTime() : new Date(b.startDate).getTime();
       return aKey - bKey;
     });
-
-  const pad = (n: number) => n.toString().padStart(2, '0');
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 select-none">

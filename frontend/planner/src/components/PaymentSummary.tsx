@@ -2,17 +2,20 @@ import type { EventItem } from '../api/events.ts';
 
 interface Props {
   events: EventItem[];
+  month: number; // 0-11
+  year: number;
 }
 
-export default function PaymentSummary({ events }: Props) {
+export default function PaymentSummary({ events, month, year }: Props) {
   const payments = events.filter((e) => e.type === 'payment');
   if (payments.length === 0) return null;
 
   const monthTotal = payments.reduce((sum, e) => sum + (e.amount || 0), 0);
 
-  const now = new Date();
-  const weekStart = new Date(now);
-  weekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+  // Неделя, содержащая 1-е число отображаемого месяца (пн-вс)
+  const firstDayOfMonth = new Date(year, month, 1);
+  const weekStart = new Date(firstDayOfMonth);
+  weekStart.setDate(firstDayOfMonth.getDate() - ((firstDayOfMonth.getDay() + 6) % 7));
   weekStart.setHours(0, 0, 0, 0);
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);

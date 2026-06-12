@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import type { EventItem } from '../api/events.ts';
+import { isSameDay, isEventOnDay, pad } from '../utils/date.ts';
 
 interface Props {
   isOpen: boolean;
@@ -12,24 +13,6 @@ interface Props {
 
 const weekDaysShort = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 const monthNames = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
-
-function isSameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-
-function isEventOnDay(e: EventItem, day: Date) {
-  const start = new Date(e.startDate);
-  start.setHours(0, 0, 0, 0);
-  const end = e.endDate ? new Date(e.endDate) : new Date(start);
-  end.setHours(23, 59, 59, 999);
-  const d = new Date(day);
-  d.setHours(12, 0, 0, 0);
-  return d >= start && d <= end;
-}
-
-function pad(n: number) {
-  return n.toString().padStart(2, '0');
-}
 
 export default function WeekModal({ isOpen, weekStart, events, onClose, onSelectEvent, onCreate }: Props) {
   const [offset, setOffset] = useState(0);

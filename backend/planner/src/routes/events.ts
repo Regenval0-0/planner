@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../prisma.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { io } from '../server.js';
 
 const router = Router();
 
@@ -51,7 +53,6 @@ function generateOccurrences(event: any, monthStart: Date, monthEnd: Date): any[
   let current = new Date(originalStart);
   const interval = event.recurrence === 'custom' ? event.recurrenceInterval : undefined;
 
-  // Fast-forward to first occurrence >= monthStart
   let safety = 0;
   while (current < monthStart && current <= recurrenceEnd && safety < 1000) {
     current = addRecurrence(current, event.recurrence, interval);
@@ -83,7 +84,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
   const { month, year } = req.query;
   const userId = req.userId!;
 
-  let where: any = { userId };
+  const where: Prisma.EventWhereInput = { userId };
 
   if (month && year) {
     const m = parseInt(month as string, 10);
@@ -130,7 +131,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
     const monthStart = new Date(y, m - 1, 1);
     const monthEnd = new Date(y, m, 0, 23, 59, 59, 999);
 
-    const result: any[] = [];
+    const result: Array<Prisma.EventGetPayload<{}> & { isRecurrenceInstance?: boolean; originId?: string }> = [];
     for (const event of events) {
       if (event.recurrence) {
         result.push(...generateOccurrences(event, monthStart, monthEnd));
@@ -156,6 +157,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
     data: { ...parsed.data, title: parsed.data.title || '', userId: req.userId! },
   });
 
+  io.to(`user_${req.userId}`).emit('event:created', event);
   res.status(201).json(event);
 });
 
@@ -167,7 +169,7 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
   }
 
   const existing = await prisma.event.findFirst({
-    where: { id: req.params.id as string, userId: req.userId! },
+    where: { id: req.params.id, userId: req.userId! },
   });
   if (!existing) {
     res.status(404).json({ error: 'Event not found' });
@@ -175,23 +177,26 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
   }
 
   const updated = await prisma.event.update({
-    where: { id: req.params.id as string },
+    where: { id: req.params.id },
     data: parsed.data,
   });
 
+  io.to(`user_${req.userId}`).emit('event:updated', updated);
   res.json(updated);
 });
 
 router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
   const existing = await prisma.event.findFirst({
-    where: { id: req.params.id as string, userId: req.userId! },
+    where: { id: req.params.id, userId: req.userId! },
   });
   if (!existing) {
     res.status(404).json({ error: 'Event not found' });
     return;
   }
 
-  await prisma.event.delete({ where: { id: req.params.id as string } });
+  await prisma.event.delete({ where: { id: req.params.id } });
+
+  io.to(`user_${req.userId}`).emit('event:deleted', { id: req.params.id });
   res.status(204).send();
 });
 

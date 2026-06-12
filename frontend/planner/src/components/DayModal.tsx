@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { EventItem } from '../api/events.ts';
 import ConfirmModal from './ConfirmModal.tsx';
+import { isSameDay, pad } from '../utils/date.ts';
 
 interface Props {
   isOpen: boolean;
@@ -35,12 +36,6 @@ const recurrenceLabels: Record<string, string> = {
   custom: 'Каждые N дней',
 };
 
-function isSameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() &&
-         a.getMonth() === b.getMonth() &&
-         a.getDate() === b.getDate();
-}
-
 export default function DayModal({ isOpen, date, events, onClose, onCreate, onEdit, onDelete }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmEvent, setConfirmEvent] = useState<EventItem | null>(null);
@@ -53,7 +48,6 @@ export default function DayModal({ isOpen, date, events, onClose, onCreate, onEd
     return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
   });
 
-  const pad = (n: number) => n.toString().padStart(2, '0');
   const dateStr = `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}`;
 
   return (

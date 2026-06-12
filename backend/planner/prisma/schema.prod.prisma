@@ -8,16 +8,15 @@ datasource db {
 }
 
 model User {
-  id                      String    @id @default(uuid())
-  email                   String    @unique
-  passwordHash            String    @map("password_hash")
-  emailVerified           Boolean   @default(false) @map("email_verified")
-  verificationCode        String?   @map("verification_code")
-  verificationCodeExpires DateTime? @map("verification_code_expires")
-  resetCode               String?   @map("reset_code")
-  resetCodeExpires        DateTime? @map("reset_code_expires")
-  createdAt               DateTime  @default(now()) @map("created_at")
-  updatedAt               DateTime  @updatedAt @map("updated_at")
+  id                String   @id @default(uuid())
+  username          String   @unique
+  passwordHash      String   @map("password_hash")
+  phone             String   @unique
+  securityQuestion  String   @map("security_question")
+  securityAnswer    String   @map("security_answer")
+  vkId              String?  @unique @map("vk_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
   events Event[]
 

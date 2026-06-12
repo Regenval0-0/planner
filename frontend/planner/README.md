@@ -1,73 +1,66 @@
-# React + TypeScript + Vite
+# 📁 frontend/planner/
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Назначение:** Клиентское приложение «Персональный планировщик».
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Стек
 
-## React Compiler
+| Технология | Версия |
+|-----------|--------|
+| React | 19.2.6 |
+| Vite | 6.0.1 |
+| Tailwind CSS | 4.3.0 |
+| React Router | 7.16.0 |
+| Axios | 1.17.0 |
+| Electron | 33 (desktop) |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Запуск
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# Web dev server
+npm run dev          # localhost:5173
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Desktop (Electron)
+npm run electron:dev
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Production build
+npm run build
+npm run build:desktop
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Структура
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── pages/              # Страницы приложения
+│   ├── CalendarPage.tsx
+│   ├── LoginPage.tsx
+│   ├── RegisterPage.tsx
+│   └── ...
+├── components/         # UI компоненты
+├── context/            # React Context (AuthContext)
+├── api/                # API клиент (axios)
+├── hooks/              # Кастомные хуки
+└── main.tsx            # Точка входа
+```
+
+---
+
+## Функционал
+
+- 📅 Календарь событий (цветовая кодировка)
+- ✅ Задачи с дедлайнами
+- 💰 Платежи и напоминания
+- 🔐 JWT-аутентификация
+- 🔔 Уведомления (Electron desktop)
+
+---
+
+## Связь с backend
+
+Backend: `backend/planner/` (Express + Prisma + PostgreSQL)

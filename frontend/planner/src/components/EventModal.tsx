@@ -157,7 +157,11 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormError('');
-    if (!title && !isPayment) return;
+    if (!title && !isPayment) {
+      setFormError('Введите название');
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       let startDate: string;

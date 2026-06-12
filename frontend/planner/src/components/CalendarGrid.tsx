@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { EventItem } from '../api/events.ts';
+import { isSameDay, isEventOnDay } from '../utils/date.ts';
 
 interface Props {
   year: number;
@@ -18,22 +19,6 @@ const typeColors: Record<string, string> = {
   meeting: 'bg-purple-500',
   payment: 'bg-orange-300',
 };
-
-function isSameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() &&
-         a.getMonth() === b.getMonth() &&
-         a.getDate() === b.getDate();
-}
-
-function isEventOnDay(e: EventItem, day: Date) {
-  const start = new Date(e.startDate);
-  start.setHours(0, 0, 0, 0);
-  const end = e.endDate ? new Date(e.endDate) : new Date(start);
-  end.setHours(23, 59, 59, 999);
-  const d = new Date(day);
-  d.setHours(12, 0, 0, 0);
-  return d >= start && d <= end;
-}
 
 function getISOWeek(d: Date): number {
   const tmp = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -75,7 +60,9 @@ export default function CalendarGrid({ year, month, events, onSelectDate, onSele
   const today = new Date();
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden select-none">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden select-none overflow-x-auto">
+      {/* Mobile wrapper to allow horizontal scroll on small screens */}
+      <div className="min-w-[640px]">
       {/* Заголовок дней недели */}
       <div className="flex border-b border-gray-200">
         <div className="w-10 sm:w-12 flex-shrink-0 bg-gray-50 border-r border-gray-200" />
@@ -217,6 +204,7 @@ export default function CalendarGrid({ year, month, events, onSelectDate, onSele
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );

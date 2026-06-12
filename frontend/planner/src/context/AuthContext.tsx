@@ -3,14 +3,15 @@ import { api } from '../api/client.ts';
 
 interface User {
   id: string;
-  email: string;
+  username: string;
+  phone: string;
   createdAt: string;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -23,7 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      setLoading(false);
+      queueMicrotask(() => setLoading(false));
       return;
     }
     api
@@ -33,8 +34,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const res = await api.post('/auth/login', { email, password });
+  const login = async (username: string, password: string) => {
+    const res = await api.post('/auth/login', { username, password });
     localStorage.setItem('token', res.data.token);
     setUser(res.data.user);
   };
@@ -51,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');

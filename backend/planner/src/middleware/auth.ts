@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { JWT_SECRET } from '../config.js';
 
 export interface AuthRequest extends Request {
   userId?: string;
 }
-
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;

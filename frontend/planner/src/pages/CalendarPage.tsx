@@ -8,6 +8,8 @@ import UpcomingPanel from '../components/UpcomingPanel.tsx';
 import PaymentSummary from '../components/PaymentSummary.tsx';
 import TypeSelectorModal from '../components/TypeSelectorModal.tsx';
 import WeekModal from '../components/WeekModal.tsx';
+import { isEventOnDay } from '../utils/date.ts';
+import { useSocket } from '../hooks/useSocket.ts';
 
 export default function CalendarPage() {
   const { user, logout } = useAuth();
@@ -38,15 +40,35 @@ export default function CalendarPage() {
     try {
       const data = await fetchEvents(month, year);
       setEvents(data);
-    } catch (e: any) {
-      setError(e.response?.data?.error || 'Не удалось загрузить события');
+    } catch (e: unknown) {
+      const msg = e && typeof e === 'object' && 'response' in e
+        ? (e as { response?: { data?: { error?: string } } }).response?.data?.error
+        : undefined;
+      setError(msg || 'Не удалось загрузить события');
     } finally {
       setLoading(false);
     }
   }, [month, year]);
 
+  const token = localStorage.getItem('token');
+
+  useSocket(token, (type, data) => {
+    setEvents((prev) => {
+      if (type === 'created') {
+        return [...prev, data];
+      }
+      if (type === 'updated') {
+        return prev.map((e) => (e.id === data.id ? data : e));
+      }
+      if (type === 'deleted') {
+        return prev.filter((e) => e.id !== data.id);
+      }
+      return prev;
+    });
+  });
+
   useEffect(() => {
-    load();
+    queueMicrotask(() => load());
   }, [load]);
 
   function prevMonth() {
@@ -83,7 +105,9 @@ export default function CalendarPage() {
 
   async function handleSave(data: EventCreate) {
     if (selectedEvent) {
-      const id = selectedEvent.isRecurrenceInstance ? selectedEvent.originId! : selectedEvent.id;
+      const id = selectedEvent.isRecurrenceInstance && selectedEvent.originId
+        ? selectedEvent.originId
+        : selectedEvent.id;
       await updateEvent(id, data);
     } else {
       await createEvent(data);
@@ -92,19 +116,9 @@ export default function CalendarPage() {
   }
 
   async function handleDeleteEvent(event: EventItem) {
-    const id = event.isRecurrenceInstance ? event.originId! : event.id;
+    const id = event.isRecurrenceInstance && event.originId ? event.originId : event.id;
     await deleteEvent(id);
     await load();
-  }
-
-  function isEventOnDay(e: EventItem, day: Date) {
-    const start = new Date(e.startDate);
-    start.setHours(0, 0, 0, 0);
-    const end = e.endDate ? new Date(e.endDate) : new Date(start);
-    end.setHours(23, 59, 59, 999);
-    const d = new Date(day);
-    d.setHours(12, 0, 0, 0);
-    return d >= start && d <= end;
   }
 
   const monthNames = [
@@ -124,7 +138,7 @@ export default function CalendarPage() {
           <h1 className="text-xl font-semibold text-gray-800">Планер</h1>
         </div>
         <div className="flex items-center gap-3">
-          <div className="text-sm text-gray-500">{user?.email}</div>
+          <div className="text-sm text-gray-500">{user?.username}</div>
           <button
             onClick={logout}
             className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition"
@@ -207,7 +221,7 @@ export default function CalendarPage() {
           <div className="space-y-4">
             <UpcomingPanel events={events} onSelectEvent={handleSelectEvent} />
 
-            <PaymentSummary events={events} />
+            <PaymentSummary events={events} month={currentDate.getMonth()} year={currentDate.getFullYear()} />
           </div>
         </div>
       </main>

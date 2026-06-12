@@ -8,3 +8,17 @@ frontend/planner/release/
 planner-app/desktop/dist-installer-v2/
 *.exe
 *.zip
+_trash/
+.browser-sessions/
+node_modules/
+*.log
+release/
+dist/
+.env
+.env.production
+.deploy-browser-data/
+release*/
+cleanup.js
+*.pma
+backend/planner/dev.db
+backend/planner/dist/

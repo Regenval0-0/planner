@@ -4,222 +4,183 @@ import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { prisma } from '../prisma.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
-import { sendVerificationCode, sendResetCode } from '../mailer.js';
+import { checkRateLimit } from '../utils/rateLimit.js';
+import { JWT_SECRET } from '../config.js';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
-
-function generateCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
 
 const registerSchema = z.object({
-  email: z.string().email(),
+  username: z.string().min(3).max(30),
   password: z.string().min(6),
-});
-
-const verifySchema = z.object({
-  email: z.string().email(),
-  code: z.string().length(6),
+  phone: z.string().min(5).max(20),
+  securityQuestion: z.string().min(3).max(200),
+  securityAnswer: z.string().min(1).max(200),
 });
 
 const loginSchema = z.object({
-  email: z.string().email(),
+  username: z.string(),
   password: z.string(),
 });
 
-const forgotSchema = z.object({
-  email: z.string().email(),
+const findUserSchema = z.object({
+  phone: z.string(),
 });
 
 const resetSchema = z.object({
-  email: z.string().email(),
-  code: z.string().length(6),
+  username: z.string(),
+  securityAnswer: z.string(),
   newPassword: z.string().min(6),
 });
 
 router.post('/register', async (req, res) => {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: 'Invalid data', details: parsed.error.format() });
+    res.status(400).json({ error: 'Проверьте данные: логин от 3 симв., пароль от 6, телефон, вопрос и ответ обязательны' });
+    return;
+  }
+  const { username, password, phone, securityQuestion, securityAnswer } = parsed.data;
+
+  const existingUser = await prisma.user.findUnique({ where: { username } });
+  if (existingUser) {
+    res.status(409).json({ error: 'Такой логин уже занят' });
     return;
   }
 
-  const { email, password } = parsed.data;
-
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
-    res.status(409).json({ error: 'User already exists' });
+  const existingPhone = await prisma.user.findUnique({ where: { phone } });
+  if (existingPhone) {
+    res.status(409).json({ error: 'Такой номер телефона уже используется' });
     return;
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const code = generateCode();
-  const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 минут
+  const answerHash = await bcrypt.hash(securityAnswer.toLowerCase().trim(), 10);
 
   const user = await prisma.user.create({
-    data: {
-      email,
-      passwordHash,
-      verificationCode: code,
-      verificationCodeExpires: expires,
-    },
-    select: { id: true, email: true, createdAt: true, emailVerified: true },
+    data: { username, passwordHash, phone, securityQuestion, securityAnswer: answerHash },
+    select: { id: true, username: true, phone: true, createdAt: true },
   });
 
-  const previewUrl = await sendVerificationCode(email, code);
-
-  res.status(201).json({
-    user: { id: user.id, email: user.email, createdAt: user.createdAt },
-    message: 'Registration successful. Check your email for verification code.',
-    previewUrl,
-    code: previewUrl ? undefined : code, // показываем код если нет реального SMTP
-  });
-});
-
-router.post('/verify', async (req, res) => {
-  const parsed = verifySchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: 'Invalid data', details: parsed.error.format() });
-    return;
-  }
-
-  const { email, code } = parsed.data;
-
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) {
-    res.status(404).json({ error: 'User not found' });
-    return;
-  }
-
-  if (user.emailVerified) {
-    res.status(400).json({ error: 'Email already verified' });
-    return;
-  }
-
-  if (user.verificationCode !== code || !user.verificationCodeExpires || user.verificationCodeExpires < new Date()) {
-    res.status(400).json({ error: 'Invalid or expired code' });
-    return;
-  }
-
-  const updated = await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      emailVerified: true,
-      verificationCode: null,
-      verificationCodeExpires: null,
-    },
-    select: { id: true, email: true, createdAt: true, emailVerified: true },
-  });
-
-  const token = jwt.sign({ userId: updated.id }, JWT_SECRET, { expiresIn: '7d' });
-  res.json({ user: updated, token, message: 'Email verified successfully' });
+  const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+  res.status(201).json({ user, token });
 });
 
 router.post('/login', async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: 'Invalid data', details: parsed.error.format() });
+    res.status(400).json({ error: 'Введите логин и пароль' });
+    return;
+  }
+  const { username, password } = parsed.data;
+
+  const limit = checkRateLimit('login', username, 5, 15 * 60 * 1000, 30 * 60 * 1000);
+  if (!limit.allowed) {
+    res.status(429).json({ error: `Слишком много попыток. Попробуйте через ${limit.retryAfter} сек.` });
     return;
   }
 
-  const { email, password } = parsed.data;
-
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({ where: { username } });
   if (!user) {
-    res.status(401).json({ error: 'Invalid credentials' });
-    return;
-  }
-
-  if (!user.emailVerified) {
-    res.status(403).json({ error: 'Email not verified. Please check your email.' });
+    res.status(401).json({ error: 'Неверный логин или пароль' });
     return;
   }
 
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {
-    res.status(401).json({ error: 'Invalid credentials' });
+    res.status(401).json({ error: 'Неверный логин или пароль' });
     return;
   }
 
   const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
-  res.json({ user: { id: user.id, email: user.email, createdAt: user.createdAt }, token });
+  res.json({ user: { id: user.id, username: user.username, phone: user.phone, createdAt: user.createdAt }, token });
 });
 
-router.post('/forgot-password', async (req, res) => {
-  const parsed = forgotSchema.safeParse(req.body);
+router.post('/find-user', async (req, res) => {
+  const parsed = findUserSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: 'Invalid data', details: parsed.error.format() });
+    res.status(400).json({ error: 'Введите номер телефона' });
+    return;
+  }
+  const { phone } = parsed.data;
+
+  // Rate limit по IP — max 5 попыток в 1 минуту
+  const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown') as string;
+  const limit = checkRateLimit('finduser', clientIp, 5, 60 * 1000, 5 * 60 * 1000);
+  if (!limit.allowed) {
+    res.status(429).json({ error: `Слишком много попыток. Попробуйте через ${limit.retryAfter} сек.` });
     return;
   }
 
-  const { email } = parsed.data;
-
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({ where: { phone } });
   if (!user) {
-    res.status(404).json({ error: 'User not found' });
+    res.status(404).json({ error: 'Пользователь с таким номером не найден' });
     return;
   }
 
-  const code = generateCode();
-  const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 минут
+  res.json({ username: user.username });
+});
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      resetCode: code,
-      resetCodeExpires: expires,
-    },
+// Публичный endpoint для получения секретного вопроса по логину
+router.get('/question/:username', async (req, res) => {
+  const username = req.params.username;
+  if (!username || username.trim().length < 3) {
+    res.status(400).json({ error: 'Введите корректный логин' });
+    return;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { username: username.trim() },
+    select: { securityQuestion: true },
   });
 
-  const previewUrl = await sendResetCode(email, code);
+  if (!user) {
+    res.status(404).json({ error: 'Пользователь не найден' });
+    return;
+  }
 
-  res.json({
-    message: 'Reset code sent to your email',
-    previewUrl,
-    code: previewUrl ? undefined : code,
-  });
+  res.json({ securityQuestion: user.securityQuestion });
 });
 
 router.post('/reset-password', async (req, res) => {
   const parsed = resetSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: 'Invalid data', details: parsed.error.format() });
+    res.status(400).json({ error: 'Проверьте данные: пароль минимум 6 символов' });
+    return;
+  }
+  const { username, securityAnswer, newPassword } = parsed.data;
+
+  // Защита от перебора ответа: max 3 попытки в 15 минут
+  const limit = checkRateLimit('reset', username, 3, 15 * 60 * 1000, 30 * 60 * 1000);
+  if (!limit.allowed) {
+    res.status(429).json({ error: `Слишком много попыток. Попробуйте через ${limit.retryAfter} сек.` });
     return;
   }
 
-  const { email, code, newPassword } = parsed.data;
-
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({ where: { username } });
   if (!user) {
-    res.status(404).json({ error: 'User not found' });
+    res.status(404).json({ error: 'Пользователь не найден' });
     return;
   }
 
-  if (user.resetCode !== code || !user.resetCodeExpires || user.resetCodeExpires < new Date()) {
-    res.status(400).json({ error: 'Invalid or expired code' });
+  const valid = await bcrypt.compare(securityAnswer.toLowerCase().trim(), user.securityAnswer);
+  if (!valid) {
+    res.status(400).json({ error: 'Неверный ответ на секретный вопрос' });
     return;
   }
 
   const passwordHash = await bcrypt.hash(newPassword, 10);
-  const updated = await prisma.user.update({
+  await prisma.user.update({
     where: { id: user.id },
-    data: {
-      passwordHash,
-      resetCode: null,
-      resetCodeExpires: null,
-    },
-    select: { id: true, email: true, createdAt: true, emailVerified: true },
+    data: { passwordHash },
   });
 
-  const token = jwt.sign({ userId: updated.id }, JWT_SECRET, { expiresIn: '7d' });
-  res.json({ user: updated, token, message: 'Password reset successfully' });
+  const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+  res.json({ message: 'Пароль успешно изменён', token });
 });
 
 router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
   const user = await prisma.user.findUnique({
     where: { id: req.userId },
-    select: { id: true, email: true, createdAt: true },
+    select: { id: true, username: true, phone: true, createdAt: true },
   });
   if (!user) {
     res.status(404).json({ error: 'User not found' });

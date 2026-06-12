@@ -1,34 +1,46 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
-function createWindow() {
-  const win = new BrowserWindow({
+let mainWindow = null;
+const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+
+function createMainWindow() {
+  mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
-    minWidth: 900,
+    minWidth: 360,
     minHeight: 600,
     webPreferences: {
       contextIsolation: true,
+      preload: path.join(__dirname, 'preload.cjs'),
     },
     title: 'Планер',
     autoHideMenuBar: true,
+    show: false,
+    icon: path.join(__dirname, '..', 'public', 'favicon.svg'),
   });
 
-  // В dev режиме можно подключиться к dev-серверу
-  if (process.env.NODE_ENV === 'development') {
-    win.loadURL('http://localhost:5173');
-    win.webContents.openDevTools();
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:5173');
+    mainWindow.webContents.openDevTools();
+    mainWindow.show();
   } else {
-    // Production: загружаем собранный index.html
-    win.loadFile(path.join(__dirname, '..', 'index.html'));
+    // Load bundled frontend dist (connects to cloud backend via API client)
+    const distPath = path.join(__dirname, '..', 'dist', 'index.html');
+    mainWindow.loadFile(distPath);
+    mainWindow.once('ready-to-show', () => mainWindow.show());
   }
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
 }
 
 app.whenReady().then(() => {
-  createWindow();
+  createMainWindow();
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
   });
 });
 
