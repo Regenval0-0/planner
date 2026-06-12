@@ -1,0 +1,33 @@
+{
+  "video": "VID_20260608_102133_359.mp4",
+  "output_dir": "C:\\Ren\\video-analysis\\results\\VID_20260608_102133_359",
+  "metadata": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "aac",
+        "r_frame_rate": "0/0"
+      },
+      {
+        "codec_name": "h264",
+        "width": 718,
+        "height": 1280,
+        "r_frame_rate": "30/1"
+      }
+    ],
+    "format": {
+      "duration": "63.483265",
+      "bit_rate": "630965"
+    }
+  },
+  "frames": [
+    "C:\\Ren\\video-analysis\\results\\VID_20260608_102133_359\\frames\\frame_01_at_10.6s.jpg",
+    "C:\\Ren\\video-analysis\\results\\VID_20260608_102133_359\\frames\\frame_02_at_21.2s.jpg",
+    "C:\\Ren\\video-analysis\\results\\VID_20260608_102133_359\\frames\\frame_03_at_31.7s.jpg",
+    "C:\\Ren\\video-analysis\\results\\VID_20260608_102133_359\\frames\\frame_04_at_42.3s.jpg",
+    "C:\\Ren\\video-analysis\\results\\VID_20260608_102133_359\\frames\\frame_05_at_52.9s.jpg"
+  ],
+  "transcript": true,
+  "model": "base"
+}

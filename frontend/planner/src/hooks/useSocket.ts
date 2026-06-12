@@ -1,16 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { getBackendUrl } from '../api/client.ts';
 
-const isDev = import.meta.env.DEV;
-const envUrl = import.meta.env.VITE_BACKEND_URL;
-
-const socketUrl = envUrl
-  ? envUrl
-  : isDev
-    ? 'http://localhost:3001'
-    : window.location.origin.includes('localhost')
-      ? 'http://localhost:3001'
-      : window.location.origin;
+function getSocketUrl(): string {
+  const url = getBackendUrl();
+  if (url) return url;
+  if (import.meta.env.DEV) return 'http://localhost:3001';
+  return 'http://localhost:3001';
+}
 
 export function useSocket(token: string | null, onEvent: (type: string, data: any) => void) {
   const socketRef = useRef<Socket | null>(null);
@@ -18,6 +15,7 @@ export function useSocket(token: string | null, onEvent: (type: string, data: an
   useEffect(() => {
     if (!token) return;
 
+    const socketUrl = getSocketUrl();
     const socket = io(socketUrl, {
       auth: { token },
       transports: ['websocket', 'polling'],
@@ -26,7 +24,7 @@ export function useSocket(token: string | null, onEvent: (type: string, data: an
     socketRef.current = socket;
 
     socket.on('connect', () => {
-      console.log('Socket connected');
+      console.log('Socket connected to', socketUrl);
     });
 
     socket.on('event:created', (data) => {

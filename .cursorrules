@@ -1,0 +1,59 @@
+# Vibe Coding Rules — Fullstack Learning Project
+# Tech Stack: React 19 + Vite, Node.js + Express, PostgreSQL + Prisma, Tailwind CSS, Zod, Docker
+
+## Core Directives
+- TypeScript by default. No lectures about types — just use them.
+- Always validate inputs with Zod before touching DB or API responses.
+- Prefer explicit over implicit. Avoid `any`.
+- Write code like the surrounding code: match comment density, naming, and idiom.
+
+## File Conventions
+- Co-locate tests: `*.test.ts` next to source files.
+- Use kebab-case for file names (`auth-service.ts`), PascalCase for components (`UserCard.tsx`).
+- Barrel exports via `index.ts` only when it reduces import verbosity.
+
+## React Frontend
+- Functional components + hooks. No class components.
+- Use TanStack Query for server state, Zustand or React Context for client state.
+- Tailwind for styling. No inline style objects.
+- API calls go through the centralized `src/api/client.ts`.
+- Handle loading and error states explicitly.
+
+## Node.js Backend
+- Express with async route handlers. Wrap in try/catch or use an error wrapper.
+- Prisma for all DB access. Raw SQL only for migrations or complex reports.
+- Return consistent API envelope: `{ success: boolean, data?: T, error?: string }`.
+- Use `src/routes/` for route definitions, `src/services/` for business logic, `src/middleware/` for cross-cutting concerns.
+- Never log secrets. Use structured logging (`console.log` is fine for learning, but prefer a logger abstraction).
+
+## Database & Prisma
+- Schema changes require a migration: `npx prisma migrate dev --name <desc>`.
+- Seed scripts live in `prisma/seed.ts`.
+- Use transactions for multi-table writes.
+- Index foreign keys and frequently queried fields.
+
+## Validation
+- Zod schemas in `src/schemas/` or co-located with routes.
+- Parse request bodies with schema before passing to services.
+- Export inferred TypeScript types from Zod schemas (`z.infer<typeof Schema>`).
+
+## Docker & DevOps
+- `docker-compose.yml` defines local infra (Postgres, optionally Redis).
+- Keep `.env.example` updated. Never commit `.env`.
+- GitHub Actions: lint + typecheck + test on PR.
+
+## Testing
+- Vitest for unit tests. Playwright for E2E.
+- Mock Prisma client for service tests.
+- One meaningful assertion per test.
+
+## Security
+- Use `bcrypt` for password hashing. Minimum 10 salt rounds.
+- JWT in HttpOnly cookies or secure `Authorization` headers.
+- Rate-limit auth endpoints.
+- Sanitize user input before rendering (React mostly handles XSS, but stay alert).
+
+## Git
+- Conventional commits: `feat:`, `fix:`, `refactor:`, `test:`, `docs:`.
+- Small, focused commits. One concern per PR.
+- Rebase before merging to keep history clean.

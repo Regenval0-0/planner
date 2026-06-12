@@ -1,0 +1,2367 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Supercharged Figma AI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --ui-bg: var(--figma-color-bg, #ffffff);
+      --ui-bg-secondary: var(--figma-color-bg-secondary, #f5f5f5);
+      --ui-bg-tertiary: var(--figma-color-bg-tertiary, #e6e6e6);
+      --ui-border: var(--figma-color-border, #e6e6e6);
+      --ui-border-strong: var(--figma-color-border-strong, #2c2c2c);
+      --ui-text: var(--figma-color-text, #1f1f1f);
+      --ui-text-secondary: var(--figma-color-text-secondary, #6b6b6b);
+      --ui-text-tertiary: var(--figma-color-text-tertiary, #8c8c8c);
+      --ui-brand: var(--figma-color-bg-brand, #0d99ff);
+      --ui-brand-hover: var(--figma-color-bg-brand-hover, #007acc);
+      --ui-success: var(--figma-color-bg-success, #14ae5c);
+      --ui-warning: var(--figma-color-bg-warning, #ffcd29);
+      --ui-danger: var(--figma-color-bg-danger, #f24822);
+      --ui-info: var(--figma-color-text-brand, #0d99ff);
+      --ui-log-bg: var(--figma-color-bg-secondary, #f5f5f5);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--ui-bg);
+      color: var(--ui-text);
+      padding: 8px;
+      line-height: 1.25;
+      font-size: 13px;
+      height: 100vh;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--ui-border);
+    }
+    
+    .header h1 {
+      font-size: 14px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .lang-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 4px;
+    }
+
+    .lang-switch select {
+      background: var(--ui-bg-secondary);
+      color: var(--ui-text);
+      border: 1px solid var(--ui-border);
+      border-radius: 6px;
+      padding: 3px 6px;
+      font-size: 11px;
+      height: 24px;
+    }
+    
+    .status {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ui-danger);
+      transition: all 0.3s;
+    }
+    
+    .status.connected {
+      background: var(--ui-success);
+      box-shadow: 0 0 8px var(--ui-success);
+    }
+    
+    .status.processing {
+      background: var(--ui-warning);
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .section {
+      margin-bottom: 8px;
+    }
+
+    #panel-config {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .config-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .config-footer {
+      flex-shrink: 0;
+      padding-top: 8px;
+      border-top: 1px solid var(--ui-border);
+      background: linear-gradient(
+        to top,
+        var(--ui-bg) 70%,
+        color-mix(in srgb, var(--ui-bg) 70%, transparent) 100%
+      );
+    }
+
+    .step-card {
+      margin-top: 8px;
+      background: var(--ui-bg-secondary);
+      border: 1px solid var(--ui-border);
+      border-radius: 8px;
+      padding: 8px;
+    }
+
+    .step-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .step-badge {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--figma-color-text-onbrand, #fff);
+      background: var(--ui-brand);
+      border-radius: 999px;
+      padding: 2px 8px;
+      line-height: 1.2;
+    }
+
+    .step-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ui-text);
+    }
+    
+    .section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--ui-text-secondary);
+      margin-bottom: 6px;
+    }
+    
+    input[type="text"] {
+      width: 100%;
+      padding: 8px 10px;
+      background: var(--ui-bg-secondary);
+      border: 1px solid var(--ui-border);
+      border-radius: 6px;
+      color: var(--ui-text);
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    
+    input[type="text"]:focus {
+      border-color: var(--ui-brand);
+    }
+    
+    button {
+      width: 100%;
+      padding: 8px 10px;
+      background: var(--ui-brand);
+      border: none;
+      border-radius: 6px;
+      color: var(--figma-color-text-onbrand, #ffffff);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 4px;
+    }
+    
+    button:hover {
+      background: var(--ui-brand-hover);
+      transform: translateY(-1px);
+    }
+    
+    button:disabled {
+      background: var(--ui-bg-tertiary);
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    button.secondary {
+      background: var(--ui-bg-secondary);
+      border: 1px solid var(--ui-border);
+      color: var(--ui-text);
+    }
+    
+    button.secondary:hover {
+      background: var(--ui-bg-tertiary);
+    }
+    
+    button.danger {
+      background: var(--ui-danger);
+    }
+    
+    button.danger:hover {
+      filter: brightness(0.92);
+    }
+    
+    /* 统计卡片（高密度） */
+    .stats {
+      margin-bottom: 8px;
+    }
+
+    .stats-inline {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      background: var(--ui-bg-secondary);
+      border: 1px solid var(--ui-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .stats-inline-item {
+      padding: 7px 6px;
+      text-align: center;
+      border-right: 1px solid var(--ui-border);
+    }
+
+    .stats-inline-item:last-child {
+      border-right: none;
+    }
+
+    .stat-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ui-info);
+      line-height: 1.1;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--ui-text-tertiary);
+      margin-top: 2px;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stats-source {
+      margin-top: 2px;
+      margin-bottom: 6px;
+      font-size: 11px;
+      color: var(--ui-text-secondary);
+      text-align: left;
+      line-height: 1.35;
+    }
+    
+    /* 日志区域 */
+    .log-container {
+      background: var(--ui-log-bg);
+      border: 1px solid var(--ui-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 7px;
+      background: var(--ui-bg-secondary);
+      border-bottom: 1px solid var(--ui-border);
+    }
+    
+    .log-title {
+      font-size: 9px;
+      color: var(--ui-text-tertiary);
+      text-transform: uppercase;
+    }
+
+    .log-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .log-clear {
+      font-size: 9px;
+      color: var(--ui-text-secondary);
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .log-clear:hover {
+      color: var(--ui-text);
+    }
+    
+    .log {
+      max-height: 132px;
+      overflow-y: auto;
+      padding: 4px 6px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 9px;
+    }
+    
+    .log-entry {
+      padding: 3px 0;
+      border-bottom: 1px solid var(--ui-border);
+      display: block;
+    }
+    
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+    
+    .log-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .log-time {
+      color: var(--ui-text-tertiary);
+      flex-shrink: 0;
+    }
+    
+    .log-message {
+      color: var(--ui-text-secondary);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .log-expand {
+      color: var(--ui-text-tertiary);
+      font-size: 9px;
+      width: 10px;
+      text-align: center;
+      flex-shrink: 0;
+      visibility: hidden;
+    }
+
+    .log-entry.expandable .log-expand {
+      visibility: visible;
+    }
+
+    .log-entry.expanded .log-expand {
+      transform: rotate(90deg);
+    }
+
+    .log-detail {
+      display: none;
+      margin-top: 3px;
+      margin-left: 56px;
+      color: var(--ui-text-tertiary);
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.2;
+      border-left: 1px solid var(--ui-border);
+      padding-left: 6px;
+      font-size: 9px;
+    }
+
+    .log-entry.expanded .log-detail {
+      display: block;
+    }
+    
+    .log-entry.success .log-message {
+      color: var(--ui-success);
+    }
+    
+    .log-entry.error .log-message {
+      color: var(--ui-danger);
+    }
+    
+    .log-entry.info .log-message {
+      color: var(--ui-info);
+    }
+    
+    .log-entry.warning .log-message {
+      color: var(--ui-warning);
+    }
+    
+    /* 操作列表 */
+    .operations-list {
+      background: var(--ui-bg-secondary);
+      border: 1px solid var(--ui-border);
+      border-radius: 8px;
+      padding: 6px;
+      margin-bottom: 8px;
+      max-height: 84px;
+      overflow-y: auto;
+    }
+
+    .operations-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 9px;
+      color: var(--ui-text-tertiary);
+    }
+
+    .operations-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .operations-action {
+      cursor: pointer;
+      user-select: none;
+      color: var(--ui-text-secondary);
+    }
+
+    .operations-action:hover {
+      color: var(--ui-text);
+    }
+
+    .op-group {
+      border: 1px solid var(--ui-border);
+      border-radius: 6px;
+      margin-bottom: 5px;
+      background: var(--ui-bg);
+      overflow: hidden;
+    }
+
+    .op-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .op-group-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px;
+      cursor: pointer;
+      background: var(--ui-bg-secondary);
+      border-bottom: 1px solid transparent;
+      font-size: 10px;
+    }
+
+    .op-group.expanded .op-group-head {
+      border-bottom-color: var(--ui-border);
+    }
+
+    .op-group-arrow {
+      font-size: 9px;
+      color: var(--ui-text-tertiary);
+      width: 10px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .op-group.expanded .op-group-arrow {
+      transform: rotate(90deg);
+    }
+
+    .op-group-name {
+      flex: 1;
+      color: var(--ui-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .op-group-stats {
+      color: var(--ui-text-tertiary);
+      font-size: 9px;
+      flex-shrink: 0;
+    }
+
+    .op-group-items {
+      display: none;
+      padding: 4px;
+      background: var(--ui-bg);
+    }
+
+    .op-group.expanded .op-group-items {
+      display: block;
+    }
+    
+    .operation-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 4px 6px;
+      border-radius: 6px;
+      margin-bottom: 3px;
+      background: var(--ui-bg-secondary);
+      border: 1px solid var(--ui-border);
+      font-size: 10px;
+    }
+    
+    .operation-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .operation-status {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    .operation-status.pending {
+      background: var(--ui-text-tertiary);
+    }
+    
+    .operation-status.running {
+      background: var(--ui-warning);
+      animation: pulse 1s infinite;
+    }
+    
+    .operation-status.completed {
+      background: var(--ui-success);
+    }
+    
+    .operation-status.error {
+      background: var(--ui-danger);
+    }
+    
+    .operation-name {
+      flex: 1;
+    }
+
+    .operation-main {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+    }
+    
+    .operation-meta {
+      color: var(--ui-text-tertiary);
+      font-size: 9px;
+      max-width: 48%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .operation-progress-wrap {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .operation-progress-bg {
+      flex: 1;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--ui-bg-tertiary);
+      overflow: hidden;
+    }
+
+    .operation-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--ui-brand), var(--ui-success));
+      transition: width 0.18s ease;
+    }
+
+    .operation-progress-label {
+      font-size: 9px;
+      color: var(--ui-text-tertiary);
+      min-width: 54px;
+      text-align: right;
+    }
+
+    .empty-note {
+      padding: 8px 6px;
+      font-size: 10px;
+      color: var(--ui-text-tertiary);
+      text-align: center;
+      border: 1px dashed var(--ui-border);
+      border-radius: 6px;
+      background: var(--ui-bg);
+    }
+    
+    /* 隐藏/显示 */
+    .hidden {
+      display: none !important;
+    }
+    
+    /* 滚动条样式 */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--ui-border-strong);
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      filter: brightness(1.08);
+    }
+
+    .prompt-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+      background: var(--ui-bg-secondary);
+      border: 1px solid var(--ui-border);
+      border-radius: 6px;
+      padding: 7px 8px;
+    }
+
+    .prompt-viewer {
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-gutter: stable both-edges;
+      white-space: nowrap;
+      color: var(--ui-text);
+      font-size: 11px;
+      line-height: 1.4;
+      padding-bottom: 2px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .icon-btn {
+      width: auto;
+      min-width: 28px;
+      padding: 4px 6px;
+      margin: 0;
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .config-snippet-card {
+      margin-top: 8px;
+      background: var(--ui-bg-secondary);
+      border: 1px solid var(--ui-border);
+      border-radius: 8px;
+      padding: 8px;
+    }
+
+    .config-snippet-card.attention {
+      border-color: var(--ui-warning);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-warning) 35%, transparent);
+      animation: attentionPulse 1.2s ease 1;
+    }
+
+    @keyframes attentionPulse {
+      0% { transform: translateY(0); }
+      25% { transform: translateY(-1px); }
+      50% { transform: translateY(0); }
+      75% { transform: translateY(-1px); }
+      100% { transform: translateY(0); }
+    }
+
+    .fold-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .fold-title {
+      font-size: 11px;
+      color: var(--ui-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .fold-arrow {
+      font-size: 10px;
+      color: var(--ui-text-tertiary);
+      width: 12px;
+      text-align: center;
+      transition: transform 0.15s ease;
+    }
+
+    .config-snippet-card.expanded .fold-arrow {
+      transform: rotate(90deg);
+    }
+
+    .fold-body {
+      display: none;
+      margin-top: 6px;
+    }
+
+    .config-snippet-card.expanded .fold-body {
+      display: block;
+    }
+
+    .config-snippet-title {
+      font-size: 11px;
+      color: var(--ui-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 6px;
+    }
+
+    .config-snippet-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--ui-text);
+      margin: 6px 0 4px;
+    }
+
+    .config-snippet-code {
+      background: var(--ui-bg);
+      border: 1px solid var(--ui-border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 10px;
+      line-height: 1.35;
+      color: var(--ui-text);
+      white-space: pre;
+      overflow: auto;
+      scrollbar-gutter: stable both-edges;
+    }
+
+    .relay-help-hint {
+      font-size: 11px;
+      color: var(--ui-warning);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .btn-connect {
+      background: var(--ui-success);
+      color: var(--figma-color-text-onbrand, #ffffff);
+    }
+
+    .btn-connect:hover {
+      filter: brightness(0.95);
+      background: var(--ui-success);
+    }
+
+    .main-tabs {
+      display: flex;
+      gap: 4px;
+      margin: 6px 0;
+      flex-shrink: 0;
+    }
+
+    .main-tab {
+      flex: 1;
+      text-align: center;
+      padding: 5px 0;
+      border: 1px solid var(--ui-border);
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--ui-text-secondary);
+      background: var(--ui-bg-secondary);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .main-tab.active {
+      color: var(--figma-color-text-onbrand, #ffffff);
+      background: var(--ui-brand);
+      border-color: var(--ui-brand);
+      font-weight: 600;
+    }
+
+    .main-tab-panel {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .main-tab-panel.hidden {
+      display: none !important;
+    }
+
+    .channel-card {
+      margin-top: 8px;
+    }
+
+    .config-empty-state {
+      margin-top: 8px;
+      background: var(--ui-bg-secondary);
+      border: 1px solid var(--ui-border);
+      border-radius: 8px;
+      padding: 10px;
+      color: var(--ui-text-secondary);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .config-empty-state-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ui-text);
+      margin-bottom: 6px;
+    }
+
+    body[data-viewport="lg"] .channel-card {
+      margin-top: auto;
+    }
+
+    body[data-viewport="lg"] .config-empty-state {
+      margin-top: auto;
+    }
+
+    body[data-viewport="sm"] .section-title {
+      font-size: 10px;
+    }
+
+    body[data-viewport="sm"] input[type="text"] {
+      font-size: 13px;
+      padding: 6px 8px;
+    }
+
+    body[data-viewport="sm"] button {
+      font-size: 13px;
+      padding: 6px 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div id="status" class="status"></div>
+    <h1 id="title-main">Supercharged Figma AI</h1>
+    <div class="lang-switch">
+      <select id="lang-select" onchange="setLanguage(this.value)">
+        <option value="zh-CN">简体中文</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+    <span id="connection-status" style="font-size: 13px; color: var(--ui-text-tertiary);">离线</span>
+  </div>
+
+  <div class="main-tabs">
+    <div id="tab-config" class="main-tab active" onclick="setMainTab('config')">Config</div>
+    <div id="tab-status" class="main-tab" onclick="setMainTab('status')">Status</div>
+    <div id="tab-logs" class="main-tab" onclick="setMainTab('logs')">Logs</div>
+  </div>
+
+  <div id="panel-config" class="main-tab-panel section">
+    <div class="config-scroll">
+      <div id="relay-help-card" class="step-card">
+        <div class="step-head">
+          <span class="step-badge">Step 1</span>
+          <span id="step1-title" class="step-title">启动 Relay Server</span>
+        </div>
+        <div id="relay-help-hint" class="relay-help-hint">若连接失败，请先在项目根目录启动 relay server。</div>
+        <div class="config-snippet-label">
+          <span id="relay-start-label">启动命令（项目根目录）</span>
+          <button id="copy-relay-btn" class="secondary icon-btn" onclick="copyRelayStartCommand()" title="复制启动命令" aria-label="复制启动命令">⧉</button>
+        </div>
+        <div id="relay-start-viewer" class="config-snippet-code"></div>
+      </div>
+
+      <div id="mcp-config-card" class="step-card">
+        <div class="step-head">
+          <span class="step-badge">Step 2</span>
+          <span id="step2-title" class="step-title">AGENT MCPSERVER 配置</span>
+        </div>
+        <div class="config-snippet-card">
+          <div class="fold-header" onclick="toggleMcpConfigCard()">
+            <div id="mcp-fold-title" class="fold-title">展开/收起配置</div>
+            <div class="fold-arrow">▶</div>
+          </div>
+          <div class="fold-body">
+            <div class="config-snippet-label">
+              <span id="mcp-json-label">mcp.json 片段</span>
+              <button id="copy-mcp-json-btn" class="secondary icon-btn" onclick="copyMcpJsonConfig()" title="复制 mcp.json 配置" aria-label="复制 mcp.json 配置">⧉</button>
+            </div>
+            <div id="mcp-json-viewer" class="config-snippet-code"></div>
+            <div class="config-snippet-label">
+              <span id="claude-cli-label">Claude CLI 快捷命令</span>
+              <button id="copy-claude-btn" class="secondary icon-btn" onclick="copyClaudeAddCommand()" title="复制 claude mcp add 命令" aria-label="复制 claude mcp add 命令">⧉</button>
+            </div>
+            <div id="claude-add-viewer" class="config-snippet-code"></div>
+            <div class="config-snippet-label">
+              <span id="mcp-http-label">已部署 HTTP MCP 配置</span>
+              <button id="copy-mcp-http-btn" class="secondary icon-btn" onclick="copyHostedMcpJsonConfig()" title="复制 HTTP MCP 配置" aria-label="复制 HTTP MCP 配置">⧉</button>
+            </div>
+            <div id="mcp-http-viewer" class="config-snippet-code"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-head">
+          <span class="step-badge">Step 3</span>
+          <span id="step3-title" class="step-title">Connect to Relay Server</span>
+        </div>
+        <input type="text" id="relay-url" placeholder="wss://supercharged-figma-relay.gpw2333.workers.dev/supercharged-figma/ws" value="wss://supercharged-figma-relay.gpw2333.workers.dev/supercharged-figma/ws">
+      </div>
+
+      <div class="step-card">
+        <div class="step-head">
+          <span class="step-badge">Step 4</span>
+          <span id="step4-title" class="step-title">Copy Channel Prompt to Agent</span>
+        </div>
+        <div id="step4-waiting" class="relay-help-hint">先完成 Step 3 连接后，此处会显示 connect prompt 与 Channel Code。</div>
+        <div id="connect-prompt-row" class="prompt-row hidden">
+          <div id="prompt-viewer" class="prompt-viewer">connect_to_relay {"relayUrl":"wss://supercharged-figma-relay.gpw2333.workers.dev/supercharged-figma/ws","channelCode":"--"}</div>
+          <button id="copy-prompt-btn" class="secondary icon-btn" onclick="copyConnectPrompt()" title="复制 Prompt" aria-label="复制 Prompt">⧉</button>
+        </div>
+        <div id="channel-section" class="hidden channel-card" style="padding: 10px; background: var(--ui-bg-secondary); border-radius: 8px; border: 1px solid var(--ui-border);">
+          <div id="channel-code-title" style="font-size: 12px; color: var(--ui-text-tertiary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Channel Code</div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <div id="channel-code" style="font-size: 32px; font-weight: 700; color: var(--ui-info); font-family: monospace; letter-spacing: 1px;">--</div>
+            <button id="copy-channel-btn" onclick="copyChannelCode()" style="width: auto; padding: 6px 11px; font-size: 13px; margin: 0;">复制</button>
+          </div>
+          <div id="channel-help-text" style="font-size: 12px; color: var(--ui-text-tertiary); margin-top: 6px;">在 Cursor/Claude 中输入此 Code 连接</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="config-footer">
+      <button id="connect-btn" class="btn-connect" onclick="connect()">连接 Relay Server</button>
+      <button id="disconnect-btn" class="danger hidden" onclick="disconnect()">断开连接</button>
+    </div>
+  </div>
+
+  <div id="panel-status" class="main-tab-panel section hidden">
+    <div class="stats">
+      <div class="stats-inline">
+        <div class="stats-inline-item">
+          <div class="stat-value" id="active-ops">0</div>
+          <div id="stat-running-label" class="stat-label">运行中</div>
+        </div>
+        <div class="stats-inline-item">
+          <div class="stat-value" id="completed-ops">0</div>
+          <div id="stat-completed-label" class="stat-label">已完成</div>
+        </div>
+        <div class="stats-inline-item">
+          <div class="stat-value" id="failed-ops">0</div>
+          <div id="stat-failed-label" class="stat-label">失败</div>
+        </div>
+        <div class="stats-inline-item">
+          <div class="stat-value" id="total-ops">0</div>
+          <div id="stat-total-label" class="stat-label">总操作数</div>
+        </div>
+      </div>
+    </div>
+    <div id="status-runtime" class="stats-source">会话时长：--</div>
+    <div id="status-last" class="stats-source">最近活动：--</div>
+    <div id="status-current" class="stats-source">当前运行：暂无</div>
+
+    <div id="operations-container" class="section">
+      <div id="operations-title" class="section-title">运行队列</div>
+      <div class="operations-toolbar">
+        <span id="operations-summary">0 组</span>
+        <div class="operations-actions">
+          <span id="operations-expand" class="operations-action" onclick="toggleAllOperationGroups(true)">展开</span>
+          <span id="operations-collapse" class="operations-action" onclick="toggleAllOperationGroups(false)">收起</span>
+        </div>
+      </div>
+      <div id="operations-list" class="operations-list"></div>
+    </div>
+  </div>
+
+  <div id="panel-logs" class="main-tab-panel section hidden">
+    <div class="log-container">
+      <div class="log-header">
+        <span id="log-title" class="log-title">活动日志</span>
+        <div class="log-actions">
+          <span id="log-expand" class="log-clear" onclick="toggleAllLogs(true)">展开</span>
+          <span id="log-collapse" class="log-clear" onclick="toggleAllLogs(false)">收起</span>
+          <span id="log-clear" class="log-clear" onclick="clearLog()">清除</span>
+        </div>
+      </div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const connectionStatusEl = document.getElementById('connection-status');
+    const connectBtn = document.getElementById('connect-btn');
+    const disconnectBtn = document.getElementById('disconnect-btn');
+    const relayHelpCardEl = document.getElementById('relay-help-card');
+    const relayHelpHintEl = document.getElementById('relay-help-hint');
+    const step4WaitingEl = document.getElementById('step4-waiting');
+    const connectPromptRowEl = document.getElementById('connect-prompt-row');
+    const promptViewerEl = document.getElementById('prompt-viewer');
+    const relayStartViewerEl = document.getElementById('relay-start-viewer');
+    const mcpJsonViewerEl = document.getElementById('mcp-json-viewer');
+    const claudeAddViewerEl = document.getElementById('claude-add-viewer');
+    const mcpHttpViewerEl = document.getElementById('mcp-http-viewer');
+    const mcpConfigCardEl = document.getElementById('mcp-config-card');
+    const channelSection = document.getElementById('channel-section');
+    const channelCodeEl = document.getElementById('channel-code');
+    const tabConfigEl = document.getElementById('tab-config');
+    const tabStatusEl = document.getElementById('tab-status');
+    const tabLogsEl = document.getElementById('tab-logs');
+    const panelConfigEl = document.getElementById('panel-config');
+    const panelStatusEl = document.getElementById('panel-status');
+    const panelLogsEl = document.getElementById('panel-logs');
+    const logEl = document.getElementById('log');
+    const operationsList = document.getElementById('operations-list');
+    const operationsSummaryEl = document.getElementById('operations-summary');
+    const activeOpsEl = document.getElementById('active-ops');
+    const completedOpsEl = document.getElementById('completed-ops');
+    const failedOpsEl = document.getElementById('failed-ops');
+    const totalOpsEl = document.getElementById('total-ops');
+    const statusRuntimeEl = document.getElementById('status-runtime');
+    const statusLastEl = document.getElementById('status-last');
+    const statusCurrentEl = document.getElementById('status-current');
+    const langSelectEl = document.getElementById('lang-select');
+
+    const I18N = {
+      'zh-CN': {
+        titleMain: 'Supercharged Figma AI',
+        tabs: { config: '配置', status: '状态', logs: '日志' },
+        status: { connected: '已连接', offline: '离线', waiting: '等待 Channel...' },
+        step1Title: '启动 Relay Server',
+        step2Title: 'AGENT MCPSERVER 配置',
+        step3Title: '连接 Relay Server',
+        step4Title: '复制连接提示给 Agent',
+        relayHint: '若连接失败，请先在项目根目录启动 relay server。',
+        relayStartLabel: '启动命令（项目根目录）',
+        copyRelayStartTitle: '复制启动命令',
+        mcpFoldTitle: '展开/收起配置',
+        mcpJsonLabel: 'mcp.json 片段',
+        copyMcpJsonTitle: '复制 mcp.json 配置',
+        claudeCliLabel: 'Claude CLI 快捷命令',
+        copyClaudeCliTitle: '复制 claude mcp add 命令',
+        mcpHttpLabel: '已部署 HTTP MCP 配置',
+        copyMcpHttpTitle: '复制 HTTP MCP 配置',
+        step4Waiting: '先完成 Step 3 连接后，此处会显示 connect prompt 与 Channel Code。',
+        copyPromptTitle: '复制 Prompt',
+        channelCode: 'Channel Code',
+        copy: '复制',
+        channelHelp: '在 Cursor/Claude 中输入此 Code 连接',
+        connectBtn: '连接 Relay Server',
+        connectingBtn: '连接中...',
+        disconnectBtn: '断开连接',
+        statRunning: '运行中',
+        statCompleted: '已完成',
+        statFailed: '失败',
+        statTotal: '总操作数',
+        operationsTitle: '运行队列',
+        statusRuntime: '会话时长：{value}',
+        statusLastActivity: '最近活动：{value}',
+        statusCurrentRunning: '当前运行：{value}',
+        noCurrentRunning: '暂无',
+        activityStart: '{name} 开始',
+        activityDone: '{name} 完成',
+        activityFailed: '{name} 失败',
+        logsTitle: '活动日志',
+        expand: '展开',
+        collapse: '收起',
+        clear: '清除',
+        progressProcessing: '处理中...',
+        progressReady: '准备',
+        progressCalculating: '计算中...',
+        progressExecuting: '执行中',
+        progressCompleted: '完成',
+        progressFailed: '失败',
+        progressStalled: '进度长时间未更新，自动结束当前进度显示',
+        currentOperation: '当前操作',
+        etaSeconds: '预计剩余 {seconds} 秒',
+        operationProcessing: '处理中...',
+        statsCatalog: '统计来源：catalog（服务端 get_tools）',
+        statsRuntime: '统计来源：runtime（尚未收到工具清单）',
+        logCleared: '日志已清除',
+        noOperations: '暂无活动操作',
+        enterRelay: '请输入 Relay Server 地址',
+        connectingRelayLog: '正在连接 Relay Server',
+        connectedRelayWaiting: '已连接到 Relay Server，等待 Channel...',
+        relayDisconnected: '与 Relay Server 断开连接',
+        relayConnectFailed: '连接失败，请检查 Relay Server 地址',
+        relayConnectException: '连接异常。请先启动 Relay Server，再检查地址与端口。',
+        relayDisconnectedHint: '连接已断开。请确认 Relay Server 仍在运行。',
+        relayFailedHint: '连接失败。请确认你已在项目根目录运行 relay server。',
+        relayDefaultHint: '若连接失败，请先在项目根目录启动 relay server。',
+        disconnectedDone: '已断开连接',
+        connectedMcp: '已连接到 MCP Server',
+        noChannelCopy: '尚未获取 Channel Code，无法复制',
+        noChannelPromptCopy: '尚未获取 Channel Code，无法复制 Prompt',
+        waitingConnect: '等待连接...',
+        cannotRelayResponse: '无法回传响应：Relay 未连接',
+        connectionErrorPrefix: '错误',
+        groupsUnit: '组',
+        itemsUnit: '条',
+        copyEmpty: '为空，无法复制',
+        copyDone: '已复制',
+        copyDoneFallback: '已复制（fallback）',
+        copyFailed: '自动复制失败，请手动复制',
+        relayStartCommandLabel: 'relay 启动命令',
+        mcpJsonConfigLabel: 'mcp.json 配置',
+        claudeAddCommandLabel: 'claude mcp add 命令',
+        hostedMcpConfigLabel: 'HTTP MCP 配置',
+        contentLabel: '内容',
+      },
+      en: {
+        titleMain: 'Supercharged Figma AI',
+        tabs: { config: 'Config', status: 'Status', logs: 'Logs' },
+        status: { connected: 'Connected', offline: 'Offline', waiting: 'Waiting channel...' },
+        step1Title: 'Start Relay Server',
+        step2Title: 'AGENT MCPSERVER Config',
+        step3Title: 'Connect to Relay Server',
+        step4Title: 'Copy Channel Prompt to Agent',
+        relayHint: 'If connection fails, start relay server in project root first.',
+        relayStartLabel: 'Start command (project root)',
+        copyRelayStartTitle: 'Copy start command',
+        mcpFoldTitle: 'Expand/Collapse config',
+        mcpJsonLabel: 'mcp.json snippet',
+        copyMcpJsonTitle: 'Copy mcp.json config',
+        claudeCliLabel: 'Claude CLI command',
+        copyClaudeCliTitle: 'Copy claude mcp add command',
+        mcpHttpLabel: 'Hosted HTTP MCP config',
+        copyMcpHttpTitle: 'Copy HTTP MCP config',
+        step4Waiting: 'Complete Step 3 first, then channel prompt and code will appear here.',
+        copyPromptTitle: 'Copy prompt',
+        channelCode: 'Channel Code',
+        copy: 'Copy',
+        channelHelp: 'Paste this code into Cursor/Claude to connect',
+        connectBtn: 'Connect Relay Server',
+        connectingBtn: 'Connecting...',
+        disconnectBtn: 'Disconnect',
+        statRunning: 'Running',
+        statCompleted: 'Completed',
+        statFailed: 'Failed',
+        statTotal: 'Total Ops',
+        operationsTitle: 'Execution Queue',
+        statusRuntime: 'Session uptime: {value}',
+        statusLastActivity: 'Last activity: {value}',
+        statusCurrentRunning: 'Now running: {value}',
+        noCurrentRunning: 'None',
+        activityStart: '{name} started',
+        activityDone: '{name} done',
+        activityFailed: '{name} failed',
+        logsTitle: 'Activity Logs',
+        expand: 'Expand',
+        collapse: 'Collapse',
+        clear: 'Clear',
+        progressProcessing: 'Processing...',
+        progressReady: 'Ready',
+        progressCalculating: 'Calculating...',
+        progressExecuting: 'Running',
+        progressCompleted: 'Done',
+        progressFailed: 'Failed',
+        progressStalled: 'Progress stalled too long, auto-finishing progress display',
+        currentOperation: 'Current operation',
+        etaSeconds: '{seconds}s remaining',
+        operationProcessing: 'Processing...',
+        statsCatalog: 'Stats source: catalog (server get_tools)',
+        statsRuntime: 'Stats source: runtime (catalog not received yet)',
+        logCleared: 'Logs cleared',
+        noOperations: 'No active operations',
+        enterRelay: 'Please enter Relay Server URL',
+        connectingRelayLog: 'Connecting to Relay Server',
+        connectedRelayWaiting: 'Connected to Relay Server, waiting channel...',
+        relayDisconnected: 'Disconnected from Relay Server',
+        relayConnectFailed: 'Connection failed, check Relay Server URL',
+        relayConnectException: 'Connection error. Start Relay Server first, then verify URL/port.',
+        relayDisconnectedHint: 'Connection closed. Confirm Relay Server is still running.',
+        relayFailedHint: 'Connection failed. Start relay server in project root first.',
+        relayDefaultHint: 'If connection fails, start relay server in project root first.',
+        disconnectedDone: 'Disconnected',
+        connectedMcp: 'Connected to MCP Server',
+        noChannelCopy: 'Channel code not available yet',
+        noChannelPromptCopy: 'Channel code not available yet',
+        waitingConnect: 'Waiting for connection...',
+        cannotRelayResponse: 'Cannot forward response: relay not connected',
+        connectionErrorPrefix: 'Error',
+        groupsUnit: 'groups',
+        itemsUnit: 'items',
+        copyEmpty: 'is empty, cannot copy',
+        copyDone: 'copied',
+        copyDoneFallback: 'copied (fallback)',
+        copyFailed: 'Auto-copy failed, please copy manually',
+        relayStartCommandLabel: 'relay start command',
+        mcpJsonConfigLabel: 'mcp.json config',
+        claudeAddCommandLabel: 'claude mcp add command',
+        hostedMcpConfigLabel: 'HTTP MCP config',
+        contentLabel: 'content',
+      },
+    };
+
+    let currentLang = 'zh-CN';
+    let inMemoryLang = null;
+
+    function t(path, fallback = '') {
+      const dict = I18N[currentLang] || I18N['zh-CN'];
+      const parts = String(path).split('.');
+      let value = dict;
+      for (const p of parts) {
+        value = value?.[p];
+      }
+      return value ?? fallback ?? path;
+    }
+
+    function setText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+
+    function setAttr(id, attr, value) {
+      const el = document.getElementById(id);
+      if (el) el.setAttribute(attr, value);
+    }
+
+    function applyI18n() {
+      setText('title-main', t('titleMain'));
+      setText('tab-config', t('tabs.config'));
+      setText('tab-status', t('tabs.status'));
+      setText('tab-logs', t('tabs.logs'));
+      setText('step1-title', t('step1Title'));
+      setText('step2-title', t('step2Title'));
+      setText('step3-title', t('step3Title'));
+      setText('step4-title', t('step4Title'));
+      setText('relay-help-hint', t('relayHint'));
+      setText('relay-start-label', t('relayStartLabel'));
+      setText('mcp-fold-title', t('mcpFoldTitle'));
+      setText('mcp-json-label', t('mcpJsonLabel'));
+      setText('claude-cli-label', t('claudeCliLabel'));
+      setText('mcp-http-label', t('mcpHttpLabel'));
+      setText('step4-waiting', t('step4Waiting'));
+      setText('channel-code-title', t('channelCode'));
+      setText('copy-channel-btn', t('copy'));
+      setText('channel-help-text', t('channelHelp'));
+      setText('connect-btn', t('connectBtn'));
+      setText('disconnect-btn', t('disconnectBtn'));
+      setText('stat-running-label', t('statRunning'));
+      setText('stat-completed-label', t('statCompleted'));
+      setText('stat-failed-label', t('statFailed'));
+      setText('stat-total-label', t('statTotal'));
+      setText('operations-title', t('operationsTitle'));
+      setText('operations-expand', t('expand'));
+      setText('operations-collapse', t('collapse'));
+      setText('log-title', t('logsTitle'));
+      setText('log-expand', t('expand'));
+      setText('log-collapse', t('collapse'));
+      setText('log-clear', t('clear'));
+      setAttr('copy-relay-btn', 'title', t('copyRelayStartTitle'));
+      setAttr('copy-relay-btn', 'aria-label', t('copyRelayStartTitle'));
+      setAttr('copy-mcp-json-btn', 'title', t('copyMcpJsonTitle'));
+      setAttr('copy-mcp-json-btn', 'aria-label', t('copyMcpJsonTitle'));
+      setAttr('copy-claude-btn', 'title', t('copyClaudeCliTitle'));
+      setAttr('copy-claude-btn', 'aria-label', t('copyClaudeCliTitle'));
+      setAttr('copy-mcp-http-btn', 'title', t('copyMcpHttpTitle'));
+      setAttr('copy-mcp-http-btn', 'aria-label', t('copyMcpHttpTitle'));
+      setAttr('copy-prompt-btn', 'title', t('copyPromptTitle'));
+      setAttr('copy-prompt-btn', 'aria-label', t('copyPromptTitle'));
+      refreshConnectionStatusLabel();
+      renderMcpSetupHints();
+      refreshStatusPanel();
+      updateOperationsList();
+    }
+
+    function safeGetStoredLang() {
+      try {
+        return localStorage.getItem('supercharged-figma-lang');
+      } catch (_) {
+        return inMemoryLang;
+      }
+    }
+
+    function safeSetStoredLang(lang) {
+      inMemoryLang = lang;
+      try {
+        localStorage.setItem('supercharged-figma-lang', lang);
+      } catch (_) {
+        // data: URL environments may block storage; memory fallback is enough.
+      }
+    }
+
+    function detectDefaultLanguage() {
+      const saved = safeGetStoredLang();
+      if (saved && (saved === 'zh-CN' || saved === 'en')) return saved;
+      const docLang = String(document.documentElement.lang || '').toLowerCase();
+      if (docLang.startsWith('zh')) return 'zh-CN';
+      const navLang = String(navigator.language || '').toLowerCase();
+      return navLang.startsWith('zh') ? 'zh-CN' : 'en';
+    }
+
+    function setLanguage(lang) {
+      currentLang = lang === 'en' ? 'en' : 'zh-CN';
+      if (langSelectEl) langSelectEl.value = currentLang;
+      safeSetStoredLang(currentLang);
+      applyI18n();
+    }
+
+    function refreshConnectionStatusLabel() {
+      if (!connectionStatusEl || !statusEl) return;
+      const state = connectionState || (statusEl.classList.contains('connected')
+        ? 'connected'
+        : statusEl.classList.contains('processing')
+          ? 'waiting'
+          : 'offline');
+      if (state === 'connected') {
+        connectionStatusEl.textContent = t('status.connected');
+        connectionStatusEl.style.color = 'var(--ui-success)';
+        return;
+      }
+      if (state === 'waiting') {
+        connectionStatusEl.textContent = t('status.waiting');
+        connectionStatusEl.style.color = 'var(--ui-warning)';
+        return;
+      }
+      connectionStatusEl.textContent = t('status.offline');
+      connectionStatusEl.style.color = 'var(--ui-text-tertiary)';
+    }
+
+    const operations = new Map();
+    const collapsedOperationGroups = new Set();
+    const seenTools = new Set();
+    let availableToolCount = 0;
+    let sessionConnectedAt = 0;
+    let totalOpsStarted = 0;
+    let totalOpsCompleted = 0;
+    let totalOpsFailed = 0;
+    let lastActivityLabel = '--';
+    let runtimeTimer = null;
+    let ws = null;
+    let currentChannelCode = null;
+    let currentBridgeSessionId = null;
+    let bridgeSessionCounter = 0;
+    let currentProgressValue = 0;
+    let lastProgressAt = 0;
+    let progressAutoHideTimer = null;
+    let progressStallTimer = null;
+    let reconnectTimer = null;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_DELAY_MS = 5000;
+    const HEARTBEAT_INTERVAL_MS = 20000;
+    const MAX_LOG_ENTRIES = 300;
+    let currentMainTab = 'config';
+    let manualDisconnecting = false;
+    let connectionState = 'offline'; // offline | waiting | connected
+    let heartbeatTimer = null;
+
+    function nextBridgeSessionId() {
+      bridgeSessionCounter += 1;
+      return `${Date.now()}-${bridgeSessionCounter}-${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function clearReconnectTimer() {
+      if (!reconnectTimer) return;
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+
+    function clearHeartbeatTimer() {
+      if (!heartbeatTimer) return;
+      clearInterval(heartbeatTimer);
+      heartbeatTimer = null;
+    }
+
+    function startHeartbeat(socket) {
+      clearHeartbeatTimer();
+      heartbeatTimer = setInterval(() => {
+        if (ws !== socket || socket.readyState !== WebSocket.OPEN) {
+          clearHeartbeatTimer();
+          return;
+        }
+        try {
+          socket.send(JSON.stringify({ type: 'system', event: 'heartbeat', ts: Date.now() }));
+        } catch (_) {
+          // Best effort keepalive.
+        }
+      }, HEARTBEAT_INTERVAL_MS);
+    }
+
+    function scheduleReconnect() {
+      if (manualDisconnecting) return;
+      if (ws && ws.readyState === WebSocket.OPEN) return;
+      clearReconnectTimer();
+      reconnectAttempts += 1;
+      const delay = Math.min(500 * (2 ** (reconnectAttempts - 1)), MAX_RECONNECT_DELAY_MS);
+      log(`relay reconnect scheduled in ${Math.round(delay / 1000)}s (attempt ${reconnectAttempts})`, 'warning');
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        if (manualDisconnecting) return;
+        connect();
+      }, delay);
+    }
+
+    function formatTime(date) {
+      return date.toTimeString().slice(0, 8);
+    }
+
+    function normalizeToolName(raw) {
+      if (!raw) return 'unknown_tool';
+      const name = String(raw).trim();
+      const cleaned = name.replace(/^create_/, '');
+      return cleaned.toLowerCase();
+    }
+
+    function extractToolNameFromMessage(message) {
+      if (!message) return 'system';
+      const text = String(message);
+      const bracket = text.match(/\[([a-zA-Z0-9_:-]+)\]/);
+      if (bracket) return normalizeToolName(bracket[1]);
+      const exec = text.match(/Error executing ([a-zA-Z0-9_:-]+)/);
+      if (exec) return normalizeToolName(exec[1]);
+      const token = text.match(/([a-zA-Z][a-zA-Z0-9_:-]+)/);
+      return token ? normalizeToolName(token[1]) : 'system';
+    }
+
+    function truncateText(text, max = 140) {
+      const s = String(text ?? '');
+      return s.length > max ? `${s.slice(0, max)}...` : s;
+    }
+
+    function summarizeValue(value, maxLen = 120) {
+      if (value === null) return 'null';
+      if (value === undefined) return 'undefined';
+      if (typeof value === 'string') return truncateText(value, maxLen);
+      if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+      if (Array.isArray(value)) return `array(${value.length})`;
+      if (typeof value === 'object') {
+        const keys = Object.keys(value);
+        if (keys.length === 0) return '{}';
+        const brief = keys.slice(0, 6).map((k) => `${k}:${summarizeValue(value[k], 24)}`).join(', ');
+        const suffix = keys.length > 6 ? ', ...' : '';
+        return `{${brief}${suffix}}`;
+      }
+      return truncateText(String(value), maxLen);
+    }
+
+    function summarizeToolCallMessage(msg) {
+      const toolName = normalizeToolName(msg?.type || 'unknown_tool');
+      const payload = msg?.payload || {};
+      const summary = summarizeValue(payload, 120);
+      const detail = (() => {
+        try {
+          return JSON.stringify(payload, null, 2);
+        } catch (_) {
+          return String(payload);
+        }
+      })();
+      return { summary: `${toolName} | payload=${summary}`, detail };
+    }
+
+    function summarizeResponseMessage(opName, payload) {
+      const hasError = Boolean(payload?.error);
+      if (hasError) {
+        return {
+          summary: `${opName} | failed | error=${truncateText(payload.error, 160)}`,
+          detail: String(payload?.error || ''),
+        };
+      }
+      const resultSummary = summarizeValue(payload?.result, 140);
+      const detail = (() => {
+        try {
+          return JSON.stringify(payload?.result, null, 2);
+        } catch (_) {
+          return String(payload?.result ?? '');
+        }
+      })();
+      return { summary: `${opName} | success | result=${resultSummary}`, detail };
+    }
+
+    function createLogEntry(summary, type, detail = '') {
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      const normalizedSummary = String(summary ?? '');
+      const normalizedDetail = String(detail ?? '').trim();
+      const hasDetail = normalizedDetail && normalizedDetail !== normalizedSummary;
+      if (hasDetail) entry.classList.add('expandable');
+      entry.innerHTML = `
+        <div class="log-row">
+          <span class="log-time">${formatTime(new Date())}</span>
+          <span class="log-message">${normalizedSummary}</span>
+          <span class="log-expand">▶</span>
+        </div>
+        <div class="log-detail">${hasDetail ? normalizedDetail : ''}</div>
+      `;
+      if (hasDetail) {
+        entry.querySelector('.log-row').addEventListener('click', () => {
+          entry.classList.toggle('expanded');
+        });
+      }
+      return entry;
+    }
+
+    function log(message, type = 'info', detail = '') {
+      const entry = createLogEntry(message, type, detail);
+      logEl.appendChild(entry);
+      while (logEl.children.length > MAX_LOG_ENTRIES) {
+        logEl.removeChild(logEl.firstElementChild);
+      }
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function toggleAllLogs(expand) {
+      const rows = logEl.querySelectorAll('.log-entry.expandable');
+      rows.forEach((el) => {
+        if (expand) el.classList.add('expanded');
+        else el.classList.remove('expanded');
+      });
+    }
+
+    function clearLog() {
+      logEl.innerHTML = '';
+      log(t('logCleared'), 'info');
+    }
+
+    function formatDuration(ms) {
+      if (!Number.isFinite(ms) || ms <= 0) return '00:00:00';
+      const totalSec = Math.floor(ms / 1000);
+      const h = Math.floor(totalSec / 3600).toString().padStart(2, '0');
+      const m = Math.floor((totalSec % 3600) / 60).toString().padStart(2, '0');
+      const s = (totalSec % 60).toString().padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function refreshStatusPanel() {
+      if (activeOpsEl) activeOpsEl.textContent = String(operations.size);
+      if (completedOpsEl) completedOpsEl.textContent = String(totalOpsCompleted);
+      if (failedOpsEl) failedOpsEl.textContent = String(totalOpsFailed);
+      if (totalOpsEl) totalOpsEl.textContent = String(totalOpsStarted);
+
+      const uptime = sessionConnectedAt > 0 ? formatDuration(Date.now() - sessionConnectedAt) : '--';
+      if (statusRuntimeEl) {
+        statusRuntimeEl.textContent = t('statusRuntime').replace('{value}', uptime);
+      }
+      if (statusLastEl) {
+        statusLastEl.textContent = t('statusLastActivity').replace('{value}', lastActivityLabel || '--');
+      }
+      const runningNames = Array.from(operations.values())
+        .filter((op) => op.status === 'running' || op.status === 'pending')
+        .map((op) => op.name)
+        .slice(0, 3);
+      const runningLabel = runningNames.length > 0 ? runningNames.join(', ') : t('noCurrentRunning');
+      if (statusCurrentEl) {
+        statusCurrentEl.textContent = t('statusCurrentRunning').replace('{value}', runningLabel);
+      }
+    }
+
+    function setMainTab(tab) {
+      const normalized = tab === 'status' || tab === 'logs' ? tab : 'config';
+      currentMainTab = normalized;
+      if (tabConfigEl) tabConfigEl.classList.toggle('active', normalized === 'config');
+      if (tabStatusEl) tabStatusEl.classList.toggle('active', normalized === 'status');
+      if (tabLogsEl) tabLogsEl.classList.toggle('active', normalized === 'logs');
+      if (panelConfigEl) panelConfigEl.classList.toggle('hidden', normalized !== 'config');
+      if (panelStatusEl) panelStatusEl.classList.toggle('hidden', normalized !== 'status');
+      if (panelLogsEl) panelLogsEl.classList.toggle('hidden', normalized !== 'logs');
+    }
+
+    function applyViewportLayout() {
+      const h = window.innerHeight || 0;
+      let mode = 'md';
+      if (h <= 380) mode = 'sm';
+      else if (h >= 520) mode = 'lg';
+      document.body.setAttribute('data-viewport', mode);
+    }
+
+    function clampProgress(v) {
+      return Math.max(0, Math.min(100, Math.round(v)));
+    }
+
+    function normalizeProgress(data) {
+      const operationName = data.operationName || data.name || t('operationProcessing');
+      const current = Number.isFinite(data.current) ? data.current : undefined;
+      const total = Number.isFinite(data.total) ? data.total : undefined;
+      let percentage = Number.isFinite(data.percentage) ? data.percentage : undefined;
+
+      if (!Number.isFinite(percentage) && Number.isFinite(current) && Number.isFinite(total) && total > 0) {
+        percentage = (current / total) * 100;
+      }
+      if (!Number.isFinite(percentage)) {
+        percentage = currentProgressValue > 0 ? currentProgressValue : 2;
+      }
+      if (percentage === 0) {
+        percentage = currentProgressValue > 0 ? currentProgressValue : 3;
+      }
+
+      percentage = clampProgress(percentage);
+      if (percentage < currentProgressValue) {
+        percentage = currentProgressValue;
+      }
+
+      return {
+        operationName,
+        percentage,
+        message: data.message || '',
+        stage: data.stage || '',
+        eta: Number.isFinite(data.eta) ? data.eta : null,
+      };
+    }
+
+    function scheduleProgressStallWatch() {
+      if (progressStallTimer) clearTimeout(progressStallTimer);
+      progressStallTimer = setTimeout(() => {
+        if (operations.size === 0) return;
+        const idleMs = Date.now() - lastProgressAt;
+        if (idleMs >= 15000) {
+          log(t('progressStalled'), 'warning');
+          completeProgress({ name: t('currentOperation'), duration: 0 }, true);
+        }
+      }, 16000);
+    }
+
+    function startPseudoProgress(operationName) {
+      currentProgressValue = Math.max(currentProgressValue, 6);
+      statusEl.classList.add('processing');
+      if (connectionState !== 'connected') connectionState = 'waiting';
+      refreshConnectionStatusLabel();
+      lastProgressAt = Date.now();
+      scheduleProgressStallWatch();
+    }
+
+    function updateProgress(data) {
+      const normalized = normalizeProgress(data || {});
+      const { operationName, percentage, message, stage, eta } = normalized;
+
+      if (progressAutoHideTimer) {
+        clearTimeout(progressAutoHideTimer);
+        progressAutoHideTimer = null;
+      }
+
+      lastProgressAt = Date.now();
+      currentProgressValue = percentage;
+      statusEl.classList.add('processing');
+      if (connectionState !== 'connected') connectionState = 'waiting';
+      refreshConnectionStatusLabel();
+      scheduleProgressStallWatch();
+
+      const opId = data?.operationId;
+      let targetOp = null;
+      if (opId && operations.has(opId)) {
+        targetOp = operations.get(opId);
+      } else {
+        const normName = normalizeToolName(operationName);
+        targetOp = Array.from(operations.values())
+          .find((op) => (op.status === 'running' || op.status === 'pending') && normalizeToolName(op.name) === normName)
+          || Array.from(operations.values())
+            .find((op) => op.status === 'running' || op.status === 'pending')
+          || null;
+      }
+      if (targetOp) {
+        targetOp.progress = percentage;
+        targetOp.progressStage = stage || '';
+        targetOp.progressEta = eta;
+      }
+      updateOperationsList();
+
+      if (message || percentage === 0 || percentage === 100 || percentage % 10 === 0) {
+        const detail = [stage, message].filter(Boolean).join(' | ');
+        log(`progress | ${normalizeToolName(operationName)} | ${percentage}%${detail ? ` | ${truncateText(detail, 120)}` : ''}`, 'info');
+      }
+    }
+
+    function completeProgress(data, silent = false) {
+      const { name, duration } = data;
+
+      if (progressStallTimer) {
+        clearTimeout(progressStallTimer);
+        progressStallTimer = null;
+      }
+
+      currentProgressValue = 100;
+      const normalizedName = normalizeToolName(name || 'operation');
+      const candidate = Array.from(operations.values())
+        .find((op) => normalizeToolName(op.name) === normalizedName && (op.status === 'running' || op.status === 'pending'))
+        || Array.from(operations.values()).find((op) => op.status === 'running' || op.status === 'pending');
+      if (candidate) {
+        candidate.progress = 100;
+        candidate.progressStage = t('progressCompleted');
+        candidate.progressEta = null;
+      }
+
+      progressAutoHideTimer = setTimeout(() => {
+        statusEl.classList.remove('processing');
+        connectionState = currentChannelCode ? 'connected' : 'offline';
+        refreshConnectionStatusLabel();
+        currentProgressValue = 0;
+        if (!silent) {
+          log(normalizeToolName(name || 'operation'), 'success');
+        }
+        updateOperationsList();
+      }, 700);
+    }
+
+    function addOperation(opId, name, meta = '') {
+      operations.set(opId, {
+        id: opId,
+        name,
+        status: 'pending',
+        meta,
+        createdAt: Date.now(),
+        // Initialize minimal progress so queue can render per-op tracking immediately.
+        progress: 2,
+        progressStage: t('progressReady'),
+        progressEta: null,
+      });
+      seenTools.add(name);
+      totalOpsStarted += 1;
+      lastActivityLabel = t('activityStart').replace('{name}', name);
+      refreshStatusPanel();
+      if (operations.size === 1) {
+        startPseudoProgress(name);
+      }
+      updateOperationsList();
+    }
+
+    function updateOperation(opId, status, meta) {
+      const op = operations.get(opId);
+      if (op) {
+        op.status = status;
+        if (meta !== undefined) op.meta = meta;
+        if (status === 'running') {
+          if (!Number.isFinite(op.progress)) op.progress = 6;
+          else op.progress = Math.max(6, Math.min(96, Number(op.progress)));
+          if (!op.progressStage) op.progressStage = t('progressProcessing');
+        } else if (status === 'completed') {
+          op.progress = 100;
+          op.progressStage = t('progressCompleted');
+          op.progressEta = null;
+        } else if (status === 'error') {
+          op.progress = Number.isFinite(op.progress) ? Number(op.progress) : 0;
+          op.progressStage = t('progressFailed');
+          op.progressEta = null;
+        }
+        op.updatedAt = Date.now();
+        updateOperationsList();
+      }
+    }
+
+    function removeOperation(opId) {
+      operations.delete(opId);
+      updateOperationsList();
+    }
+
+    function getGroupedOperations() {
+      const groups = new Map();
+      for (const op of operations.values()) {
+        const key = op.name || 'unknown';
+        if (!groups.has(key)) {
+          groups.set(key, {
+            name: key,
+            items: [],
+            counts: { pending: 0, running: 0, completed: 0, error: 0 },
+            latestAt: 0,
+          });
+        }
+        const g = groups.get(key);
+        g.items.push(op);
+        if (g.counts[op.status] === undefined) g.counts[op.status] = 0;
+        g.counts[op.status] += 1;
+        g.latestAt = Math.max(g.latestAt, Number(op.updatedAt || op.createdAt || 0));
+      }
+      return Array.from(groups.values()).sort((a, b) => b.latestAt - a.latestAt);
+    }
+
+    function toggleOperationGroup(name) {
+      if (collapsedOperationGroups.has(name)) collapsedOperationGroups.delete(name);
+      else collapsedOperationGroups.add(name);
+      updateOperationsList();
+    }
+
+    function toggleAllOperationGroups(expand) {
+      const groups = getGroupedOperations();
+      if (expand) {
+        collapsedOperationGroups.clear();
+      } else {
+        groups.forEach((g) => collapsedOperationGroups.add(g.name));
+      }
+      updateOperationsList();
+    }
+
+    function updateOperationsList() {
+      if (activeOpsEl) activeOpsEl.textContent = String(operations.size);
+      const groups = getGroupedOperations();
+      if (operationsSummaryEl) {
+        operationsSummaryEl.textContent = `${groups.length} ${t('groupsUnit')} / ${operations.size} ${t('itemsUnit')}`;
+      }
+
+      operationsList.innerHTML = '';
+      if (groups.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-note';
+        empty.textContent = t('noOperations');
+        operationsList.appendChild(empty);
+        refreshStatusPanel();
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+      for (const group of groups) {
+        const isCollapsed = collapsedOperationGroups.has(group.name);
+        const groupEl = document.createElement('div');
+        groupEl.className = `op-group ${isCollapsed ? '' : 'expanded'}`;
+
+        const head = document.createElement('div');
+        head.className = 'op-group-head';
+        const statsText = `R:${group.counts.running || 0} P:${group.counts.pending || 0} E:${group.counts.error || 0}`;
+        head.innerHTML = `
+          <span class="op-group-arrow">▶</span>
+          <span class="op-group-name">${group.name}</span>
+          <span class="op-group-stats">${group.items.length} | ${statsText}</span>
+        `;
+        head.addEventListener('click', () => toggleOperationGroup(group.name));
+
+        const items = document.createElement('div');
+        items.className = 'op-group-items';
+        group.items
+          .sort((a, b) => Number(b.updatedAt || b.createdAt || 0) - Number(a.updatedAt || a.createdAt || 0))
+          .forEach((op) => {
+            const item = document.createElement('div');
+            item.className = 'operation-item';
+            const hasProgress = Number.isFinite(op.progress);
+            const stageText = op.progressStage || '';
+            const etaText = Number.isFinite(op.progressEta)
+              ? t('etaSeconds').replace('{seconds}', String(op.progressEta))
+              : '';
+            item.innerHTML = `
+              <div class="operation-main">
+                <div class="operation-status ${op.status}"></div>
+                <span class="operation-name">${op.id ? op.id.slice(0, 8) : 'op'}</span>
+                <span class="operation-meta">${op.meta || ''}</span>
+              </div>
+              ${hasProgress ? `
+              <div class="operation-progress-wrap">
+                <div class="operation-progress-bg"><div class="operation-progress-fill" style="width:${Math.max(0, Math.min(100, Number(op.progress)))}%"></div></div>
+                <div class="operation-progress-label">${Math.round(Number(op.progress))}%${stageText ? ` · ${stageText}` : ''}${etaText ? ` · ${etaText}` : ''}</div>
+              </div>` : ''}
+            `;
+            items.appendChild(item);
+          });
+
+        groupEl.appendChild(head);
+        groupEl.appendChild(items);
+        fragment.appendChild(groupEl);
+      }
+      operationsList.appendChild(fragment);
+      refreshStatusPanel();
+    }
+
+    function settleOperationFromResponse(payload) {
+      if (!payload || !payload.id) return;
+      const op = operations.get(payload.id);
+      if (!op) return;
+      const hasError = Boolean(payload.error);
+      if (hasError) {
+        totalOpsFailed += 1;
+        lastActivityLabel = t('activityFailed').replace('{name}', op.name);
+      } else {
+        totalOpsCompleted += 1;
+        lastActivityLabel = t('activityDone').replace('{name}', op.name);
+      }
+      const responseSummary = summarizeResponseMessage(op.name, payload);
+      log(responseSummary.summary, hasError ? 'error' : 'success', responseSummary.detail);
+      removeOperation(payload.id);
+      refreshStatusPanel();
+      if (operations.size === 0) {
+        completeProgress({ name: op.name, duration: 0 }, true);
+      } else {
+        const nextOp = operations.values().next().value;
+        if (nextOp?.name) startPseudoProgress(nextOp.name);
+      }
+    }
+
+    function connect() {
+      const relayUrl = document.getElementById('relay-url').value.trim();
+      if (!relayUrl) {
+        log(t('enterRelay'), 'error');
+        return;
+      }
+      clearReconnectTimer();
+      clearHeartbeatTimer();
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        try { ws.close(); } catch (_) {}
+      }
+      if (relayHelpCardEl) relayHelpCardEl.classList.remove('attention');
+      if (relayHelpHintEl) relayHelpHintEl.textContent = t('relayDefaultHint');
+      
+      connectBtn.disabled = true;
+      connectBtn.textContent = t('connectingBtn');
+      log(`${t('connectingRelayLog')}: ${relayUrl}`, 'info');
+      
+      try {
+        const sessionId = nextBridgeSessionId();
+        currentBridgeSessionId = sessionId;
+        // 连接到 relay server（使用固定 channel REN2026）
+        const socket = new WebSocket(`${relayUrl}?type=figma&channel=REN2026`);
+        ws = socket;
+        
+        socket.onopen = () => {
+          if (ws !== socket) return;
+          reconnectAttempts = 0;
+          startHeartbeat(socket);
+          log(t('connectedRelayWaiting'), 'success');
+          // 更新 UI 状态为等待 channel
+          statusEl.classList.add('processing');
+          connectionState = 'waiting';
+          refreshConnectionStatusLabel();
+        };
+        
+        socket.onmessage = async (event) => {
+          if (ws !== socket) return;
+          let rawData = event.data;
+          if (rawData instanceof Blob) {
+            rawData = await rawData.text();
+          }
+
+          let msg;
+          try {
+            msg = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+          } catch (err) {
+            return;
+          }
+
+          // 处理系统消息
+          if (msg.type === 'system') {
+            if (msg.event === 'heartbeat_ack') {
+              return;
+            }
+            if (msg.event === 'connected') {
+              currentChannelCode = msg.channel;
+              channelCodeEl.textContent = currentChannelCode;
+              renderConnectPrompt();
+              channelSection.classList.remove('hidden');
+              showConnected();
+              log(`Channel Code: ${currentChannelCode}`, 'success');
+
+              // 通知主线程
+              parent.postMessage({
+                pluginMessage: {
+                  type: 'relay-connected',
+                  channel: currentChannelCode,
+                  sessionId
+                }
+              }, '*');
+            }
+            return;
+          }
+
+          // Progress messages are for UI display and should not be forwarded as tool calls.
+          if (msg.type === 'progress_update') {
+            updateProgress(msg.payload);
+            return;
+          }
+          if (msg.type === 'progress_complete') {
+            completeProgress(msg.payload);
+            return;
+          }
+
+          if (msg.id && msg.type && msg.type !== 'response') {
+            const toolName = normalizeToolName(msg.type);
+            const callSummary = summarizeToolCallMessage(msg);
+            if (!operations.has(msg.id)) {
+              addOperation(msg.id, toolName, truncateText(callSummary.summary, 80));
+            }
+            updateOperation(msg.id, 'running');
+            log(`start | ${callSummary.summary}`, 'info', callSummary.detail);
+          }
+
+      if (msg.type === 'get_tools' && Array.isArray(msg.payload?.tools)) {
+            availableToolCount = msg.payload.tools.length;
+            refreshStatusPanel();
+          }
+
+          // 转发消息到主线程
+          parent.postMessage({
+            pluginMessage: {
+              type: 'relay-message',
+              sessionId,
+              payload: msg
+            }
+          }, '*');
+        };
+        
+        socket.onclose = () => {
+          if (ws !== socket) return;
+          clearHeartbeatTimer();
+          log(t('relayDisconnected'), 'warning');
+          ws = null;
+          currentChannelCode = null;
+          currentBridgeSessionId = null;
+          if (!manualDisconnecting) {
+            revealRelayHelp(t('relayDisconnectedHint'));
+            scheduleReconnect();
+          }
+          manualDisconnecting = false;
+          showDisconnected();
+          parent.postMessage({ pluginMessage: { type: 'relay-disconnected', sessionId } }, '*');
+        };
+        
+        socket.onerror = (error) => {
+          if (ws !== socket) return;
+          clearHeartbeatTimer();
+          log(t('relayConnectFailed'), 'error');
+          revealRelayHelp(t('relayFailedHint'));
+          showDisconnected();
+        };
+      } catch (err) {
+        log(`error: ${err.message}`, 'error');
+        revealRelayHelp(t('relayConnectException'));
+        showDisconnected();
+      }
+    }
+
+    function copyChannelCode() {
+      if (!currentChannelCode) {
+        log(t('noChannelCopy'), 'error');
+        return;
+      }
+      copyTextWithFallback(currentChannelCode, 'Channel Code');
+    }
+
+    function buildConnectPrompt() {
+      const relayUrl = document.getElementById('relay-url').value.trim() || 'wss://supercharged-figma-relay.gpw2333.workers.dev/supercharged-figma/ws';
+      const payload = {
+        relayUrl,
+        channelCode: currentChannelCode || '--',
+      };
+      return `connect_to_relay ${JSON.stringify(payload)}`;
+    }
+
+    function renderConnectPrompt() {
+      if (!promptViewerEl) return;
+      promptViewerEl.textContent = buildConnectPrompt();
+    }
+
+    function copyConnectPrompt() {
+      if (!currentChannelCode) {
+        log(t('noChannelPromptCopy'), 'error');
+        return;
+      }
+      const prompt = buildConnectPrompt();
+      renderConnectPrompt();
+      copyTextWithFallback(prompt, 'connect_to_relay Prompt');
+    }
+
+    function getRelayUrlInput() {
+      const value = document.getElementById('relay-url')?.value?.trim();
+      return value || 'wss://supercharged-figma-relay.gpw2333.workers.dev/supercharged-figma/ws';
+    }
+
+    function parseRelayUrl() {
+      const relayUrl = getRelayUrlInput();
+      try {
+        const url = new URL(relayUrl);
+        return { relayUrl, url };
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function isLocalRelayHost(hostname) {
+      const h = String(hostname || '').toLowerCase();
+      return h === '127.0.0.1' || h === 'localhost' || h === '::1';
+    }
+
+    function buildMcpJsonConfig() {
+      const parsed = parseRelayUrl();
+      let args = ['-y', 'supercharged-figma-mcp', '--local', '--relay-host', '127.0.0.1', '--relay-port', '8888'];
+      if (parsed) {
+        const host = parsed.url.hostname;
+        const port = parsed.url.port || (parsed.url.protocol === 'wss:' ? '443' : '80');
+        if (isLocalRelayHost(host)) {
+          args = ['-y', 'supercharged-figma-mcp', '--local', '--relay-host', host, '--relay-port', String(port)];
+        } else {
+          args = ['-y', 'supercharged-figma-mcp', '--remote', parsed.relayUrl];
+        }
+      }
+
+      const config = {
+        mcpServers: {
+          'supercharged-figma': {
+            command: 'npx',
+            args,
+          },
+        },
+      };
+      return JSON.stringify(config, null, 2);
+    }
+
+    function buildRelayStartCommand() {
+      const parsed = parseRelayUrl();
+      if (!parsed) return 'npx -y supercharged-figma-mcp --local --relay-host 127.0.0.1 --relay-port 8888';
+      const host = parsed.url.hostname;
+      const port = parsed.url.port || (parsed.url.protocol === 'wss:' ? '443' : '80');
+      if (isLocalRelayHost(host)) {
+        return `npx -y supercharged-figma-mcp --local --relay-host ${host} --relay-port ${port}`;
+      }
+      return `npx -y supercharged-figma-mcp --remote ${parsed.relayUrl}`;
+    }
+
+    function buildClaudeAddCommand() {
+      const parsed = parseRelayUrl();
+      if (!parsed) return 'claude mcp add supercharged-figma -- npx -y supercharged-figma-mcp --local --relay-host 127.0.0.1 --relay-port 8888';
+      const host = parsed.url.hostname;
+      const port = parsed.url.port || (parsed.url.protocol === 'wss:' ? '443' : '80');
+      if (isLocalRelayHost(host)) {
+        return `claude mcp add supercharged-figma -- npx -y supercharged-figma-mcp --local --relay-host ${host} --relay-port ${port}`;
+      }
+      return `claude mcp add supercharged-figma -- npx -y supercharged-figma-mcp --remote ${parsed.relayUrl}`;
+    }
+
+    const FALLBACK_HOSTED_MCP_URL = 'https://supercharged-figma-relay.gpw2333.workers.dev/mcp';
+
+    function buildHostedMcpJsonConfig() {
+      let mcpUrl = FALLBACK_HOSTED_MCP_URL;
+      const parsed = parseRelayUrl();
+      if (parsed && !isLocalRelayHost(parsed.url.hostname)) {
+        const scheme = parsed.url.protocol === 'wss:' ? 'https:' : 'http:';
+        mcpUrl = `${scheme}//${parsed.url.host}/mcp`;
+      }
+      const config = {
+        mcpServers: {
+          'supercharged-figma-http': {
+            url: mcpUrl,
+          },
+        },
+      };
+      return JSON.stringify(config, null, 2);
+    }
+
+    function renderMcpSetupHints() {
+      if (relayStartViewerEl) relayStartViewerEl.textContent = buildRelayStartCommand();
+      if (mcpJsonViewerEl) mcpJsonViewerEl.textContent = buildMcpJsonConfig();
+      if (claudeAddViewerEl) claudeAddViewerEl.textContent = buildClaudeAddCommand();
+      if (mcpHttpViewerEl) mcpHttpViewerEl.textContent = buildHostedMcpJsonConfig();
+    }
+
+    function copyRelayStartCommand() {
+      copyTextWithFallback(buildRelayStartCommand(), t('relayStartCommandLabel'));
+    }
+
+    function copyMcpJsonConfig() {
+      copyTextWithFallback(buildMcpJsonConfig(), t('mcpJsonConfigLabel'));
+    }
+
+    function copyClaudeAddCommand() {
+      copyTextWithFallback(buildClaudeAddCommand(), t('claudeAddCommandLabel'));
+    }
+
+    function copyHostedMcpJsonConfig() {
+      copyTextWithFallback(buildHostedMcpJsonConfig(), t('hostedMcpConfigLabel'));
+    }
+
+    function fallbackCopyText(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      ta.style.top = '0';
+      ta.setAttribute('readonly', 'readonly');
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    }
+
+    function copyTextWithFallback(text, label = t('contentLabel')) {
+      const normalized = String(text ?? '');
+      if (!normalized) {
+        log(`${label} ${t('copyEmpty')}`, 'error');
+        return;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(normalized).then(() => {
+          log(`${label} ${t('copyDone')}`, 'success');
+        }).catch(() => {
+          const ok = fallbackCopyText(normalized);
+          if (ok) log(`${label} ${t('copyDoneFallback')}`, 'success');
+          else log(`${t('copyFailed')}: ${label}`, 'warning');
+        });
+        return;
+      }
+      const ok = fallbackCopyText(normalized);
+      if (ok) log(`${label} ${t('copyDoneFallback')}`, 'success');
+      else log(`${t('copyFailed')}: ${label}`, 'warning');
+    }
+
+    function disconnect() {
+      clearReconnectTimer();
+      clearHeartbeatTimer();
+      reconnectAttempts = 0;
+      const socket = ws;
+      const sessionId = currentBridgeSessionId || undefined;
+      manualDisconnecting = true;
+      ws = null;
+      currentChannelCode = null;
+      currentBridgeSessionId = null;
+      showDisconnected();
+      parent.postMessage({ pluginMessage: { type: 'relay-disconnected', sessionId } }, '*');
+      if (socket) {
+        try {
+          socket.close();
+        } catch (_) {
+          // Ignore close errors because local state is already reset.
+        }
+      }
+      manualDisconnecting = false;
+    }
+
+    function toggleMcpConfigCard() {
+      if (!mcpConfigCardEl) return;
+      const foldCard = mcpConfigCardEl.querySelector('.config-snippet-card');
+      if (!foldCard) return;
+      foldCard.classList.toggle('expanded');
+    }
+
+    function revealRelayHelp(message = t('relayFailedHint')) {
+      if (relayHelpHintEl) relayHelpHintEl.textContent = message;
+      if (!relayHelpCardEl) return;
+      relayHelpCardEl.classList.remove('hidden');
+      relayHelpCardEl.classList.add('attention');
+      relayHelpCardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      setTimeout(() => relayHelpCardEl.classList.remove('attention'), 1800);
+    }
+
+    function showConnected() {
+      statusEl.classList.add('connected');
+      statusEl.classList.remove('processing');
+      connectionState = 'connected';
+      refreshConnectionStatusLabel();
+
+      connectBtn.classList.add('hidden');
+      disconnectBtn.classList.remove('hidden');
+      if (relayHelpCardEl) relayHelpCardEl.classList.add('hidden');
+      if (connectPromptRowEl) connectPromptRowEl.classList.remove('hidden');
+      if (step4WaitingEl) step4WaitingEl.classList.add('hidden');
+      renderConnectPrompt();
+      setMainTab(currentMainTab || 'status');
+      sessionConnectedAt = Date.now();
+      if (runtimeTimer) clearInterval(runtimeTimer);
+      runtimeTimer = setInterval(refreshStatusPanel, 1000);
+      refreshStatusPanel();
+
+      log(t('connectedMcp'), 'success');
+    }
+
+    function showDisconnected() {
+      clearHeartbeatTimer();
+      statusEl.classList.remove('connected', 'processing');
+      connectionState = 'offline';
+      refreshConnectionStatusLabel();
+
+      connectBtn.classList.remove('hidden');
+      disconnectBtn.classList.add('hidden');
+      if (relayHelpCardEl) relayHelpCardEl.classList.remove('hidden');
+      if (connectPromptRowEl) connectPromptRowEl.classList.add('hidden');
+      if (step4WaitingEl) step4WaitingEl.classList.remove('hidden');
+      channelSection.classList.add('hidden');
+      connectBtn.disabled = false;
+      connectBtn.textContent = t('connectBtn');
+      setMainTab('config');
+      
+      operations.clear();
+      collapsedOperationGroups.clear();
+      seenTools.clear();
+      availableToolCount = 0;
+      totalOpsStarted = 0;
+      totalOpsCompleted = 0;
+      totalOpsFailed = 0;
+      lastActivityLabel = '--';
+      sessionConnectedAt = 0;
+      if (runtimeTimer) {
+        clearInterval(runtimeTimer);
+        runtimeTimer = null;
+      }
+      refreshStatusPanel();
+      if (operationsSummaryEl) operationsSummaryEl.textContent = `0 ${t('groupsUnit')}`;
+      updateOperationsList();
+      if (progressAutoHideTimer) {
+        clearTimeout(progressAutoHideTimer);
+        progressAutoHideTimer = null;
+      }
+      if (progressStallTimer) {
+        clearTimeout(progressStallTimer);
+        progressStallTimer = null;
+      }
+      currentProgressValue = 0;
+      
+      log(t('disconnectedDone'), 'warning');
+    }
+
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (!msg) return;
+      
+      switch (msg.type) {
+        case 'connected':
+          showConnected();
+          break;
+        case 'disconnected':
+          showDisconnected();
+          break;
+        case 'error':
+          connectBtn.disabled = false;
+          connectBtn.textContent = t('connectBtn');
+          log(`${t('connectionErrorPrefix')}: ${msg.payload}`, 'error');
+          break;
+        case 'response':
+          settleOperationFromResponse(msg.payload);
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(msg.payload));
+          } else {
+            log(t('cannotRelayResponse'), 'error');
+          }
+          break;
+        case 'progress':
+          updateProgress(msg.payload);
+          break;
+        case 'progress_complete':
+          completeProgress(msg.payload);
+          break;
+        case 'operation_start':
+          addOperation(msg.payload.operationId, msg.payload.name);
+          break;
+        case 'operation_update':
+          updateOperation(msg.payload.operationId, msg.payload.status, msg.payload.meta);
+          break;
+        case 'operation_end':
+          removeOperation(msg.payload.operationId);
+          break;
+        case 'log':
+          log(msg.payload?.message || extractToolNameFromMessage(msg.payload?.message), msg.payload?.level || 'info');
+          break;
+      }
+    };
+
+    // Initial state
+    parent.postMessage({ pluginMessage: { type: 'get-status' } }, '*');
+    document.getElementById('relay-url').addEventListener('input', () => {
+      renderConnectPrompt();
+      renderMcpSetupHints();
+    });
+    window.addEventListener('resize', applyViewportLayout);
+    applyViewportLayout();
+    setLanguage(detectDefaultLanguage());
+    renderMcpSetupHints();
+    renderConnectPrompt();
+    setMainTab('config');
+    log(t('waitingConnect'), 'info');
+  </script>
+</body>
+</html>

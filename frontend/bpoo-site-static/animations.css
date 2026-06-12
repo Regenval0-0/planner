@@ -1,0 +1,459 @@
+/* =========================
+   БПОО — Анимации + Мобильная адаптация
+   Подключить в index.html: <link rel="stylesheet" href="animations.css">
+   ========================= */
+
+/* ---- Keyframes ---- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ---- Entrance Animations ---- */
+.hero-panel {
+  animation: slideInRight 0.9s ease-out both;
+}
+
+.section {
+  animation: fadeIn 0.6s ease-out both;
+}
+
+.section-header h2 {
+  animation: fadeInUp 0.7s ease-out both;
+}
+
+.section-line {
+  animation: fadeInUp 0.7s 0.15s ease-out both;
+}
+
+.card {
+  animation: scaleIn 0.5s ease-out both;
+}
+
+/* Staggered delays for cards inside grids */
+.grid .card:nth-child(1) { animation-delay: 0.05s; }
+.grid .card:nth-child(2) { animation-delay: 0.15s; }
+.grid .card:nth-child(3) { animation-delay: 0.25s; }
+.grid .card:nth-child(4) { animation-delay: 0.35s; }
+.grid .card:nth-child(5) { animation-delay: 0.45s; }
+.grid .card:nth-child(6) { animation-delay: 0.55s; }
+
+.accordion-item {
+  animation: fadeInUp 0.4s ease-out both;
+}
+.accordion-item:nth-child(1) { animation-delay: 0.05s; }
+.accordion-item:nth-child(2) { animation-delay: 0.1s; }
+.accordion-item:nth-child(3) { animation-delay: 0.15s; }
+.accordion-item:nth-child(4) { animation-delay: 0.2s; }
+.accordion-item:nth-child(5) { animation-delay: 0.25s; }
+.accordion-item:nth-child(6) { animation-delay: 0.3s; }
+
+.partners-grid .partner-card {
+  animation: scaleIn 0.4s ease-out both;
+}
+.partners-grid .partner-card:nth-child(1)  { animation-delay: 0.02s; }
+.partners-grid .partner-card:nth-child(2)  { animation-delay: 0.04s; }
+.partners-grid .partner-card:nth-child(3)  { animation-delay: 0.06s; }
+.partners-grid .partner-card:nth-child(4)  { animation-delay: 0.08s; }
+.partners-grid .partner-card:nth-child(5)  { animation-delay: 0.10s; }
+.partners-grid .partner-card:nth-child(6)  { animation-delay: 0.12s; }
+.partners-grid .partner-card:nth-child(7)  { animation-delay: 0.14s; }
+.partners-grid .partner-card:nth-child(8)  { animation-delay: 0.16s; }
+.partners-grid .partner-card:nth-child(9)  { animation-delay: 0.18s; }
+.partners-grid .partner-card:nth-child(10) { animation-delay: 0.20s; }
+.partners-grid .partner-card:nth-child(11) { animation-delay: 0.22s; }
+.partners-grid .partner-card:nth-child(12) { animation-delay: 0.24s; }
+.partners-grid .partner-card:nth-child(13) { animation-delay: 0.26s; }
+.partners-grid .partner-card:nth-child(14) { animation-delay: 0.28s; }
+.partners-grid .partner-card:nth-child(15) { animation-delay: 0.30s; }
+.partners-grid .partner-card:nth-child(16) { animation-delay: 0.32s; }
+
+.team-card {
+  animation: fadeInUp 0.5s ease-out both;
+}
+.team-card:nth-child(1) { animation-delay: 0.05s; }
+.team-card:nth-child(2) { animation-delay: 0.12s; }
+.team-card:nth-child(3) { animation-delay: 0.19s; }
+.team-card:nth-child(4) { animation-delay: 0.26s; }
+.team-card:nth-child(5) { animation-delay: 0.33s; }
+.team-card:nth-child(6) { animation-delay: 0.40s; }
+
+.doc-link {
+  animation: fadeIn 0.35s ease-out both;
+}
+.doc-link:nth-child(1) { animation-delay: 0.03s; }
+.doc-link:nth-child(2) { animation-delay: 0.06s; }
+.doc-link:nth-child(3) { animation-delay: 0.09s; }
+.doc-link:nth-child(4) { animation-delay: 0.12s; }
+.doc-link:nth-child(5) { animation-delay: 0.15s; }
+.doc-link:nth-child(6) { animation-delay: 0.18s; }
+
+/* ---- Hover Enhancements ---- */
+.card:hover .card-icon {
+  animation: float 2s ease-in-out infinite;
+}
+
+.btn-primary:hover {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.partner-card:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.team-card:hover .avatar {
+  transform: scale(1.08);
+  transition: transform 0.3s ease;
+}
+
+.footer-contacts li a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---- Smooth transitions for all interactive elements ---- */
+a, button, .card, .partner-card, .team-card, .avatar, .accordion-trigger {
+  transition-property: transform, box-shadow, background, color, border-color, opacity;
+  transition-duration: 0.25s;
+  transition-timing-function: ease;
+}
+
+/* ---- Focus Improvements ---- */
+a:focus-visible,
+button:focus-visible,
+.accordion-trigger:focus-visible {
+  outline: 3px solid #fcdd51;
+  outline-offset: 3px;
+}
+
+/* =========================
+   Mobile Media Queries
+   ========================= */
+
+@media (max-width: 768px) {
+  /* Hero adjustments */
+  .hero-panel {
+    border-top-right-radius: 30px;
+    padding: 90px 20px 50px;
+    margin-top: 35vh;
+    animation: fadeInUp 0.7s ease-out both;
+  }
+
+  .hero-panel h1 {
+    font-size: clamp(20px, 5.5vw, 26px);
+  }
+  .hero-panel h2 {
+    font-size: clamp(17px, 4.5vw, 22px);
+  }
+  .hero-text {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* Containers */
+  .container {
+    width: 92%;
+    padding: 60px 0 50px;
+  }
+
+  .section-header {
+    margin-bottom: 28px;
+  }
+  .section-header h2 {
+    font-size: clamp(24px, 7vw, 32px);
+  }
+  .section-line {
+    width: 120px;
+    height: 3px;
+  }
+
+  /* Cards */
+  .card {
+    padding: 20px;
+    border-radius: 12px;
+  }
+  .goal-card {
+    padding: 20px;
+    margin-bottom: 32px;
+  }
+  .goal-card h3 {
+    font-size: 20px;
+  }
+  .goal-card p {
+    font-size: 14px;
+  }
+
+  /* Accordion */
+  .accordion-trigger {
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+  .accordion-body p {
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+
+  /* Documents */
+  .documents-title {
+    font-size: 18px;
+  }
+  .doc-link {
+    padding: 12px 16px;
+    font-size: 14px;
+    gap: 10px;
+  }
+
+  /* Career & Events */
+  .career-icon {
+    width: 48px;
+    height: 48px;
+  }
+  .tags {
+    gap: 8px;
+  }
+  .tag {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+
+  /* Hotline */
+  .hotline-card {
+    padding: 32px 20px;
+    margin-top: 32px;
+  }
+  .hotline-card h3 {
+    font-size: 22px;
+  }
+  .hotline-desc {
+    font-size: 15px;
+    margin-bottom: 20px;
+  }
+  .hotline-buttons {
+    gap: 10px;
+  }
+  .hotline-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 14px 24px;
+    font-size: 15px;
+  }
+
+  /* Partners */
+  .partner-card {
+    padding: 16px 12px;
+    font-size: 12px;
+  }
+
+  /* Team */
+  .team-card {
+    padding: 24px 16px;
+  }
+  .avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+  .team-card h4 {
+    font-size: 15px;
+  }
+
+  /* Footer */
+  .footer-inner {
+    padding: 40px 16px 0;
+  }
+  .footer-top {
+    gap: 28px;
+    padding-bottom: 28px;
+  }
+  .footer-logo img {
+    height: 38px;
+  }
+  .footer-logo-title {
+    font-size: 15px;
+  }
+  .footer-desc {
+    font-size: 13px;
+  }
+  .footer-contacts li {
+    font-size: 13px;
+  }
+  .social-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  .footer-bottom {
+    padding: 18px 0;
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  /* Mobile menu polish */
+  .mobile-menu {
+    padding: 16px;
+  }
+  .mobile-menu a {
+    font-size: 16px;
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-panel {
+    border-top-right-radius: 24px;
+    padding: 80px 16px 40px;
+    margin-top: 30vh;
+  }
+
+  .container {
+    width: 94%;
+    padding: 48px 0 40px;
+  }
+
+  .section-header h2 {
+    font-size: clamp(20px, 7.5vw, 26px);
+  }
+
+  .card {
+    padding: 16px;
+  }
+  .card h3 {
+    font-size: 18px;
+  }
+  .card h4 {
+    font-size: 16px;
+  }
+  .card p {
+    font-size: 13px;
+  }
+
+  .goal-card h3 {
+    font-size: 18px;
+  }
+
+  .accordion-trigger {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+  .accordion-body p {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+
+  .doc-link {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .hotline-card {
+    padding: 24px 16px;
+  }
+  .hotline-card h3 {
+    font-size: 20px;
+  }
+  .hotline-desc {
+    font-size: 14px;
+  }
+
+  .partner-card {
+    padding: 14px 10px;
+    font-size: 11px;
+    border-radius: 10px;
+  }
+
+  .team-card h4 {
+    font-size: 14px;
+  }
+  .team-card p {
+    font-size: 12px;
+  }
+
+  .footer-bottom {
+    text-align: center;
+  }
+}
+
+/* Very small devices */
+@media (max-width: 360px) {
+  .hero-panel h1 {
+    font-size: 18px;
+  }
+  .hero-panel h2 {
+    font-size: 16px;
+  }
+  .section-header h2 {
+    font-size: 20px;
+  }
+  .nav-list a {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .hero-panel,
+  .section,
+  .section-header h2,
+  .section-line,
+  .card,
+  .accordion-item,
+  .partner-card,
+  .team-card,
+  .doc-link {
+    animation: none !important;
+  }
+}

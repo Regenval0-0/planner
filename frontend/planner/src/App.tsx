@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.tsx';
 import LoginPage from './pages/LoginPage.tsx';
 import CalendarPage from './pages/CalendarPage.tsx';
+import SettingsPage from './pages/SettingsPage.tsx';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -15,6 +16,7 @@ function App() {
     <AuthProvider>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route
           path="/"
           element={

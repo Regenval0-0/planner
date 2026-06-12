@@ -1,0 +1,696 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Цветовая палитра — хоррор-медицина */
+  --bg-deep: #0a0c10;
+  --bg-surface: rgba(20, 24, 32, 0.85);
+  --bg-card: rgba(26, 30, 42, 0.7);
+  --bg-input: rgba(12, 16, 24, 0.9);
+
+  --border-dim: rgba(60, 70, 90, 0.4);
+  --border-active: rgba(220, 50, 50, 0.5);
+  --border-glow: rgba(220, 50, 50, 0.2);
+
+  --text-primary: #e8e4dc;
+  --text-secondary: #9a958a;
+  --text-muted: #5a5548;
+
+  --blood-red: #c93c3c;
+  --blood-red-dim: rgba(201, 60, 60, 0.15);
+  --blood-red-glow: rgba(201, 60, 60, 0.4);
+  --blood-pulse: #ff4444;
+
+  --success: #4a9a5a;
+  --warning: #c4a030;
+  --danger: #c93c3c;
+  --info: #4a7a9a;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 40px rgba(201, 60, 60, 0.05);
+  --shadow-glow: 0 0 20px var(--blood-red-glow), 0 0 60px rgba(201, 60, 60, 0.1);
+
+  --font-heading: 'Cinzel', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(ellipse at top, rgba(201, 60, 60, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at bottom, rgba(60, 40, 30, 0.15) 0%, transparent 50%),
+    linear-gradient(180deg, var(--bg-deep) 0%, #0c0e12 100%);
+}
+
+#root {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* === HEADER === */
+.app-header {
+  text-align: center;
+  padding: 48px 0 32px;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.app-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--blood-red), transparent);
+}
+
+.app-header h1 {
+  font-family: var(--font-heading);
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 12px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 30px var(--blood-red-glow), 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.app-header h1::before {
+  content: '✦';
+  margin-right: 12px;
+  color: var(--blood-red);
+  font-size: 28px;
+  vertical-align: middle;
+}
+
+.app-header h1::after {
+  content: '✦';
+  margin-left: 12px;
+  color: var(--blood-red);
+  font-size: 28px;
+  vertical-align: middle;
+}
+
+.app-header p {
+  color: var(--text-secondary);
+  font-size: 16px;
+  letter-spacing: 0.5px;
+}
+
+/* === LAYOUT === */
+.app-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  padding-bottom: 48px;
+}
+
+@media (min-width: 900px) {
+  .app-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .app-grid > section:nth-child(1) { grid-column: 1; }
+  .app-grid > section:nth-child(2) { grid-column: 2; }
+  .app-grid > section:nth-child(3) { grid-column: 1; }
+  .app-grid > section:nth-child(4) { grid-column: 2; }
+}
+
+/* === CARDS === */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-active), transparent);
+  opacity: 0.5;
+}
+
+.card:hover {
+  border-color: var(--border-active);
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+}
+
+.card h2 {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card h2::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 20px;
+  background: var(--blood-red);
+  border-radius: 2px;
+  box-shadow: 0 0 8px var(--blood-red-glow);
+}
+
+/* === FORMS === */
+.label {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.select, .dose-input, .dose-select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-dim);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.select:focus, .dose-input:focus, .dose-select:focus {
+  border-color: var(--blood-red);
+  box-shadow: 0 0 0 3px var(--blood-red-dim), 0 0 15px var(--blood-red-glow);
+}
+
+.select:hover, .dose-input:hover, .dose-select:hover {
+  border-color: rgba(201, 60, 60, 0.3);
+}
+
+/* === BUTTONS === */
+.btn-small {
+  background: transparent;
+  border: 1px solid var(--border-dim);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-small:hover {
+  color: var(--blood-red);
+  border-color: var(--blood-red);
+  background: var(--blood-red-dim);
+  box-shadow: 0 0 10px var(--blood-red-glow);
+}
+
+.dose-btn {
+  padding: 14px 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--blood-red);
+  background: linear-gradient(135deg, rgba(201, 60, 60, 0.2), rgba(180, 40, 40, 0.1));
+  color: var(--blood-red);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+}
+
+.dose-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  transition: left 0.5s ease;
+}
+
+.dose-btn:hover::before {
+  left: 100%;
+}
+
+.dose-btn:hover {
+  background: linear-gradient(135deg, rgba(201, 60, 60, 0.35), rgba(180, 40, 40, 0.2));
+  box-shadow: 0 0 20px var(--blood-red-glow), 0 0 40px rgba(201, 60, 60, 0.1);
+  transform: translateY(-1px);
+}
+
+.dose-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* === PATIENT PROFILE === */
+.patient-card {
+  margin-top: 16px;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  background: rgba(12, 16, 24, 0.6);
+  border: 1px solid var(--border-dim);
+  position: relative;
+}
+
+.patient-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--blood-red), transparent);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.patient-name {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.patient-meta {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  letter-spacing: 0.3px;
+}
+
+.patient-allergy {
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.patient-allergy.good {
+  background: rgba(74, 154, 90, 0.12);
+  color: var(--success);
+  border: 1px solid rgba(74, 154, 90, 0.25);
+}
+
+.patient-allergy.bad {
+  background: rgba(201, 60, 60, 0.12);
+  color: var(--danger);
+  border: 1px solid rgba(201, 60, 60, 0.3);
+  box-shadow: 0 0 10px rgba(201, 60, 60, 0.1);
+}
+
+/* Patient header: icon + text */
+.patient-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.patient-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-dim);
+  object-fit: contain;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.patient-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.patient-state-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid;
+  width: fit-content;
+}
+
+/* Internal symptoms */
+.patient-internal-symptoms {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-dim);
+}
+
+.internal-label {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+
+.internal-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.internal-tag {
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(140, 160, 180, 0.08);
+  border: 1px solid rgba(140, 160, 180, 0.2);
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.internal-tag:hover {
+  background: rgba(140, 160, 180, 0.15);
+  border-color: rgba(140, 160, 180, 0.35);
+}
+
+/* === SYMPTOM GALLERY === */
+.symptom-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+}
+
+.symptom-tile {
+  background: rgba(12, 16, 24, 0.5);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-md);
+  padding: 12px 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: center;
+  position: relative;
+}
+
+.symptom-tile::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--radius-md);
+  padding: 1px;
+  background: linear-gradient(135deg, transparent, transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.symptom-tile:hover {
+  border-color: rgba(201, 60, 60, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(201, 60, 60, 0.08);
+}
+
+.symptom-tile:hover::after {
+  opacity: 1;
+  background: linear-gradient(135deg, var(--blood-red), transparent 60%);
+}
+
+.symptom-tile.active {
+  border-color: var(--blood-red);
+  background: linear-gradient(135deg, rgba(201, 60, 60, 0.15), rgba(201, 60, 60, 0.05));
+  box-shadow: 0 0 15px var(--blood-red-glow), inset 0 0 20px rgba(201, 60, 60, 0.05);
+}
+
+.symptom-tile.active::after {
+  opacity: 1;
+  background: linear-gradient(135deg, var(--blood-red), transparent);
+}
+
+.symptom-img {
+  width: 100%;
+  height: 64px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 8px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  transition: transform 0.2s ease;
+}
+
+.symptom-tile:hover .symptom-img {
+  transform: scale(1.1);
+}
+
+.symptom-caption {
+  font-size: 12px;
+  color: var(--text-primary);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.symptom-humor {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 4px;
+  letter-spacing: 0.8px;
+}
+
+/* === DOSE CALCULATOR === */
+.dose-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dose-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-end;
+}
+
+.dose-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dose-result {
+  margin-top: 8px;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  background: rgba(12, 16, 24, 0.6);
+  border: 1px solid var(--border-dim);
+  position: relative;
+  animation: fadeInUp 0.4s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dose-result.success {
+  border-color: var(--success);
+  box-shadow: 0 0 15px rgba(74, 154, 90, 0.15), inset 0 0 20px rgba(74, 154, 90, 0.03);
+}
+
+.dose-result.danger {
+  border-color: var(--danger);
+  box-shadow: 0 0 15px rgba(201, 60, 60, 0.15), inset 0 0 20px rgba(201, 60, 60, 0.03);
+}
+
+.result-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+
+.result-value {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-shadow: 0 0 20px rgba(201, 60, 60, 0.2);
+}
+
+.result-note {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 12px;
+  line-height: 1.5;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-dim);
+}
+
+/* === MIX CALCULATOR === */
+.mix-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mix-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: rgba(12, 16, 24, 0.5);
+  border: 1px solid var(--border-dim);
+  transition: all 0.2s ease;
+}
+
+.mix-row:hover {
+  border-color: var(--border-active);
+  background: rgba(12, 16, 24, 0.7);
+}
+
+.mix-humor-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+
+.mix-info {
+  flex: 1;
+}
+
+.mix-name {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.mix-dose {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.mix-note {
+  font-size: 12px;
+  color: var(--warning);
+  margin-top: 6px;
+  font-style: italic;
+}
+
+/* === UTILITIES === */
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.humor-badge {
+  font-size: 14px;
+  color: var(--text-secondary);
+  padding: 10px 16px;
+  background: rgba(12, 16, 24, 0.5);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-dim);
+  display: inline-block;
+}
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-dim);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--blood-red-dim);
+}
+
+/* === ANIMATIONS === */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.dose-btn:not(:disabled) {
+  animation: subtle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes subtle-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--blood-red-dim); }
+  50% { box-shadow: 0 0 0 4px rgba(201, 60, 60, 0.08); }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .app-header h1 {
+    font-size: 28px;
+  }
+
+  .app-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dose-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .symptom-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+}
+/* force rebuild */

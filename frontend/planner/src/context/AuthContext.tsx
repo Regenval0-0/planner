@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { api } from '../api/client.ts';
+import { api, initApi, setBackendUrl } from '../api/client.ts';
 
 interface User {
   id: string;
@@ -22,16 +22,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      queueMicrotask(() => setLoading(false));
-      return;
+    async function init() {
+      // Load backend URL from Electron config if available
+      const electronAPI = (window as any).electronAPI;
+      if (electronAPI?.getBackendUrl) {
+        try {
+          const savedUrl = await electronAPI.getBackendUrl();
+          if (savedUrl) {
+            setBackendUrl(savedUrl);
+          }
+        } catch {
+          // ignore
+        }
+      }
+      initApi();
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      api
+        .get('/auth/me')
+        .then((res) => setUser(res.data))
+        .catch(() => localStorage.removeItem('token'))
+        .finally(() => setLoading(false));
     }
-    api
-      .get('/auth/me')
-      .then((res) => setUser(res.data))
-      .catch(() => localStorage.removeItem('token'))
-      .finally(() => setLoading(false));
+    init();
   }, []);
 
   const login = async (username: string, password: string) => {

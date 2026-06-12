@@ -3,41 +3,83 @@ import axios from 'axios';
 const isDev = import.meta.env.DEV;
 const envUrl = import.meta.env.VITE_BACKEND_URL;
 
-// Priority:
-// 1. Explicit VITE_BACKEND_URL env var (for GitHub Pages / cloud)
-// 2. Dev mode → localhost:3001
-// 3. Production with same-origin (Electron bundled mode) → /api
-// 4. Fallback to localhost for safety
-const baseURL = envUrl
-  ? `${envUrl}/api`
-  : isDev
-    ? 'http://localhost:3001/api'
-    : window.location.origin.includes('localhost')
-      ? 'http://localhost:3001/api'
-      : '/api';
+function getElectronBackendUrl(): string | null {
+  if (typeof window !== 'undefined' && (window as any).electronAPI?.getBackendUrl) {
+    // Note: this is async in reality, but for initialization we use a sync approach
+    // The actual URL will be set via initApi() after Electron config is loaded
+    return null;
+  }
+  return null;
+}
 
-export const api = axios.create({
-  baseURL,
+function getBaseURL(): string {
+  // Priority 1: Electron config (loaded into localStorage by app init)
+  const storedUrl = localStorage.getItem('backendUrl');
+  if (storedUrl) {
+    return `${storedUrl}/api`;
+  }
+
+  // Priority 2: Build-time env var (for GitHub Pages / cloud)
+  if (envUrl) {
+    return `${envUrl}/api`;
+  }
+
+  // Priority 3: Dev mode
+  if (isDev) {
+    return 'http://localhost:3001/api';
+  }
+
+  // Priority 4: Fallback
+  return 'http://localhost:3001/api';
+}
+
+export let api = axios.create({
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+export function initApi() {
+  const baseURL = getBaseURL();
+  api = axios.create({
+    baseURL,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.hash = '#/login';
+  api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return Promise.reject(error);
-  }
-);
+    return config;
+  });
+
+  api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        window.location.hash = '#/login';
+      }
+      return Promise.reject(error);
+    }
+  );
+}
+
+export function setBackendUrl(url: string) {
+  localStorage.setItem('backendUrl', url);
+  initApi();
+}
+
+export function getBackendUrl(): string {
+  const stored = localStorage.getItem('backendUrl');
+  if (stored) return stored;
+  if (envUrl) return envUrl;
+  if (isDev) return 'http://localhost:3001';
+  return 'http://localhost:3001';
+}
+
+initApi();

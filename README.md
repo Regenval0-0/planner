@@ -1,49 +1,82 @@
-# Планер — онлайн-календарь событий, задач и платежей
+# 🏠 C:\Ren — Рабочее пространство
 
-Бесплатный онлайн-планер с регистрацией через email, повторяющимися событиями и напоминаниями.
+**Владелец:** Даша (Fullstack-студент, Junior+ road map 2026)  
+**Ассистент:** Лорен (Claude Code)  
+**Дата организации:** 2026-06-08
 
-🔗 **Фронтенд (GitHub Pages):** https://regenval0-0.github.io/planner/
+---
 
-## Деплой бэкенда (одна кнопка)
+## 📁 Структура
 
-<!-- Бэкенд разворачивается на Render.com — нужен бесплатный аккаунт -->
-<a href="https://render.com/deploy?repo=https://github.com/Regenval0-0/planner">
-  <img src="https://render.com/images/deploy-to-render-button.svg" alt="Deploy to Render" />
-</a>
-
-### Шаги после нажатия кнопки:
-
-1. Зарегистрируйся на Render через GitHub (1 кнопка)
-2. Добавь 3 переменные окружения в настройках сервиса:
-   - `DATABASE_URL` — строка подключения PostgreSQL (создай бесплатно на [neon.tech](https://neon.tech))
-   - `RESEND_API_KEY` — API ключ для почты (создай бесплатно на [resend.com](https://resend.com))
-   - `APP_URL` — URL твоего сервиса на Render (например `https://planner-app.onrender.com`)
-3. Открой **Shell** на Render и выполни: `npx prisma migrate deploy`
-4. Сайт готов!
-
-### Полная инструкция
-
-См. [backend/planner/DEPLOY.md](backend/planner/DEPLOY.md)
-
-## Локальный запуск
-
-```bash
-# Бэкенд
-cd backend/planner
-npm install
-npx prisma migrate dev
-npx tsx src/server.ts
-
-# Фронтенд (в другом терминале)
-cd frontend/planner
-npm install
-npx vite --port 5173 --open
+```
+C:\Ren\
+├── 📁 projects/          ← Активные проекты (backend, frontend, database, DNH, Olimpium)
+├── 📁 docs/              ← Обучающие материалы и roadmaps
+├── 📁 tools/             ← Утилиты и генераторы
+├── 📁 archive/           ← Архивы, анализы видео, vibe-tools
+├── 📁 assets/            ← Скриншоты, визитки, изображения
+├── 📁 workspace/         ← Рабочие файлы (Атлас, Справочники, сервисы)
+├── 📁 setup/             ← Скрипты настройки и установки
+├── 📁 _trash/            ← 🗑 Удалённые старые проекты (planner-app, voice-assistant и др.)
+│
+├── CLAUDE.md             ← Инструкции для Claude Code
+├── README.md             ← Этот файл
+└── .git                  ← Git-репозиторий всего workspace
 ```
 
-## Технологии
+---
 
-- **Frontend:** React 19, Vite, Tailwind CSS, TypeScript
-- **Backend:** Node.js, Express, Prisma, JWT
-- **Database:** PostgreSQL (Neon) / SQLite (local)
-- **Email:** Resend
-- **Hosting:** GitHub Pages (frontend) + Render (backend)
+## 🚀 Активные проекты
+
+| Проект | Стек | Статус | Путь |
+|--------|------|--------|------|
+| **Planner** | React 19 + Vite + Tailwind, Express + Prisma, PostgreSQL | 🔥 В разработке | `projects/planner/` |
+| **BPOO Site** | React + Vite (redesign сайта колледжа) | 🔥 В разработке | `projects/bpoo-site/` |
+| **Do No Harm** | React + Electron (калькулятор + руководство) | 🎮 Активный | `projects/dnh/` |
+| **Olimpium** | Python + Playwright (автоматизация курса) | 🤖 Автоматизирован | `projects/olimpium/` |
+
+---
+
+## 📚 Документы
+
+- `CLAUDE.md` — правила работы с Claude Code (tech stack, guidelines)
+- `AGENTS.md` — описание ролей агентов (если используется multi-agent)
+- `.cursorrules` — правила для Cursor IDE
+
+---
+
+## 🗑 Что удалено
+
+В `_trash/` перемещены устаревшие проекты:
+- `planner-app/` — старый Electron desktop (заменён на fullstack planner)
+- `voice-assistant/` — пустой Vite-шаблон
+- `olimpium_solutions/` — дубль старых решений
+- `package.json` — остаток от старого planner-app
+- `EOF`, `nul`, `site-monitor.log` — мусорные файлы
+
+---
+
+## 🛠 Быстрые команды
+
+```bash
+# Planner frontend
+cd projects/frontend/planner && npm run dev
+
+# Planner backend
+cd projects/backend/planner && npm run dev
+
+# BPOO site
+cd projects/frontend/bpoo-site && npm run dev
+
+# DNH Project
+cd projects/dnh/dnh-project && npm run dev
+
+# Olimpium scraper
+cd projects/olimpium && python scripts/full_course_scraper.py
+```
+
+---
+
+## 📝 Память проекта
+
+См. `C:\Users\dasha\.claude\projects\C--Ren\memory\` — постоянная память о проектах, навыках, roadmaps.

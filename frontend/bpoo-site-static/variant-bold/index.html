@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>БПОО Кузбасса — Главная</title>
+  <meta name="description" content="Бюро профессиональной ориентации и обучения Кузбасса. Профориентация, образовательные программы, партнерство с вузами.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a href="#main" class="skip-link">Пропустить к содержимому</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="logo-group" aria-label="На главную">
+        <img src="https://bpoo.pkgn.ru/images/logo.png" alt="Логотип БПОО" class="logo-img" loading="lazy">
+        <div class="logo-text">
+          <span class="logo-title">БПОО Кузбасса</span>
+          <span class="logo-sub">Бюро профессиональной ориентации и обучения</span>
+        </div>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Главное меню">
+        <a href="index.html" class="active">Главная</a>
+        <a href="basic-info.html">О БПОО</a>
+        <a href="education.html">Образование</a>
+        <a href="career.html">Карьера</a>
+        <a href="events.html">Мероприятия</a>
+        <a href="partners.html">Партнеры</a>
+        <a href="accessible.html">Доступная среда</a>
+        <a href="contact.html">Контакты</a>
+      </nav>
+
+      <button class="nav-toggle" aria-label="Открыть меню" aria-expanded="false">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="mobile-nav" role="dialog" aria-label="Мобильное меню">
+    <button class="nav-close" aria-label="Закрыть меню">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+    <a href="index.html">Главная</a>
+    <a href="basic-info.html">О БПОО</a>
+    <a href="education.html">Образование</a>
+    <a href="career.html">Карьера</a>
+    <a href="events.html">Мероприятия</a>
+    <a href="partners.html">Партнеры</a>
+    <a href="accessible.html">Доступная среда</a>
+    <a href="contact.html">Контакты</a>
+  </div>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero" aria-label="Главный баннер">
+      <div class="hero-inner">
+        <div class="hero-content">
+          <span class="hero-tag">Профориентация и обучение</span>
+          <h1>Построй своё будущее вместе с <em>БПОО Кузбасса</em></h1>
+          <p class="hero-lead">
+            Бюро профессиональной ориентации и обучения — ваш проводник в мир востребованных профессий.
+            Помогаем школьникам, студентам и взрослым сделать осознанный выбор и получить востребованные навыки.
+          </p>
+          <div class="hero-actions">
+            <a href="education.html" class="btn btn-primary">Направления обучения</a>
+            <a href="career.html" class="btn btn-accent">Карьерное консультирование</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <img src="https://bpoo.pkgn.ru/images/hero-students.jpg" alt="Студенты БПОО на практике" class="hero-photo" loading="eager">
+          <div class="hero-photo-shadow" aria-hidden="true"></div>
+          <div class="hero-stat">
+            <div class="stat-num">10 000+</div>
+            <div class="stat-label">Участников в год</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUICK LINKS -->
+    <section class="section" aria-labelledby="quick-links-title">
+      <div class="section-header">
+        <span class="section-tag">Направления</span>
+        <h2 id="quick-links-title" class="section-title">Чем мы занимаемся</h2>
+        <p class="section-desc">
+          Комплексная поддержка на всех этапах профессионального развития: от выбора профессии до трудоустройства.
+        </p>
+      </div>
+
+      <div class="card-grid card-grid-3">
+        <article class="card">
+          <div class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c0 1.66 4 3 9 3s9-1.34 9-3v-5"/>
+            </svg>
+          </div>
+          <h3>Образование</h3>
+          <p>Программы повышения квалификации, профессиональная подготовка и переподготовка по востребованным направлениям.</p>
+          <a href="education.html">Подробнее →</a>
+        </article>
+
+        <article class="card">
+          <div class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M20 7h-9"/>
+              <path d="M14 17H5"/>
+              <circle cx="17" cy="17" r="3"/>
+              <circle cx="7" cy="7" r="3"/>
+            </svg>
+          </div>
+          <h3>Карьера</h3>
+          <p>Профориентация, трудоустройство, сопровождение при поступлении и выборе профессионального пути.</p>
+          <a href="career.html">Подробнее →</a>
+        </article>
+
+        <article class="card">
+          <div class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <h3>Мероприятия</h3>
+          <p>Олимпиады, конкурсы, профориентационные акции, дни открытых дверей и онлайн-вебинары.</p>
+          <a href="events.html">Подробнее →</a>
+        </article>
+
+        <article class="card">
+          <div class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <h3>Партнёры</h3>
+          <p>Сотрудничество с вузами, колледжами, работодателями и социальными партнёрами региона.</p>
+          <a href="partners.html">Подробнее →</a>
+        </article>
+
+        <article class="card">
+          <div class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <h3>Доступная среда</h3>
+          <p>Инклюзивное образование, адаптированные программы и создание барьер-free среды для всех.</p>
+          <a href="accessible.html">Подробнее →</a>
+        </article>
+
+        <article class="card">
+          <div class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.56 12.56 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.56 12.56 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </div>
+          <h3>Телефон доверия</h3>
+          <p>Бесплатная консультация по вопросам образования, профориентации и трудоустройства.</p>
+          <a href="hotline.html">Подробнее →</a>
+        </article>
+      </div>
+    </section>
+
+    <!-- HOTLINE BANNER -->
+    <section class="section" aria-label="Горячая линия">
+      <div class="hotline-banner">
+        <div>
+          <h3>Нужна консультация?</h3>
+          <p>Позвоните на горячую линию БПОО — мы поможем с выбором профессии, поступлением и обучением.</p>
+        </div>
+        <a href="tel:83843287470" class="phone">8 (3843) 32-87-47</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo-title">БПОО Кузбасса</div>
+          <p>Бюро профессиональной ориентации и обучения Кузбасса. Профориентация, образование, карьера.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Разделы</h4>
+          <ul>
+            <li><a href="basic-info.html">О БПОО</a></li>
+            <li><a href="education.html">Образование</a></li>
+            <li><a href="career.html">Карьера</a></li>
+            <li><a href="events.html">Мероприятия</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Информация</h4>
+          <ul>
+            <li><a href="partners.html">Партнёры</a></li>
+            <li><a href="accessible.html">Доступная среда</a></li>
+            <li><a href="hotline.html">Телефон доверия</a></li>
+            <li><a href="team.html">Команда</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Контакты</h4>
+          <ul>
+            <li><a href="contact.html">Обратная связь</a></li>
+            <li><a href="tel:83843287470">8 (3843) 32-87-47</a></li>
+            <li><a href="mailto:bpoo@pkgn.ru">bpoo@pkgn.ru</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© БПОО Кузбасса, 2020–<span class="current-year"></span>. Все права защищены.</span>
+        <div class="footer-social">
+          <a href="https://vk.com/bpoo42" aria-label="ВКонтакте" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.684 0H8.316C1.592 0 0 1.592 0 8.316v7.368C0 22.408 1.592 24 8.316 24h7.368C22.408 24 24 22.408 24 15.684V8.316C24 1.592 22.408 0 15.684 0zm3.692 17.123h-1.744c-.66 0-.864-.525-2.05-1.727-1.033-1-1.49-1.135-1.744-1.135-.356 0-.458.102-.458.593v1.575c0 .424-.135.678-1.253.678-1.846 0-3.896-1.12-5.335-3.202C4.624 10.857 4 8.946 4 8.522c0-.254.102-.491.593-.491h1.744c.44 0 .61.203.78.678.864 2.49 2.303 4.675 2.896 4.675.22 0 .322-.102.322-.66V9.862c-.068-1.186-.695-1.287-.695-1.71 0-.203.17-.407.44-.407h2.744c.373 0 .508.203.508.643v3.473c0 .372.203.508.322.508.22 0 .407-.136.813-.542 1.254-1.389 2.151-3.529 2.151-3.529.119-.254.322-.491.763-.491h1.744c.525 0 .644.27.525.643-.22 1.017-2.354 4.031-2.354 4.031-.186.305-.254.44 0 .78.186.254.796.779 1.203 1.253.745.847 1.32 1.558 1.473 2.05.17.49-.085.745-.576.745z"/></svg>
+          </a>
+          <a href="https://t.me/bpoo42" aria-label="Telegram" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          </a>
+          <a href="https://ok.ru/bpoopkgn" aria-label="Одноклассники" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm4.87 7.16a1.55 1.55 0 0 1 0 3.1 1.55 1.55 0 0 1-1.55-1.55 1.55 1.55 0 0 1 1.55-1.55zm-9.74 0a1.55 1.55 0 1 1 0 3.1 1.55 1.55 0 0 1 0-3.1zm9.9 5.07c-.75 1.3-2.1 2.1-3.53 2.1v1.68c2.04 0 3.9-1.03 5-2.63a.91.91 0 0 0-1.47-1.15zm-9.97 0a.91.91 0 1 0 1.48 1.15c1.1 1.6 2.97 2.63 5 2.63v-1.68c-1.43 0-2.78-.8-3.53-2.1zM12 13.5c1.56 0 3 .97 3.65 2.44.31.67.05 1.47-.62 1.78-.67.31-1.47.05-1.78-.62-.3-.65-.93-1.1-1.65-1.26v1.36c0 .75-.61 1.36-1.36 1.36s-1.36-.61-1.36-1.36v-1.36c-.72.16-1.35.61-1.65 1.26-.31.67-1.11.93-1.78.62-.67-.31-.93-1.11-.62-1.78.65-1.47 2.09-2.44 3.65-2.44z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

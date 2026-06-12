@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.tsx';
 import { fetchEvents, createEvent, updateEvent, deleteEvent, type EventItem, type EventCreate, type EventType } from '../api/events.ts';
 import CalendarGrid from '../components/CalendarGrid.tsx';
@@ -12,6 +13,7 @@ import { isEventOnDay } from '../utils/date.ts';
 import { useSocket } from '../hooks/useSocket.ts';
 
 export default function CalendarPage() {
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -139,6 +141,13 @@ export default function CalendarPage() {
         </div>
         <div className="flex items-center gap-3">
           <div className="text-sm text-gray-500">{user?.username}</div>
+          <button
+            onClick={() => navigate('/settings')}
+            className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition"
+            title="Настройки сервера"
+          >
+            ⚙️
+          </button>
           <button
             onClick={logout}
             className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition"

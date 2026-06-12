@@ -1,6 +1,7 @@
-const { contextBridge } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 
-// Expose minimal safe API to renderer
 contextBridge.exposeInMainWorld('electronAPI', {
+  getBackendUrl: () => ipcRenderer.invoke('get-backend-url'),
+  setBackendUrl: (url) => ipcRenderer.invoke('set-backend-url', url),
   platform: process.platform,
 });

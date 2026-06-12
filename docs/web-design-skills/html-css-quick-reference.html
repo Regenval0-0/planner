@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>HTML + CSS Quick Reference</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #f8f9fa;
+      color: #212529;
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 8px; }
+    .subtitle { color: #6c757d; margin-bottom: 32px; }
+    h2 {
+      font-size: 1.3rem;
+      margin-top: 32px;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #fcdd51;
+      display: inline-block;
+    }
+    .tag {
+      display: inline-block;
+      background: #e9ecef;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9em;
+      color: #d63384;
+    }
+    .code-block {
+      background: #212529;
+      color: #f8f9fa;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9em;
+      margin: 12px 0;
+    }
+    .code-block .prop { color: #7ee787; }
+    .code-block .val { color: #79c0ff; }
+    .code-block .sel { color: #d2a8ff; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid #dee2e6;
+    }
+    th {
+      background: #e9ecef;
+      font-weight: 600;
+    }
+    .note {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 12px 16px;
+      margin: 16px 0;
+      border-radius: 0 6px 6px 0;
+    }
+    .grid-demo {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .grid-demo .box {
+      background: #fcdd51;
+      padding: 20px;
+      text-align: center;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .flex-demo {
+      display: flex;
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .flex-demo .box {
+      background: #6c757d;
+      color: #fff;
+      padding: 20px;
+      border-radius: 6px;
+      flex: 1;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 HTML + CSS Quick Reference</h1>
+    <p class="subtitle">Шпаргалка по основам верстки для проекта БПОО</p>
+
+    <h2>1. Семантические теги HTML5</h2>
+    <table>
+      <tr><th>Тег</th><th>Значение</th><th>Использование</th></tr>
+      <tr><td><span class="tag">&lt;header&gt;</span></td><td>Шапка страницы/секции</td><td>Логотип, навигация</td></tr>
+      <tr><td><span class="tag">&lt;nav&gt;</span></td><td>Навигация</td><td>Меню, ссылки</td></tr>
+      <tr><td><span class="tag">&lt;main&gt;</span></td><td>Основное содержимое</td><td>Только один на странице</td></tr>
+      <tr><td><span class="tag">&lt;section&gt;</span></td><td>Секция/раздел</td><td>Группировка по теме</td></tr>
+      <tr><td><span class="tag">&lt;article&gt;</span></td><td>Независимая статья</td><td>Карточка, пост, новость</td></tr>
+      <tr><td><span class="tag">&lt;aside&gt;</span></td><td>Боковая панель</td><td>Сайдбар, реклама</td></tr>
+      <tr><td><span class="tag">&lt;footer&gt;</span></td><td>Подвал</td><td>Контакты, копирайт</td></tr>
+      <tr><td><span class="tag">&lt;figure&gt;</span></td><td>Иллюстрация</td><td>Картинка + подпись</td></tr>
+    </table>
+
+    <div class="note">
+      <strong>Важно:</strong> Всегда используй семантические теги вместо <span class="tag">&lt;div&gt;</span> где возможно — это улучшает доступность и SEO.
+    </div>
+
+    <h2>2. CSS Box Model</h2>
+    <div class="code-block">
+<span class="sel">.box</span> {
+  <span class="prop">width</span>: <span class="val">300px</span>;
+  <span class="prop">padding</span>: <span class="val">20px</span>;
+  <span class="prop">border</span>: <span class="val">2px solid #000</span>;
+  <span class="prop">margin</span>: <span class="val">10px</span>;
+  <span class="prop">box-sizing</span>: <span class="val">border-box</span>; <span class="prop">/* Включает padding и border в width */</span>
+}
+    </div>
+
+    <h2>3. Flexbox — выравнивание</h2>
+    <div class="code-block">
+<span class="sel">.container</span> {
+  <span class="prop">display</span>: <span class="val">flex</span>;
+  <span class="prop">justify-content</span>: <span class="val">center</span>;  <span class="prop">/* по горизонтали: flex-start | center | space-between | space-around */</span>
+  <span class="prop">align-items</span>: <span class="val">center</span>;      <span class="prop">/* по вертикали: stretch | center | flex-start | flex-end */</span>
+  <span class="prop">flex-wrap</span>: <span class="val">wrap</span>;          <span class="prop">/* перенос на новую строку */</span>
+  <span class="prop">gap</span>: <span class="val">16px</span>;
+}
+    </div>
+    <div class="flex-demo">
+      <div class="box">1</div>
+      <div class="box">2</div>
+      <div class="box">3</div>
+    </div>
+
+    <h2>4. CSS Grid — сетка</h2>
+    <div class="code-block">
+<span class="sel">.grid</span> {
+  <span class="prop">display</span>: <span class="val">grid</span>;
+  <span class="prop">grid-template-columns</span>: <span class="val">repeat(3, 1fr)</span>; <span class="prop">/* 3 равные колонки */</span>
+  <span class="prop">gap</span>: <span class="val">20px</span>;
+}
+    </div>
+    <div class="grid-demo">
+      <div class="box">A</div>
+      <div class="box">B</div>
+      <div class="box">C</div>
+    </div>
+
+    <h2>5. Адаптивность — Media Queries</h2>
+    <div class="code-block">
+<span class="prop">/* Мобильные */</span>
+<span class="sel">@media</span> (<span class="prop">max-width</span>: <span class="val">768px</span>) {
+  <span class="sel">.card</span> {
+    <span class="prop">width</span>: <span class="val">100%</span>;
+    <span class="prop">flex-direction</span>: <span class="val">column</span>;
+  }
+}
+    </div>
+
+    <h2>6. Полезные CSS-свойства</h2>
+    <table>
+      <tr><th>Свойство</th><th>Что делает</th><th>Пример</th></tr>
+      <tr><td><span class="tag">position: fixed</span></td><td>Фиксирует элемент</td><td>Шапка, кнопка "наверх"</td></tr>
+      <tr><td><span class="tag">z-index</span></td><td>Порядок слоёв</td><td>Модальное окно поверх всего</td></tr>
+      <tr><td><span class="tag">backdrop-filter</span></td><td>Размытие фона</td><td>Glassmorphism эффект</td></tr>
+      <tr><td><span class="tag">transition</span></td><td>Плавная анимация</td><td>Hover-эффекты</td></tr>
+      <tr><td><span class="tag">transform</span></td><td>Трансформация</td><td>rotate, scale, translate</td></tr>
+      <tr><td><span class="tag">clamp()</span></td><td>Адаптивный размер</td><td>font-size: clamp(16px, 2vw, 24px)</td></tr>
+      <tr><td><span class="tag">overflow: hidden</span></td><td>Скрывает лишнее</td><td>Скругление + картинка</td></tr>
+    </table>
+
+    <h2>7. Типографика</h2>
+    <div class="code-block">
+<span class="sel">body</span> {
+  <span class="prop">font-family</span>: <span class="val">'Inter', system-ui, sans-serif</span>;
+  <span class="prop">font-size</span>: <span class="val">16px</span>;
+  <span class="prop">line-height</span>: <span class="val">1.6</span>;
+  <span class="prop">color</span>: <span class="val">#212529</span>;
+}
+    </div>
+
+    <div class="note">
+      <strong>Совет:</strong> Используй <span class="tag">clamp()</span> для адаптивных заголовков — не нужно писать кучу media queries для текста.
+    </div>
+
+    <h2>8. Доступность (Accessibility)</h2>
+    <ul style="margin: 12px 0 12px 24px;">
+      <li>Всегда добавляй <span class="tag">alt</span> к изображениям</li>
+      <li>Используй <span class="tag">aria-label</span> для иконок-кнопок</li>
+      <li>Цветовой контраст минимум 4.5:1</li>
+      <li>Фокус-стили для keyboard-навигации</li>
+      <li>Skip-link для быстрого перехода к контенту</li>
+    </ul>
+
+    <div style="margin-top: 48px; padding-top: 24px; border-top: 1px solid #dee2e6; color: #6c757d; font-size: 0.9em;">
+      <p>Создано для проекта БПОО • <a href="https://css-tricks.com" target="_blank">CSS-Tricks</a> • <a href="https://developer.mozilla.org/ru/docs/Web/CSS" target="_blank">MDN</a></p>
+    </div>
+  </div>
+</body>
+</html>

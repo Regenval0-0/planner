@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+@theme {
+  --color-yellow-header: #fcdd51;
+  --color-yellow-light: #f3db5d;
+  --color-bg-page: #f6f6f6;
+  --color-card-border: #c7c7c7;
+  --color-card-shadow: #d5d5d5;
+  --color-card-hover: #f0f0f0;
+  --color-card-hover-alt: #e0e0e0;
+  --color-text-primary: #000000;
+  --color-text-secondary: #363636;
+  --color-text-muted: #212121;
+  --color-link-blue: #2128b8;
+  --color-flex-row-bg: #e4e4e4;
+  --color-flex-row-hover: #dadada;
+  --color-slide-block-bg: #f1f1f1;
+  --color-footer-line: #2c2c2c;
+  --color-white-overlay: rgba(255, 255, 255, 0.7);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+  background: #f6f6f6;
+  color: #000000;
+  line-height: 1.5;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #fcdd51;
+  color: #000;
+  padding: 8px 16px;
+  z-index: 100;
+  transition: top 0.3s;
+  font-weight: 500;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* Focus visible for keyboard nav */
+:focus-visible {
+  outline: 3px solid #000;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  .card {
+    border: 2px solid #000;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Large text mode */
+body.large-text {
+  font-size: 1.25rem;
+}
+body.large-text h1 {
+  font-size: 2.5rem;
+}
+body.large-text h2 {
+  font-size: 2rem;
+}
+body.large-text h3 {
+  font-size: 1.5rem;
+}
+
+/* Original card style */
+.card-original {
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 10px;
+  border: 1px solid #c7c7c7;
+  box-shadow: 0px 0px 10px #d5d5d5;
+}
+
+/* Section container like original */
+.section-container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 130px;
+  padding-bottom: 100px;
+}
+
+/* Original title style */
+.section-title {
+  line-height: 1.5;
+  font-weight: 700;
+  font-size: 46px;
+}
+
+/* Original line under title */
+.title-line {
+  width: 45%;
+  height: 3px;
+  background-color: #000;
+  transform: skew(100deg);
+}
+
+/* Original link style */
+.original-link {
+  color: #2128b8;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.original-link:hover {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+/* Flex row (accordion style) */
+.flex-row-original {
+  display: flex;
+  height: 50px;
+  align-items: center;
+  background-color: #e4e4e4;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.flex-row-original:hover {
+  background-color: #dadada;
+}

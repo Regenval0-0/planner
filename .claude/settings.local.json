@@ -53,7 +53,15 @@
       "Bash(git stash *)",
       "Bash(git push *)",
       "Bash(C:/Users/dasha/AppData/Local/Temp/bin/gh.exe run *)",
-      "Bash(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=60 -R 80:localhost:3001 serveo.net)"
+      "Bash(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=60 -R 80:localhost:3001 serveo.net)",
+      "Bash(mkdir -p /c/Ren/frontend/planner/build)",
+      "Bash(cp /c/Ren/frontend/planner/public/favicon.svg /c/Ren/frontend/planner/build/icon.svg)",
+      "mcp__filesystem__create_directory",
+      "mcp__mare__browser_screenshot",
+      "mcp__mare__browser_eval",
+      "mcp__mare__browser_scroll",
+      "mcp__mare__browser_navigate",
+      "mcp__glance__browser_screenshot"
     ]
   }
 }
