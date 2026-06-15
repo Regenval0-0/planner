@@ -1,82 +1,73 @@
-# 🏠 C:\Ren — Рабочее пространство
+# Планер — Календарь, Задачи и Платежи
 
-**Владелец:** Даша (Fullstack-студент, Junior+ road map 2026)  
-**Ассистент:** Лорен (Claude Code)  
-**Дата организации:** 2026-06-08
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Regenval0-0/planner)
 
----
+**Планер** — это персональный планировщик событий с синхронизацией между устройствами.
+
+## 🚀 Быстрый старт
+
+### Вариант 1: Облако (Render) — данные синхронизируются
+
+1. Нажми кнопку "Deploy to Render" выше ↑
+2. Зарегистрируйся на Render через GitHub (1 минута)
+3. Render автоматически создаст сервер + базу данных
+4. Скопируй URL сервера (например `https://planner-backend-xxx.onrender.com`)
+5. Открой приложение → ⚙️ Настройки → вставь URL → Сохранить
+
+### Вариант 2: Локально (без регистрации)
+
+```bash
+# Docker (backend + база данных)
+cd C:\Ren
+docker-compose up -d
+
+# Или вручную
+cd backend/planner
+npm install
+npm run db:migrate
+npm run dev
+```
+
+### Вариант 3: Windows-приложение
+
+Файл: `frontend/planner/release/Планер-Portable-0.0.0.exe`
+- Двойной клик → работает
+- ⚙️ Настройки → можно указать облачный URL
+
+### Вариант 4: Android (RuStore)
+
+```bash
+cd frontend/planner
+.\scripts\build-apk.bat
+```
+APK создастся в `release/planner-rustore.apk`
+
+## ✨ Возможности
+
+- 📅 Календарь с недельной/месячной навигацией
+- ✅ Задачи с дедлайнами
+- 📍 Встречи с временем
+- 💰 Платежи с суммой и повторением
+- 🔄 **Real-time синхронизация** между ПК и телефоном
+- 🔒 JWT-аутентификация, восстановление пароля
 
 ## 📁 Структура
 
 ```
-C:\Ren\
-├── 📁 projects/          ← Активные проекты (backend, frontend, database, DNH, Olimpium)
-├── 📁 docs/              ← Обучающие материалы и roadmaps
-├── 📁 tools/             ← Утилиты и генераторы
-├── 📁 archive/           ← Архивы, анализы видео, vibe-tools
-├── 📁 assets/            ← Скриншоты, визитки, изображения
-├── 📁 workspace/         ← Рабочие файлы (Атлас, Справочники, сервисы)
-├── 📁 setup/             ← Скрипты настройки и установки
-├── 📁 _trash/            ← 🗑 Удалённые старые проекты (planner-app, voice-assistant и др.)
-│
-├── CLAUDE.md             ← Инструкции для Claude Code
-├── README.md             ← Этот файл
-└── .git                  ← Git-репозиторий всего workspace
+├── backend/planner/      # Node.js + Express + Prisma + PostgreSQL
+├── frontend/planner/     # React 19 + Vite + Tailwind + PWA
+├── render.yaml           # Конфиг деплоя на Render
+├── docker-compose.yml    # Локальный запуск
+└── DEPLOY.md             # Подробная инструкция
 ```
 
----
+## 🛠 Технологии
 
-## 🚀 Активные проекты
-
-| Проект | Стек | Статус | Путь |
-|--------|------|--------|------|
-| **Planner** | React 19 + Vite + Tailwind, Express + Prisma, PostgreSQL | 🔥 В разработке | `projects/planner/` |
-| **BPOO Site** | React + Vite (redesign сайта колледжа) | 🔥 В разработке | `projects/bpoo-site/` |
-| **Do No Harm** | React + Electron (калькулятор + руководство) | 🎮 Активный | `projects/dnh/` |
-| **Olimpium** | Python + Playwright (автоматизация курса) | 🤖 Автоматизирован | `projects/olimpium/` |
+**Frontend:** React 19, Vite 6, Tailwind CSS 4, Socket.IO Client, Capacitor (Android)  
+**Backend:** Node.js 20, Express, Prisma, PostgreSQL, Socket.IO, JWT  
+**Desktop:** Electron 42  
+**Deploy:** Render.com, Docker, GitHub Actions
 
 ---
 
-## 📚 Документы
-
-- `CLAUDE.md` — правила работы с Claude Code (tech stack, guidelines)
-- `AGENTS.md` — описание ролей агентов (если используется multi-agent)
-- `.cursorrules` — правила для Cursor IDE
-
----
-
-## 🗑 Что удалено
-
-В `_trash/` перемещены устаревшие проекты:
-- `planner-app/` — старый Electron desktop (заменён на fullstack planner)
-- `voice-assistant/` — пустой Vite-шаблон
-- `olimpium_solutions/` — дубль старых решений
-- `package.json` — остаток от старого planner-app
-- `EOF`, `nul`, `site-monitor.log` — мусорные файлы
-
----
-
-## 🛠 Быстрые команды
-
-```bash
-# Planner frontend
-cd projects/frontend/planner && npm run dev
-
-# Planner backend
-cd projects/backend/planner && npm run dev
-
-# BPOO site
-cd projects/frontend/bpoo-site && npm run dev
-
-# DNH Project
-cd projects/dnh/dnh-project && npm run dev
-
-# Olimpium scraper
-cd projects/olimpium && python scripts/full_course_scraper.py
-```
-
----
-
-## 📝 Память проекта
-
-См. `C:\Users\dasha\.claude\projects\C--Ren\memory\` — постоянная память о проектах, навыках, roadmaps.
+**Код:** [github.com/Regenval0-0/planner](https://github.com/Regenval0-0/planner)
