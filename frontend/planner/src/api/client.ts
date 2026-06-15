@@ -6,8 +6,8 @@ const envUrl = import.meta.env.VITE_BACKEND_URL;
 function getBaseURL(): string {
   // Priority 1: Electron config (loaded into localStorage by app init)
   const storedUrl = localStorage.getItem('backendUrl');
-  if (storedUrl) {
-    return `${storedUrl}/api`;
+  if (storedUrl && storedUrl.trim()) {
+    return `${storedUrl.replace(/\/$/, '')}/api`;
   }
 
   // Priority 2: Build-time env var (for GitHub Pages / cloud)
@@ -67,10 +67,15 @@ export function setBackendUrl(url: string) {
 
 export function getBackendUrl(): string {
   const stored = localStorage.getItem('backendUrl');
-  if (stored) return stored;
+  if (stored && stored.trim()) return stored.replace(/\/$/, '');
   if (envUrl) return envUrl;
   if (isDev) return 'http://localhost:3001';
   return 'http://localhost:3001';
+}
+
+export function hasBackendUrl(): boolean {
+  const stored = localStorage.getItem('backendUrl');
+  return !!(stored && stored.trim() && stored !== 'http://localhost:3001');
 }
 
 initApi();

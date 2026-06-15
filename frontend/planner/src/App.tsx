@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from './context/AuthContext.tsx';
 import LoginPage from './pages/LoginPage.tsx';
 import CalendarPage from './pages/CalendarPage.tsx';
 import SettingsPage from './pages/SettingsPage.tsx';
+import SetupPage from './pages/SetupPage.tsx';
+import { hasBackendUrl } from './api/client.ts';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -11,18 +13,38 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function RequireSetup({ children }: { children: React.ReactNode }) {
+  const isElectron = !!(window as any).electronAPI;
+  // Electron already has embedded backend; web needs setup
+  if (!isElectron && !hasBackendUrl()) {
+    return <Navigate to="/setup" replace />;
+  }
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <AuthProvider>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/setup" element={<SetupPage />} />
+        <Route path="/login" element={
+          <RequireSetup>
+            <LoginPage />
+          </RequireSetup>
+        } />
+        <Route path="/settings" element={
+          <RequireSetup>
+            <SettingsPage />
+          </RequireSetup>
+        } />
         <Route
           path="/"
           element={
-            <ProtectedRoute>
-              <CalendarPage />
-            </ProtectedRoute>
+            <RequireSetup>
+              <ProtectedRoute>
+                <CalendarPage />
+              </ProtectedRoute>
+            </RequireSetup>
           }
         />
       </Routes>

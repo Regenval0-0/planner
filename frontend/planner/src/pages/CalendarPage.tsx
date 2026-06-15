@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.tsx';
 import { fetchEvents, createEvent, updateEvent, deleteEvent, type EventItem, type EventCreate, type EventType } from '../api/events.ts';
+import { hasBackendUrl, getBackendUrl } from '../api/client.ts';
 import CalendarGrid from '../components/CalendarGrid.tsx';
 import EventModal from '../components/EventModal.tsx';
 import DayModal from '../components/DayModal.tsx';
@@ -140,6 +141,19 @@ export default function CalendarPage() {
           <h1 className="text-xl font-semibold text-gray-800">Планер</h1>
         </div>
         <div className="flex items-center gap-3">
+          {(() => {
+            const isCloud = hasBackendUrl();
+            const backend = getBackendUrl();
+            return (
+              <div
+                className={`hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium border ${isCloud ? 'bg-green-50 text-green-700 border-green-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}
+                title={isCloud ? `Синхронизация: ${backend}` : 'Работа без синхронизации (offline)'}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${isCloud ? 'bg-green-500' : 'bg-amber-500'}`}></span>
+                {isCloud ? 'Синхронизация' : 'Offline'}
+              </div>
+            );
+          })()}
           <div className="text-sm text-gray-500">{user?.username}</div>
           <button
             onClick={() => navigate('/settings')}

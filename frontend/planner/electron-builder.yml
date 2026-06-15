@@ -26,7 +26,7 @@ win:
       arch: x64
   signAndEditExecutable: false
 portable:
-  artifactName: ${productName}-Portable-${version}.exe
+  artifactName: ${productName}-Desktop-${version}.exe
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
