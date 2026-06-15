@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getBackendUrl, setBackendUrl, api } from '../api/client.ts';
+import { getBackendUrl, setBackendUrl } from '../api/client.ts';
 
 export default function SettingsPage() {
   const navigate = useNavigate();

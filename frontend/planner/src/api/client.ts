@@ -3,15 +3,6 @@ import axios from 'axios';
 const isDev = import.meta.env.DEV;
 const envUrl = import.meta.env.VITE_BACKEND_URL;
 
-function getElectronBackendUrl(): string | null {
-  if (typeof window !== 'undefined' && (window as any).electronAPI?.getBackendUrl) {
-    // Note: this is async in reality, but for initialization we use a sync approach
-    // The actual URL will be set via initApi() after Electron config is loaded
-    return null;
-  }
-  return null;
-}
-
 function getBaseURL(): string {
   // Priority 1: Electron config (loaded into localStorage by app init)
   const storedUrl = localStorage.getItem('backendUrl');

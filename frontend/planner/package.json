@@ -11,8 +11,9 @@
     "preview": "vite preview",
     "electron": "electron electron/main.cjs",
     "electron:dev": "cross-env NODE_ENV=development electron electron/main.cjs",
-    "dist": "electron-builder",
-    "dist:win": "electron-builder --win",
+    "build:server": "cd ../../backend/planner && npm run build && npx prisma generate",
+    "dist": "npm run build:server && npm run build && electron-builder",
+    "dist:win": "npm run build:server && npm run build && electron-builder --win",
     "android:sync": "npx cap sync android",
     "android:build": "vite build --mode production && npx cap sync android && cd android && .\\gradlew assembleRelease",
     "android:apk": "scripts\\build-apk.bat"

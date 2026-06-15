@@ -1,35 +1,125 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { spawn } = require('child_process');
+const http = require('http');
 
 let mainWindow = null;
+let backendProcess = null;
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+const BACKEND_PORT = 3001;
+const HEALTH_URL = `http://localhost:${BACKEND_PORT}/health`;
 
+// Config file for cloud URL (optional)
 const configPath = path.join(app.getPath('userData'), 'planner-config.json');
-
 function readConfig() {
   try {
-    if (fs.existsSync(configPath)) {
-      return JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    }
+    if (fs.existsSync(configPath)) return JSON.parse(fs.readFileSync(configPath, 'utf8'));
   } catch {}
   return {};
 }
-
 function writeConfig(config) {
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 }
 
-ipcMain.handle('get-backend-url', () => {
-  return readConfig().backendUrl || '';
-});
-
+ipcMain.handle('get-backend-url', () => readConfig().backendUrl || '');
 ipcMain.handle('set-backend-url', (_event, url) => {
   const config = readConfig();
   config.backendUrl = url;
   writeConfig(config);
   return true;
 });
+
+// Embedded backend paths
+function getBackendDir() {
+  if (isDev) {
+    return path.join(__dirname, '..', '..', '..', 'backend', 'planner');
+  }
+  return path.join(process.resourcesPath, 'backend', 'planner');
+}
+
+function isBackendRunning() {
+  return new Promise((resolve) => {
+    const req = http.get(HEALTH_URL, (res) => resolve(res.statusCode === 200));
+    req.on('error', () => resolve(false));
+    req.setTimeout(500, () => { req.destroy(); resolve(false); });
+  });
+}
+
+function waitForBackend(maxMs = 30000) {
+  const start = Date.now();
+  return new Promise((resolve) => {
+    function check() {
+      const req = http.get(HEALTH_URL, (res) => {
+        if (res.statusCode === 200) resolve(true); else retry();
+      });
+      req.on('error', retry);
+      req.setTimeout(800, () => { req.destroy(); retry(); });
+    }
+    function retry() {
+      if (Date.now() - start > maxMs) { resolve(false); return; }
+      setTimeout(check, 400);
+    }
+    check();
+  });
+}
+
+async function startEmbeddedBackend() {
+  const portReady = await isBackendRunning();
+  if (portReady) {
+    console.log('Backend already running on port', BACKEND_PORT);
+    return true;
+  }
+
+  const backendDir = getBackendDir();
+  const serverPath = path.join(backendDir, 'dist', 'server.js');
+
+  if (!fs.existsSync(serverPath)) {
+    console.error('Backend server not found:', serverPath);
+    return false;
+  }
+
+  console.log('Starting embedded backend from:', serverPath);
+
+  const env = {
+    ...process.env,
+    NODE_ENV: 'production',
+    PORT: String(BACKEND_PORT),
+    DATABASE_URL: `file:${path.join(app.getPath('userData'), 'planner.db')}`,
+    JWT_SECRET: 'embedded-local-jwt-secret-change-me-32-chars',
+  };
+  if (!isDev) env.ELECTRON_RUN_AS_NODE = '1';
+
+  backendProcess = spawn(isDev ? 'node' : process.execPath, [serverPath], {
+    cwd: backendDir,
+    env,
+    stdio: 'inherit',
+  });
+
+  backendProcess.on('error', (err) => console.error('Backend error:', err));
+  backendProcess.on('exit', (code) => {
+    console.log('Backend exited with code:', code);
+    backendProcess = null;
+  });
+
+  return await waitForBackend(30000);
+}
+
+function stopBackend() {
+  if (!backendProcess) return;
+  if (process.platform === 'win32') {
+    try {
+      spawn('taskkill', ['/pid', String(backendProcess.pid), '/T', '/F'], {
+        shell: true, detached: true, windowsHide: true,
+      });
+    } catch {
+      try { backendProcess.kill(); } catch {}
+    }
+  } else {
+    backendProcess.kill('SIGTERM');
+  }
+  backendProcess = null;
+}
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -52,17 +142,23 @@ function createMainWindow() {
     mainWindow.webContents.openDevTools();
     mainWindow.show();
   } else {
-    const distPath = path.join(__dirname, '..', 'dist', 'index.html');
-    mainWindow.loadFile(distPath);
+    mainWindow.loadURL(`http://localhost:${BACKEND_PORT}`);
     mainWindow.once('ready-to-show', () => mainWindow.show());
   }
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+    stopBackend();
   });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // In production, start embedded backend first
+  if (!isDev) {
+    const ready = await startEmbeddedBackend();
+    if (!ready) console.error('Backend failed to start');
+  }
+
   createMainWindow();
 
   app.on('activate', () => {
@@ -71,5 +167,8 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
+  stopBackend();
   if (process.platform !== 'darwin') app.quit();
 });
+
+app.on('quit', () => stopBackend());

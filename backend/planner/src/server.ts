@@ -74,6 +74,8 @@ const possibleDistPaths = [
   path.join(__dirname, '../../../frontend/planner/dist'),
   path.join(__dirname, '../../../../../dist'),
   path.join(__dirname, '../../dist'),
+  path.join(__dirname, '../../../../app/dist'),
+  path.join(__dirname, '../../../app/dist'),
   path.join(process.cwd(), 'dist'),
 ];
 

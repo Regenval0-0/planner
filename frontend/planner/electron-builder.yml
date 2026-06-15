@@ -9,6 +9,15 @@ files:
   - electron/**/*
   - public/**/*
   - package.json
+extraResources:
+  - from: ../../backend/planner/dist
+    to: backend/planner/dist
+  - from: ../../backend/planner/prisma
+    to: backend/planner/prisma
+  - from: ../../backend/planner/package.json
+    to: backend/planner/package.json
+  - from: ../../backend/planner/node_modules
+    to: backend/planner/node_modules
 win:
   target:
     - target: portable
