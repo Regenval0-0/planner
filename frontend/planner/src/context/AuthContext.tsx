@@ -24,7 +24,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function init() {
       // Load backend URL from Electron config if available
-      const electronAPI = (window as any).electronAPI;
+      const win = window as unknown as { electronAPI?: { getBackendUrl?: () => Promise<string>; setBackendUrl?: (url: string) => Promise<boolean> } };
+      const electronAPI = win.electronAPI;
       if (electronAPI?.getBackendUrl) {
         try {
           const savedUrl = await electronAPI.getBackendUrl();

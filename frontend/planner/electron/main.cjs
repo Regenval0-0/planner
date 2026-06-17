@@ -1,8 +1,30 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { spawn } = require('child_process');
 const http = require('http');
+const { spawn } = require('child_process');
+
+// ===== Guard: if we were spawned as a Node backend, run server directly =====
+if (process.env.ELECTRON_RUN_AS_NODE === '1') {
+  const serverPath = process.argv.find((a) => typeof a === 'string' && a.endsWith('server.js'));
+  if (serverPath) {
+    import(serverPath).catch((err) => {
+      console.error('Failed to load backend server:', err);
+      process.exit(1);
+    });
+    return;
+  }
+}
+
+// ===== Electron imports =====================================================
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+
+// ===== Single instance lock =================================================
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  console.log('Another instance is already running. Exiting.');
+  app.quit();
+  process.exit(0);
+}
 
 let mainWindow = null;
 let splashWindow = null;
@@ -11,7 +33,7 @@ const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 const BACKEND_PORT = 3001;
 const HEALTH_URL = `http://localhost:${BACKEND_PORT}/health`;
 
-// Config file for cloud URL (optional)
+// Config file for cloud URL
 const configPath = path.join(app.getPath('userData'), 'planner-config.json');
 function readConfig() {
   try {
@@ -20,7 +42,12 @@ function readConfig() {
   return {};
 }
 function writeConfig(config) {
-  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+  try {
+    fs.mkdirSync(path.dirname(configPath), { recursive: true });
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+  } catch (err) {
+    console.error('Failed to write config:', err);
+  }
 }
 
 ipcMain.handle('get-backend-url', () => readConfig().backendUrl || '');
@@ -65,6 +92,36 @@ function waitForBackend(maxMs = 30000) {
   });
 }
 
+async function runDbMigrate(backendDir, env) {
+  const prismaBin = path.join(backendDir, 'node_modules', '.bin', process.platform === 'win32' ? 'prisma.cmd' : 'prisma');
+  if (!fs.existsSync(prismaBin)) {
+    console.warn('Prisma CLI not found, skipping migration. DB may fail if not initialized.');
+    return false;
+  }
+  return new Promise((resolve) => {
+    console.log('Running prisma migrate deploy...');
+    const proc = spawn(prismaBin, ['migrate', 'deploy'], {
+      cwd: backendDir,
+      env,
+      stdio: 'pipe',
+      shell: process.platform === 'win32',
+      windowsHide: true,
+    });
+    let stderr = '';
+    proc.stdout?.on('data', (d) => console.log('[prisma]', d.toString().trim()));
+    proc.stderr?.on('data', (d) => { stderr += d.toString(); });
+    proc.on('error', (err) => {
+      console.error('Migration spawn error:', err);
+      resolve(false);
+    });
+    proc.on('close', (code) => {
+      console.log('Migration exited with code:', code);
+      if (code !== 0) console.error('Migration stderr:', stderr);
+      resolve(code === 0);
+    });
+  });
+}
+
 async function startEmbeddedBackend() {
   const portReady = await isBackendRunning();
   if (portReady) {
@@ -80,20 +137,51 @@ async function startEmbeddedBackend() {
     return false;
   }
 
-  console.log('Starting embedded backend from:', serverPath);
+  // Ensure userData dir exists (for DB and config)
+  const userData = app.getPath('userData');
+  fs.mkdirSync(userData, { recursive: true });
 
   const env = {
     ...process.env,
     NODE_ENV: 'production',
     PORT: String(BACKEND_PORT),
-    DATABASE_URL: `file:${path.join(app.getPath('userData'), 'planner.db')}`,
-    JWT_SECRET: 'embedded-local-jwt-secret-change-me-32-chars',
+    DATABASE_URL: `file:${path.join(userData, 'planner.db')}`,
+    JWT_SECRET: 'embedded-local-jwt-secret-change-me-32-chars-long-enough',
+    ELECTRON_RUN_AS_NODE: '1',
   };
+
+  // Always migrate DB before starting backend.
+  // Prisma creates an empty SQLite file on first connect,
+  // so checking file existence is unreliable — tables may still be missing.
+  let migrated = await runDbMigrate(backendDir, env);
+
+  // If migration failed because an old DB exists with incompatible schema,
+  // delete it and retry once.
+  if (!migrated) {
+    const dbPath = path.join(userData, 'planner.db');
+    if (fs.existsSync(dbPath)) {
+      console.log('Migration failed. Removing old DB and retrying...');
+      try {
+        fs.unlinkSync(dbPath);
+      } catch (err) {
+        console.error('Failed to delete old DB:', err);
+      }
+      migrated = await runDbMigrate(backendDir, env);
+    }
+  }
+
+  if (!migrated) {
+    console.error('DB migration failed. Cannot start backend.');
+    return false;
+  }
+
+  console.log('Starting embedded backend from:', serverPath);
 
   backendProcess = spawn(isDev ? 'node' : process.execPath, [serverPath], {
     cwd: backendDir,
     env,
     stdio: 'pipe',
+    windowsHide: true,
   });
 
   backendProcess.stdout?.on('data', (d) => console.log('[backend]', d.toString().trim()));
@@ -116,15 +204,25 @@ function stopBackend() {
         shell: true, detached: true, windowsHide: true,
       });
     } catch {
-      try { backendProcess.kill(); } catch {}
+      // ignore
+    }
+    try {
+      backendProcess.kill('SIGTERM');
+    } catch {
+      try { backendProcess.kill('SIGKILL'); } catch {}
     }
   } else {
-    backendProcess.kill('SIGTERM');
+    try {
+      backendProcess.kill('SIGTERM');
+    } catch {
+      try { backendProcess.kill('SIGKILL'); } catch {}
+    }
   }
   backendProcess = null;
 }
 
 function createSplashWindow() {
+  console.log('Creating splash window...');
   splashWindow = new BrowserWindow({
     width: 400,
     height: 300,
@@ -167,6 +265,7 @@ function createSplashWindow() {
 }
 
 function createMainWindow() {
+  console.log('Creating main window...');
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -208,7 +307,7 @@ app.whenReady().then(async () => {
     const ready = await startEmbeddedBackend();
     if (!ready) {
       if (splashWindow) { splashWindow.close(); splashWindow = null; }
-      await dialog.showErrorBox(
+      dialog.showErrorBox(
         'Ошибка запуска',
         'Не удалось запустить встроенный сервер. Попробуйте перезапустить приложение.'
       );

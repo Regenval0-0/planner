@@ -26,11 +26,11 @@ win:
       arch: x64
   signAndEditExecutable: false
 portable:
-  artifactName: ${productName}-Desktop-${version}.exe
+  artifactName: ${productName}-Готовый.exe
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
-  artifactName: ${productName}-Setup-${version}.exe
+  artifactName: ${productName}-Установщик.exe
   shortcutName: "Планер"
   createDesktopShortcut: always
   createStartMenuShortcut: true

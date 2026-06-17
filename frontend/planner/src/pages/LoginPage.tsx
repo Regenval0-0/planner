@@ -44,8 +44,9 @@ export default function LoginPage() {
     try {
       await login(username, password);
       navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Неверный логин или пароль');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string } } };
+      setError(e.response?.data?.error || 'Неверный логин или пароль');
     } finally {
       setLoading(false);
     }
@@ -82,8 +83,9 @@ export default function LoginPage() {
       localStorage.setItem('token', res.data.token);
       setSuccessMsg('Аккаунт создан! Вход выполнен.');
       window.location.reload();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Ошибка регистрации');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string } } };
+      setError(e.response?.data?.error || 'Ошибка регистрации');
     } finally {
       setLoading(false);
     }
@@ -96,8 +98,9 @@ export default function LoginPage() {
     try {
       const res = await api.post('/auth/find-user', { phone });
       setFoundUsername(res.data.username);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Пользователь не найден');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string } } };
+      setError(e.response?.data?.error || 'Пользователь не найден');
     } finally {
       setLoading(false);
     }
@@ -124,8 +127,9 @@ export default function LoginPage() {
       localStorage.setItem('token', res.data.token);
       setSuccessMsg('Пароль изменён! Вход выполнен.');
       window.location.reload();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Неверный ответ или ошибка');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string } } };
+      setError(e.response?.data?.error || 'Неверный ответ или ошибка');
     } finally {
       setLoading(false);
     }
@@ -142,8 +146,9 @@ export default function LoginPage() {
       const res = await api.get(`/auth/question/${encodeURIComponent(username.trim())}`);
       setCurrentQuestion(res.data.securityQuestion);
       setShowQuestion(true);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Не удалось получить секретный вопрос');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string } } };
+      setError(e.response?.data?.error || 'Не удалось получить секретный вопрос');
     } finally {
       setLoading(false);
     }

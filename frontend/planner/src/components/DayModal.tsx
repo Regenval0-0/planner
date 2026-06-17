@@ -74,7 +74,7 @@ export default function DayModal({ isOpen, date, events, onClose, onCreate, onEd
                 rangeText = `${pad(start.getDate())}.${pad(start.getMonth()+1)} – ${pad(end.getDate())}.${pad(end.getMonth()+1)}`;
               }
 
-              let timeLabel = '';
+              let timeLabel: string;
               if (ev.type === 'task') {
                 timeLabel = isStart ? 'старт' : isEnd ? 'дедлайн' : '·';
               } else if (ev.type === 'meeting') {

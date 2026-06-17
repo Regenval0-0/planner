@@ -14,7 +14,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function RequireSetup({ children }: { children: React.ReactNode }) {
-  const isElectron = !!(window as any).electronAPI;
+  const isElectron = !!(window as unknown as { electronAPI?: unknown }).electronAPI;
   // Electron already has embedded backend; web needs setup
   if (!isElectron && !hasBackendUrl()) {
     return <Navigate to="/setup" replace />;

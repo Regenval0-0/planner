@@ -9,7 +9,7 @@ export default function SettingsPage() {
   const [isElectron, setIsElectron] = useState(false);
 
   useEffect(() => {
-    setIsElectron(!!(window as any).electronAPI);
+    setIsElectron(!!(window as unknown as { electronAPI?: unknown }).electronAPI);
   }, []);
 
   async function handleSave() {
@@ -22,7 +22,8 @@ export default function SettingsPage() {
       setBackendUrl(testUrl);
 
       // Save to Electron config if available
-      const electronAPI = (window as any).electronAPI;
+      const win = window as unknown as { electronAPI?: { getBackendUrl?: () => Promise<string>; setBackendUrl?: (url: string) => Promise<boolean> } };
+      const electronAPI = win.electronAPI;
       if (electronAPI?.setBackendUrl) {
         await electronAPI.setBackendUrl(testUrl);
       }
@@ -32,7 +33,8 @@ export default function SettingsPage() {
     } catch {
       setStatus('⚠️ Сервер не отвечает. URL сохранён, но проверьте подключение.');
       setBackendUrl(backendUrl.replace(/\/$/, ''));
-      const electronAPI = (window as any).electronAPI;
+      const win = window as unknown as { electronAPI?: { getBackendUrl?: () => Promise<string>; setBackendUrl?: (url: string) => Promise<boolean> } };
+      const electronAPI = win.electronAPI;
       if (electronAPI?.setBackendUrl) {
         await electronAPI.setBackendUrl(backendUrl.replace(/\/$/, ''));
       }

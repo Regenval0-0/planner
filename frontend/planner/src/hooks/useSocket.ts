@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
+import type { EventItem } from '../api/events.ts';
 import { getBackendUrl } from '../api/client.ts';
 
 function getSocketUrl(): string {
@@ -9,8 +10,13 @@ function getSocketUrl(): string {
   return 'http://localhost:3001';
 }
 
-export function useSocket(token: string | null, onEvent: (type: string, data: any) => void) {
+export function useSocket(token: string | null, onEvent: (type: string, data: EventItem) => void) {
   const socketRef = useRef<Socket | null>(null);
+  const onEventRef = useRef(onEvent);
+
+  useEffect(() => {
+    onEventRef.current = onEvent;
+  });
 
   useEffect(() => {
     if (!token) return;
@@ -28,15 +34,15 @@ export function useSocket(token: string | null, onEvent: (type: string, data: an
     });
 
     socket.on('event:created', (data) => {
-      onEvent('created', data);
+      onEventRef.current('created', data);
     });
 
     socket.on('event:updated', (data) => {
-      onEvent('updated', data);
+      onEventRef.current('updated', data);
     });
 
     socket.on('event:deleted', (data) => {
-      onEvent('deleted', data);
+      onEventRef.current('deleted', data);
     });
 
     socket.on('disconnect', () => {
@@ -48,5 +54,6 @@ export function useSocket(token: string | null, onEvent: (type: string, data: an
     };
   }, [token]);
 
-  return socketRef.current;
+  // Returning the ref itself (not .current) avoids accessing ref during render
+  return socketRef;
 }

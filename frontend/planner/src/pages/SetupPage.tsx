@@ -32,7 +32,7 @@ export default function SetupPage() {
     navigate('/login');
   }
 
-  const isElectron = !!(window as any).electronAPI;
+  const isElectron = !!(window as unknown as { electronAPI?: unknown }).electronAPI;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 flex items-center justify-center p-4">

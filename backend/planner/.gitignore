@@ -5,3 +5,5 @@ dist/
 *.db-journal
 prisma/migrations/*
 !prisma/migrations/migration_lock.toml
+# Keep production-ready migrations in git for Render deploys
+!prisma/migrations/20260616120000_init/

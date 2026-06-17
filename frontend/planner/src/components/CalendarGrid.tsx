@@ -135,7 +135,7 @@ export default function CalendarGrid({ year, month, events, onSelectDate, onSele
                             const isEnd = evEnd ? isSameDay(evEnd, day) : isStart;
                             const isMiddle = !isStart && !isEnd;
 
-                            let label = ev.title;
+                            let label: string;
                             if (ev.type === 'task') {
                               if (isStart && isEnd) label = ev.title;
                               else if (isStart) label = `→ ${ev.title}`;
