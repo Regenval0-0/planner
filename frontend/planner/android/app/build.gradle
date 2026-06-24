@@ -8,9 +8,9 @@ def versionParts = packageJson.version.tokenize('.')
 def versionMajor = versionParts[0].toInteger()
 def versionMinor = versionParts[1].toInteger()
 def versionPatch = versionParts[2].toInteger()
-def versionCode = (versionMajor * 10000) + (versionMinor * 100) + versionPatch
+def appVersionCode = (versionMajor * 10000) + (versionMinor * 100) + versionPatch
 
-def versionName = packageJson.version
+def appVersionName = packageJson.version
 
 android {
     namespace = "com.planner.app"
@@ -20,8 +20,8 @@ android {
         applicationId "com.planner.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode versionCode
-        versionName versionName
+        versionCode appVersionCode
+        versionName appVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
