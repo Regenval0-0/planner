@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getBackendUrl, setBackendUrl } from '../api/client.ts';
+import { useSync } from '../sync/SyncContext.tsx';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
+  useSync();
   const [backendUrl, setUrl] = useState(getBackendUrl());
   const [status, setStatus] = useState('');
   const [isElectron, setIsElectron] = useState(false);

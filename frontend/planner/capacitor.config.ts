@@ -13,6 +13,11 @@ const config: CapacitorConfig = {
       backgroundColor: '#4f46e5',
       androidSplashResourceName: 'splash',
     },
+    LocalNotifications: {
+      smallIcon: 'ic_stat_icon_config_sample',
+      iconColor: '#4F46E5',
+      sound: 'default',
+    },
   },
 };
 

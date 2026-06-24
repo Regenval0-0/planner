@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { api, initApi, setBackendUrl } from '../api/client.ts';
+import { getStored, setStored, removeStored, STORAGE_KEYS } from '../sync/storage.ts';
 
 interface User {
   id: string;
@@ -18,7 +19,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(getStored<User | null>(STORAGE_KEYS.USER, null));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -45,8 +46,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       api
         .get('/auth/me')
-        .then((res) => setUser(res.data))
-        .catch(() => localStorage.removeItem('token'))
+        .then((res) => {
+          setUser(res.data);
+          setStored(STORAGE_KEYS.USER, res.data);
+        })
+        .catch(() => {
+          localStorage.removeItem('token');
+          removeStored(STORAGE_KEYS.USER);
+        })
         .finally(() => setLoading(false));
     }
     init();
@@ -56,10 +63,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await api.post('/auth/login', { username, password });
     localStorage.setItem('token', res.data.token);
     setUser(res.data.user);
+    setStored(STORAGE_KEYS.USER, res.data.user);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    removeStored(STORAGE_KEYS.USER);
+    removeStored(STORAGE_KEYS.EVENTS);
+    removeStored(STORAGE_KEYS.QUEUE);
+    removeStored(STORAGE_KEYS.LAST_SYNC);
     setUser(null);
   };
 

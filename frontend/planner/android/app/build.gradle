@@ -1,38 +1,81 @@
 apply plugin: 'com.android.application'
 
+// Читаем version из package.json для синхронизации с frontend
+import groovy.json.JsonSlurper
+
+def packageJson = new JsonSlurper().parse(file('../../package.json'))
+def versionParts = packageJson.version.tokenize('.')
+def versionMajor = versionParts[0].toInteger()
+def versionMinor = versionParts[1].toInteger()
+def versionPatch = versionParts[2].toInteger()
+def versionCode = (versionMajor * 10000) + (versionMinor * 100) + versionPatch
+
+def versionName = packageJson.version
+
 android {
     namespace = "com.planner.app"
     compileSdk = rootProject.ext.compileSdkVersion
+
     defaultConfig {
         applicationId "com.planner.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode versionCode
+        versionName versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
-             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+
     signingConfigs {
         release {
-            if (file('planner.keystore').exists()) {
-                storeFile file('planner.keystore')
+            def keystorePath = file('planner.keystore')
+            def keystoreProps = file('keystore.properties')
+
+            if (keystorePath.exists()) {
+                storeFile keystorePath
                 storePassword 'planner123'
                 keyAlias 'planner'
                 keyPassword 'planner123'
+            } else if (keystoreProps.exists()) {
+                // CI/CD: читаем из properties файла (секреты)
+                def props = new Properties()
+                props.load(new FileInputStream(keystoreProps))
+                storeFile file(props['STORE_FILE'])
+                storePassword props['STORE_PASSWORD']
+                keyAlias props['KEY_ALIAS']
+                keyPassword props['KEY_PASSWORD']
             }
         }
     }
+
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            if (file('planner.keystore').exists()) {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            def keystorePath = file('planner.keystore')
+            def keystoreProps = file('keystore.properties')
+            if (keystorePath.exists() || keystoreProps.exists()) {
                 signingConfig signingConfigs.release
             }
+        }
+        debug {
+            minifyEnabled false
+            shrinkResources false
+        }
+    }
+
+    bundle {
+        language {
+            enableSplit = false
+        }
+        density {
+            enableSplit = true
+        }
+        abi {
+            enableSplit = true
         }
     }
 }

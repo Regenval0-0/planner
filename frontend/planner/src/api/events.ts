@@ -15,6 +15,7 @@ export interface EventItem {
   recurrenceEnd: string | null;
   recurrenceInterval: number | null;
   amount: number | null;
+  reminderMinutes: number | null;
   isRecurrenceInstance?: boolean;
   originId?: string | null;
   createdAt: string;
@@ -31,6 +32,7 @@ export interface EventCreate {
   recurrenceEnd?: string;
   recurrenceInterval?: number;
   amount?: number;
+  reminderMinutes?: number;
 }
 
 export async function fetchEvents(month: number, year: number): Promise<EventItem[]> {

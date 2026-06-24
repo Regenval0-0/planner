@@ -35,6 +35,7 @@ model Event {
   recurrenceEnd      DateTime? @map("recurrence_end")
   recurrenceInterval Int?      @map("recurrence_interval")
   amount             Float?    @map("amount")
+  reminderMinutes    Int?      @map("reminder_minutes")
   createdAt          DateTime  @default(now()) @map("created_at")
   updatedAt          DateTime  @updatedAt @map("updated_at")
 

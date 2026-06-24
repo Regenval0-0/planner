@@ -1,0 +1,121 @@
+name: Android Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version override (e.g. 0.1.0)'
+        required: false
+        default: ''
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/planner
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: |
+            frontend/planner/package-lock.json
+            backend/planner/package-lock.json
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install frontend dependencies
+        working-directory: frontend/planner
+        run: npm ci
+
+      - name: Install backend dependencies
+        working-directory: backend/planner
+        run: npm ci
+
+      - name: Build backend
+        working-directory: backend/planner
+        run: npm run build
+
+      - name: Sync version with tag
+        working-directory: frontend/planner
+        run: |
+          VERSION="${{ github.event.inputs.version || github.ref_name }}"
+          VERSION="${VERSION#v}"  # remove 'v' prefix if present
+          echo "Building version $VERSION"
+          jq ".version = \"$VERSION\"" package.json > package.json.tmp && mv package.json.tmp package.json
+
+      - name: Build web assets
+        working-directory: frontend/planner
+        run: npx vite build --mode production
+
+      - name: Sync Capacitor Android
+        working-directory: frontend/planner
+        run: npx cap sync android
+
+      - name: Decode keystore
+        working-directory: frontend/planner/android/app
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > planner-release.keystore
+
+      - name: Create keystore.properties
+        working-directory: frontend/planner/android/app
+        run: |
+          cat > keystore.properties <<EOF
+          STORE_FILE=planner-release.keystore
+          STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
+          EOF
+
+      - name: Build Release APK
+        working-directory: frontend/planner/android
+        run: ./gradlew assembleRelease
+
+      - name: Build Release AAB
+        working-directory: frontend/planner/android
+        run: ./gradlew bundleRelease
+
+      - name: Rename artifacts
+        working-directory: frontend/planner/android/app/build/outputs
+        run: |
+          mkdir -p ../../../../../release
+          cp apk/release/app-release.apk ../../../../../release/planner-${{ github.ref_name }}.apk
+          cp bundle/release/app-release.aab ../../../../../release/planner-${{ github.ref_name }}.aab
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: planner-apk
+          path: release/*.apk
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: planner-aab
+          path: release/*.aab
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/*.apk
+            release/*.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

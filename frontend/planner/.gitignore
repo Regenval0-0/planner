@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Android release artifacts
+/release/
+*.apk
+*.aab
+*.keystore
+keystore.properties

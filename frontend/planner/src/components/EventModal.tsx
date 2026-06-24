@@ -73,6 +73,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
   const [recurrenceEnd, setRecurrenceEnd] = useState('');
   const [recurrenceInterval, setRecurrenceInterval] = useState('');
   const [amount, setAmount] = useState('');
+  const [reminderMinutes, setReminderMinutes] = useState<number | ''>('');
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -92,6 +93,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
       setRecurrence(event.recurrence || '');
       setRecurrenceEnd(event.recurrenceEnd ? toDateInput(event.recurrenceEnd) : '');
       setRecurrenceInterval(event.recurrenceInterval ? String(event.recurrenceInterval) : '');
+      setReminderMinutes(event.reminderMinutes ?? '');
 
       setAmount(event.amount ? String(event.amount) : '');
 
@@ -124,6 +126,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
       setRecurrence('');
       setRecurrenceEnd('');
       setRecurrenceInterval('');
+      setReminderMinutes('');
       setAmount('');
       const base = initialDate || new Date();
       base.setMinutes(0);
@@ -236,6 +239,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
       };
 
       if (amount) payload.amount = parseFloat(amount);
+      if (reminderMinutes !== '') payload.reminderMinutes = Number(reminderMinutes);
       if (recurrence) {
         payload.recurrence = recurrence;
         if (recurrenceEnd) payload.recurrenceEnd = new Date(recurrenceEnd).toISOString();
@@ -485,6 +489,29 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                 />
               </div>
             )}
+          </div>
+
+          <div className="border border-gray-200 rounded-lg p-3 space-y-3 bg-gray-50/50">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span className="select-none text-sm font-medium text-gray-700">Напоминание</span>
+            </div>
+            <div>
+              <select
+                value={reminderMinutes}
+                onChange={(e) => setReminderMinutes(e.target.value === '' ? '' : Number(e.target.value))}
+                className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              >
+                <option value="">Без напоминания</option>
+                <option value={5}>За 5 минут</option>
+                <option value={15}>За 15 минут</option>
+                <option value={30}>За 30 минут</option>
+                <option value={60}>За 1 час</option>
+                <option value={1440}>За 1 день</option>
+              </select>
+            </div>
           </div>
 
           <div className="flex items-center gap-3 pt-2">

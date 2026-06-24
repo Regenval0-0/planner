@@ -1,2 +1,9 @@
 /build/*
 !/build/.npmkeep
+
+# Keystore — никогда не коммитить production подпись
+*.keystore
+keystore.properties
+/release/
+*.apk
+*.aab

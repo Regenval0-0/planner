@@ -14,7 +14,18 @@
 4. Скопируй URL сервера (например `https://planner-backend-xxx.onrender.com`)
 5. Открой приложение → ⚙️ Настройки → вставь URL → Сохранить
 
-### Вариант 2: Локально (без регистрации)
+### Вариант 2: RuStore (Android)
+
+```bash
+cd frontend/planner
+.\scripts\build-apk.bat
+```
+
+APK и AAB создадутся в `release/planner-rustore.apk` и `release/planner-rustore.aab`.
+
+Подробная инструкция по публикации: [`rustore/RUSTORE_CHECKLIST.md`](rustore/RUSTORE_CHECKLIST.md)
+
+### Вариант 3: Локально (без регистрации)
 
 ```bash
 # Docker (backend + база данных)
@@ -28,37 +39,48 @@ npm run db:migrate
 npm run dev
 ```
 
-### Вариант 3: Windows-приложение
-
-Файл: `frontend/planner/release/Планер-Portable-0.0.0.exe`
-- Двойной клик → работает
-- ⚙️ Настройки → можно указать облачный URL
-
-### Вариант 4: Android (RuStore)
+### Вариант 4: Windows-приложение
 
 ```bash
 cd frontend/planner
-.\scripts\build-apk.bat
+npm run dist:win
 ```
-APK создастся в `release/planner-rustore.apk`
+
+- Двойной клик → работает
+- ⚙️ Настройки → можно указать облачный URL
 
 ## ✨ Возможности
 
-- 📅 Календарь с недельной/месячной навигацией
+- 📅 Календарь с месячной навигацией
 - ✅ Задачи с дедлайнами
 - 📍 Встречи с временем
 - 💰 Платежи с суммой и повторением
+- 🔔 Локальные уведомления о задачах (Android)
 - 🔄 **Real-time синхронизация** между ПК и телефоном
 - 🔒 JWT-аутентификация, восстановление пароля
+- 📴 **Offline-first** — работай без интернета, синхронизация при подключении
+
+## 📦 Сборки
+
+| Платформа | Команда | Результат |
+|-----------|---------|-----------|
+| Android APK | `npm run android:apk` | `release/planner-rustore.apk` |
+| Android AAB | `./gradlew bundleRelease` | `release/planner-rustore.aab` |
+| Windows | `npm run dist:win` | `release/Планер-Portable-*.exe` |
+| Web (PWA) | `npm run build` | `dist/` |
+| Backend | `npm run build` | `dist/` |
 
 ## 📁 Структура
 
 ```
 ├── backend/planner/      # Node.js + Express + Prisma + PostgreSQL
-├── frontend/planner/     # React 19 + Vite + Tailwind + PWA
-├── render.yaml           # Конфиг деплоя на Render
-├── docker-compose.yml    # Локальный запуск
-└── DEPLOY.md             # Подробная инструкция
+├── frontend/planner/     # React 19 + Vite + Tailwind + Capacitor + Electron
+├── .github/workflows/     # CI/CD для Android сборки
+├── render.yaml            # Конфиг деплоя на Render
+├── docker-compose.yml     # Локальный запуск
+├── rustore/               # Метаданные для RuStore
+├── PRIVACY.md             # Политика конфиденциальности
+└── DEPLOY.md              # Подробная инструкция по деплою
 ```
 
 ## 🛠 Технологии
@@ -66,7 +88,7 @@ APK создастся в `release/planner-rustore.apk`
 **Frontend:** React 19, Vite 6, Tailwind CSS 4, Socket.IO Client, Capacitor (Android)  
 **Backend:** Node.js 20, Express, Prisma, PostgreSQL, Socket.IO, JWT  
 **Desktop:** Electron 42  
-**Deploy:** Render.com, Docker, GitHub Actions
+**DevOps:** GitHub Actions, Render, Docker
 
 ---
 

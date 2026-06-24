@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.tsx';
-import { fetchEvents, createEvent, updateEvent, deleteEvent, type EventItem, type EventCreate, type EventType } from '../api/events.ts';
+import { useSync } from '../sync/SyncContext.tsx';
+import type { EventItem, EventCreate, EventType } from '../api/events.ts';
 import { hasBackendUrl, getBackendUrl } from '../api/client.ts';
 import CalendarGrid from '../components/CalendarGrid.tsx';
 import EventModal from '../components/EventModal.tsx';
@@ -11,15 +12,26 @@ import PaymentSummary from '../components/PaymentSummary.tsx';
 import TypeSelectorModal from '../components/TypeSelectorModal.tsx';
 import WeekModal from '../components/WeekModal.tsx';
 import { isEventOnDay } from '../utils/date.ts';
-import { useSocket } from '../hooks/useSocket.ts';
+import { scheduleNotification, cancelNotification } from '../hooks/useNotifications.ts';
 
 export default function CalendarPage() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const {
+    events,
+    loading,
+    error,
+    isOnline: onlineStatus,
+    isSyncing,
+    pendingCount,
+    createEvent: syncCreate,
+    updateEvent: syncUpdate,
+    deleteEvent: syncDelete,
+    syncNow,
+    refresh,
+  } = useSync();
+
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -35,40 +47,11 @@ export default function CalendarPage() {
   const [weekModalStart, setWeekModalStart] = useState<Date | null>(null);
 
   const year = currentDate.getFullYear();
-  const month = currentDate.getMonth() + 1;
 
+  // Refresh events when month/year changes
   const load = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const data = await fetchEvents(month, year);
-      setEvents(data);
-    } catch (e: unknown) {
-      const msg = e && typeof e === 'object' && 'response' in e
-        ? (e as { response?: { data?: { error?: string } } }).response?.data?.error
-        : undefined;
-      setError(msg || 'Не удалось загрузить события');
-    } finally {
-      setLoading(false);
-    }
-  }, [month, year]);
-
-  const token = localStorage.getItem('token');
-
-  useSocket(token, (type, data) => {
-    setEvents((prev) => {
-      if (type === 'created') {
-        return [...prev, data];
-      }
-      if (type === 'updated') {
-        return prev.map((e) => (e.id === data.id ? data : e));
-      }
-      if (type === 'deleted') {
-        return prev.filter((e) => e.id !== data.id);
-      }
-      return prev;
-    });
-  });
+    await refresh();
+  }, [refresh]);
 
   useEffect(() => {
     queueMicrotask(() => load());
@@ -111,17 +94,47 @@ export default function CalendarPage() {
       const id = selectedEvent.isRecurrenceInstance && selectedEvent.originId
         ? selectedEvent.originId
         : selectedEvent.id;
-      await updateEvent(id, data);
+      await syncUpdate(id, data);
+      // Reschedule notification if reminder changed
+      if (data.reminderMinutes !== undefined) {
+        await cancelNotification(id.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0));
+        if (data.reminderMinutes && data.reminderMinutes > 0) {
+          const start = new Date(data.startDate);
+          const reminderTime = new Date(start.getTime() - data.reminderMinutes * 60000);
+          if (reminderTime > new Date()) {
+            await scheduleNotification({
+              id: id.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0),
+              title: data.title || 'Напоминание',
+              body: `Событие начинается через ${data.reminderMinutes} мин.`,
+              scheduleAt: reminderTime,
+            });
+          }
+        }
+      }
     } else {
-      await createEvent(data);
+      await syncCreate(data);
+      if (data.reminderMinutes && data.reminderMinutes > 0) {
+        // generate deterministic id from temp id or use timestamp
+        const notifId = Date.now() % 2147483647;
+        const start = new Date(data.startDate);
+        const reminderTime = new Date(start.getTime() - data.reminderMinutes * 60000);
+        if (reminderTime > new Date()) {
+          await scheduleNotification({
+            id: notifId,
+            title: data.title || 'Напоминание',
+            body: `Событие начинается через ${data.reminderMinutes} мин.`,
+            scheduleAt: reminderTime,
+          });
+        }
+      }
     }
-    await load();
   }
 
   async function handleDeleteEvent(event: EventItem) {
     const id = event.isRecurrenceInstance && event.originId ? event.originId : event.id;
-    await deleteEvent(id);
-    await load();
+    await syncDelete(id);
+    // Cancel associated notification
+    await cancelNotification(id.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0));
   }
 
   const monthNames = [
@@ -154,6 +167,26 @@ export default function CalendarPage() {
               </div>
             );
           })()}
+          {/* Online/Offline indicator */}
+          <div
+            className={`hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium border ${onlineStatus ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-red-50 text-red-700 border-red-200'}`}
+            title={onlineStatus ? 'Подключение к интернету есть' : 'Нет подключения к интернету'}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${onlineStatus ? 'bg-blue-500' : 'bg-red-500'}`}></span>
+            {onlineStatus ? 'Online' : 'Offline'}
+          </div>
+          {isSyncing && (
+            <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium border bg-indigo-50 text-indigo-700 border-indigo-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+              Синхронизация...
+            </div>
+          )}
+          {pendingCount > 0 && (
+            <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium border bg-orange-50 text-orange-700 border-orange-200" title="Изменения ожидают отправки на сервер">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+              {pendingCount} в очереди
+            </div>
+          )}
           <div className="text-sm text-gray-500">{user?.username}</div>
           <button
             onClick={() => navigate('/settings')}
@@ -161,6 +194,13 @@ export default function CalendarPage() {
             title="Настройки сервера"
           >
             ⚙️
+          </button>
+          <button
+            onClick={() => syncNow()}
+            className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition"
+            title="Синхронизировать сейчас"
+          >
+            🔄
           </button>
           <button
             onClick={logout}
@@ -223,6 +263,12 @@ export default function CalendarPage() {
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-200">{error}</div>
+        )}
+
+        {!onlineStatus && (
+          <div className="mb-4 p-3 bg-amber-50 text-amber-700 text-sm rounded-lg border border-amber-200">
+            Нет подключения к интернету. Изменения сохраняются локально и будут отправлены при восстановлении связи.
+          </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">

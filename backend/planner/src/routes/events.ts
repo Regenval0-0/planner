@@ -17,6 +17,7 @@ const eventSchema = z.object({
   recurrenceEnd: z.string().datetime().optional(),
   recurrenceInterval: z.number().int().min(1).optional(),
   amount: z.number().optional(),
+  reminderMinutes: z.number().int().min(0).optional(),
 });
 
 const updateSchema = eventSchema.partial();

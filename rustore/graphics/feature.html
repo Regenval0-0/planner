@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Planner Feature Graphic 1024x500 — Сохраните как PNG</title>
+  <style>
+    body { margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; background: #f0f0f0; }
+    .container { text-align: center; }
+    .canvas { width: 1024px; height: 500px; background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; margin: 0 auto 24px; }
+    .canvas::before { content: ''; position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+    .canvas::after { content: ''; position: absolute; bottom: -150px; left: -150px; width: 500px; height: 500px; background: rgba(255,255,255,0.05); border-radius: 50%; }
+    .content { position: relative; z-index: 1; text-align: center; color: white; font-family: system-ui, -apple-system, sans-serif; }
+    .content h1 { font-size: 72px; font-weight: 800; margin: 0 0 16px 0; letter-spacing: -1px; }
+    .content p { font-size: 28px; margin: 0; opacity: 0.9; }
+    .icon { width: 120px; height: 120px; background: white; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 64px; font-weight: 800; color: #4F46E5; }
+    .hint { font-family: system-ui, sans-serif; color: #666; font-size: 14px; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="canvas" id="feature">
+      <div class="content">
+        <div class="icon">П</div>
+        <h1>Планер</h1>
+        <p>Календарь, задачи и платежи в одном приложении</p>
+      </div>
+    </div>
+    <div class="hint">
+      <strong>Как сохранить PNG:</strong><br>
+      1. Откройте эту страницу в Chrome на весь экран (<code>F11</code>)<br>
+      2. Нажмите <code>F12</code> → Console<br>
+      3. Вставьте команду ниже и нажмите Enter:
+      <pre style="background:#f5f5f5;padding:10px;border-radius:8px;text-align:left;overflow-x:auto;">
+html2canvas(document.querySelector('#feature')).then(c=>{
+  const a=document.createElement('a');
+  a.download='feature-1024x500.png';
+  a.href=c.toDataURL('image/png');
+  a.click();
+});
+      </pre>
+      Или используйте расширение "GoFullPage" / "FireShot" для скриншота.
+    </div>
+  </div>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</body>
+</html>
