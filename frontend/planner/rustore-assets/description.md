@@ -29,7 +29,7 @@
 Производительность, Инструменты
 
 ## Email поддержки
-planner@example.com
+planner-support@github.com
 
 ## Сайт
 https://github.com/Regenval0-0/planner
