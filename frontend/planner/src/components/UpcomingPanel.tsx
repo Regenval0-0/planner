@@ -55,24 +55,24 @@ export default function UpcomingPanel({ events, onSelectEvent }: Props) {
     });
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 select-none">
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 select-none transition-colors">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Ближайшие события</h3>
-        <span className="text-xs text-gray-400">{upcoming.length}</span>
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide transition-colors">Ближайшие события</h3>
+        <span className="text-xs text-gray-400 dark:text-gray-500 transition-colors">{upcoming.length}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-2 mb-3">
         <div>
-          <label className="block text-[10px] text-gray-500 mb-0.5">С (сегодня)</label>
+          <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-0.5 transition-colors">С (сегодня)</label>
           <input
             type="date"
             value={todayStr}
             readOnly
-            className="w-full px-2 py-1 text-xs border border-gray-200 rounded-md bg-gray-50 text-gray-500 cursor-default select-none"
+            className="w-full px-2 py-1 text-xs border border-gray-200 dark:border-slate-600 rounded-md bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-gray-400 cursor-default select-none transition-colors"
           />
         </div>
         <div>
-          <label className="block text-[10px] text-gray-500 mb-0.5">По</label>
+          <label className="block text-[10px] text-gray-500 dark:text-gray-400 mb-0.5 transition-colors">По</label>
           <input
             type="date"
             value={toDate}
@@ -80,13 +80,13 @@ export default function UpcomingPanel({ events, onSelectEvent }: Props) {
             onClick={openPicker}
             onMouseDown={preventSelect}
             onChange={(e) => setToDate(e.target.value)}
-            className="w-full px-2 py-1 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            className="w-full px-2 py-1 text-xs border border-gray-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
           />
         </div>
       </div>
 
       {upcoming.length === 0 ? (
-        <div className="text-xs text-gray-400 text-center py-4">Нет событий в выбранном диапазоне</div>
+        <div className="text-xs text-gray-400 dark:text-gray-500 text-center py-4 transition-colors">Нет событий в выбранном диапазоне</div>
       ) : (
         <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
           {upcoming.map((ev) => {
@@ -117,11 +117,11 @@ export default function UpcomingPanel({ events, onSelectEvent }: Props) {
               <button
                 key={ev.id}
                 onClick={() => onSelectEvent(ev)}
-                className={`w-full text-left border-l-4 ${typeColors[ev.type] || 'border-l-gray-500'} bg-gray-50 hover:bg-gray-100 rounded-r-lg p-2 transition select-none`}
+                className={`w-full text-left border-l-4 ${typeColors[ev.type] || 'border-l-gray-500'} bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-r-lg p-2 transition select-none transition-colors`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-800 truncate">{ev.title}</span>
-                  <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
+                  <span className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate transition-colors">{ev.title}</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap ml-2 transition-colors">
                     {isTask && end ? (
                       <>{dateLabel} (дедлайн){timeLabel}</>
                     ) : (
@@ -130,7 +130,7 @@ export default function UpcomingPanel({ events, onSelectEvent }: Props) {
                   </span>
                 </div>
                 {(ev.recurrence || ev.isRecurrenceInstance) && (
-                  <div className="flex items-center gap-1 mt-0.5 text-[10px] text-indigo-500">
+                  <div className="flex items-center gap-1 mt-0.5 text-[10px] text-[var(--color-primary)] dark:text-[var(--color-primary-light)] transition-colors">
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>

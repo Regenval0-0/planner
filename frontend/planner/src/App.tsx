@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.tsx';
+import { ThemeProvider } from './context/ThemeContext.tsx';
 import { SyncProvider } from './sync/SyncContext.tsx';
 import LoginPage from './pages/LoginPage.tsx';
 import CalendarPage from './pages/CalendarPage.tsx';
@@ -25,33 +26,35 @@ function RequireSetup({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
-    <AuthProvider>
-      <SyncProvider>
-        <Routes>
-          <Route path="/setup" element={<SetupPage />} />
-          <Route path="/login" element={
-            <RequireSetup>
-              <LoginPage />
-            </RequireSetup>
-          } />
-          <Route path="/settings" element={
-            <RequireSetup>
-              <SettingsPage />
-            </RequireSetup>
-          } />
-          <Route
-            path="/"
-            element={
+    <ThemeProvider>
+      <AuthProvider>
+        <SyncProvider>
+          <Routes>
+            <Route path="/setup" element={<SetupPage />} />
+            <Route path="/login" element={
               <RequireSetup>
-                <ProtectedRoute>
-                  <CalendarPage />
-                </ProtectedRoute>
+                <LoginPage />
               </RequireSetup>
-            }
-          />
-        </Routes>
-      </SyncProvider>
-    </AuthProvider>
+            } />
+            <Route path="/settings" element={
+              <RequireSetup>
+                <SettingsPage />
+              </RequireSetup>
+            } />
+            <Route
+              path="/"
+              element={
+                <RequireSetup>
+                  <ProtectedRoute>
+                    <CalendarPage />
+                  </ProtectedRoute>
+                </RequireSetup>
+              }
+            />
+          </Routes>
+        </SyncProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

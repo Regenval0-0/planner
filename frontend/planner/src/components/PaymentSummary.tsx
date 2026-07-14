@@ -31,16 +31,16 @@ export default function PaymentSummary({ events, month, year }: Props) {
   const fmt = (n: number) => n.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' });
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 select-none">
-      <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Финансы</h3>
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 select-none transition-colors">
+      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide transition-colors">Финансы</h3>
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">На этой неделе</span>
-          <span className="text-sm font-semibold text-orange-600">{fmt(weekTotal)}</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400 transition-colors">На этой неделе</span>
+          <span className="text-sm font-semibold text-orange-600 dark:text-orange-300 transition-colors">{fmt(weekTotal)}</span>
         </div>
-        <div className="border-t border-gray-100 pt-2 flex items-center justify-between">
-          <span className="text-sm text-gray-600">За месяц</span>
-          <span className="text-base font-bold text-orange-700">{fmt(monthTotal)}</span>
+        <div className="border-t border-gray-100 dark:border-slate-700 pt-2 flex items-center justify-between transition-colors">
+          <span className="text-sm text-gray-600 dark:text-gray-400 transition-colors">За месяц</span>
+          <span className="text-base font-bold text-orange-700 dark:text-orange-400 transition-colors">{fmt(monthTotal)}</span>
         </div>
       </div>
     </div>

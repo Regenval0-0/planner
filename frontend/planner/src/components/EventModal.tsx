@@ -257,41 +257,41 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 select-none">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
-        <h3 className="select-none text-lg font-semibold text-gray-800 mb-4">
+      <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-slate-700 transition-colors">
+        <h3 className="select-none text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 transition-colors">
           {event ? 'Редактировать' : 'Новое'} {typeLabels[type] || 'событие'}
         </h3>
 
         {formError && (
-          <div className="select-none mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg">{formError}</div>
+          <div className="select-none mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 text-sm rounded-lg transition-colors">{formError}</div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 select-none">
           <div>
-            <label className="select-none block text-sm font-medium text-gray-700 mb-1">Название{isPayment && ' (необязательно)'}</label>
+            <label className="select-none block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Название{isPayment && ' (необязательно)'}</label>
             <input
               type="text"
               required={!isPayment}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
             />
           </div>
 
           <div>
-            <label className="select-none block text-sm font-medium text-gray-700 mb-1">Описание</label>
+            <label className="select-none block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Описание</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             {isPayment && (
               <div>
-                <label className="select-none block text-sm font-medium text-gray-700 mb-1">
+                <label className="select-none block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">
                   Сумма (₽)
                 </label>
                 <input
@@ -300,12 +300,12 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.00"
-                  className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                 />
               </div>
             )}
             <div className={isPayment ? '' : 'col-span-2'}>
-              <label className="select-none block text-sm font-medium text-gray-700 mb-1">Тип</label>
+              <label className="select-none block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Тип</label>
               <select
                 value={type}
                 onChange={(e) => {
@@ -335,12 +335,12 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                     setEndValue('');
                   }
                 }}
-                className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
               >
-                <option value="event">{typeLabels.event}</option>
-                <option value="task">{typeLabels.task}</option>
-                <option value="meeting">{typeLabels.meeting}</option>
-                <option value="payment">Платёж</option>
+                <option value="event" className="dark:bg-slate-900">{typeLabels.event}</option>
+                <option value="task" className="dark:bg-slate-900">{typeLabels.task}</option>
+                <option value="meeting" className="dark:bg-slate-900">{typeLabels.meeting}</option>
+                <option value="payment" className="dark:bg-slate-900">Платёж</option>
               </select>
             </div>
           </div>
@@ -349,67 +349,67 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <div>
-                  <label className="select-none block text-sm font-medium text-gray-700 mb-1">Дата начала</label>
+                  <label className="select-none block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Дата начала</label>
                   <input
                     type="date"
                     required
                     value={startDateValue}
                     onClick={openPicker} onMouseDown={preventSelect}
                     onChange={(e) => setStartDateValue(e.target.value)}
-                    className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                    className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="select-none block text-xs text-gray-500 mb-1">Время начала (необязательно)</label>
+                  <label className="select-none block text-xs text-gray-500 dark:text-gray-400 mb-1 transition-colors">Время начала (необязательно)</label>
                   <input
                     type="time"
                     value={startTimeValue}
                     onClick={openPicker} onMouseDown={preventSelect}
                     onChange={(e) => setStartTimeValue(e.target.value)}
-                    className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                    className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                   />
                 </div>
               </div>
               <div className="space-y-2">
                 <div>
-                  <label className="select-none block text-sm font-medium text-gray-700 mb-1">Дата окончания</label>
+                  <label className="select-none block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Дата окончания</label>
                   <input
                     type="date"
                     required
                     value={endDateValue}
                     onClick={openPicker} onMouseDown={preventSelect}
                     onChange={(e) => setEndDateValue(e.target.value)}
-                    className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                    className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="select-none block text-xs text-gray-500 mb-1">Время окончания (необязательно)</label>
+                  <label className="select-none block text-xs text-gray-500 dark:text-gray-400 mb-1 transition-colors">Время окончания (необязательно)</label>
                   <input
                     type="time"
                     value={endTimeValue}
                     onClick={openPicker} onMouseDown={preventSelect}
                     onChange={(e) => setEndTimeValue(e.target.value)}
-                    className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                    className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                   />
                 </div>
               </div>
             </div>
           ) : isPayment ? (
             <div>
-              <label className="select-none block text-sm font-medium text-gray-700 mb-1">Дата</label>
+              <label className="select-none block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Дата</label>
               <input
                 type="date"
                 required
                 value={startDateValue}
                 onClick={openPicker} onMouseDown={preventSelect}
                 onChange={(e) => setStartDateValue(e.target.value)}
-                className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
               />
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="select-none block text-sm font-medium text-gray-700 mb-1">
+                <label className="select-none block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">
                   {isTask ? 'Дата начала' : 'Дата и время'}
                 </label>
                 <input
@@ -418,11 +418,11 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                   value={startValue}
                   onClick={openPicker} onMouseDown={preventSelect}
                   onChange={(e) => setStartValue(e.target.value)}
-                  className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                 />
               </div>
               <div>
-                <label className="select-none block text-sm font-medium text-gray-700 mb-1">
+                <label className="select-none block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">
                   {isTask ? 'Дедлайн' : 'Время окончания (необязательно)'}
                 </label>
                 <input
@@ -431,40 +431,40 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                   value={endValue}
                   onClick={openPicker} onMouseDown={preventSelect}
                   onChange={(e) => setEndValue(e.target.value)}
-                  className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                 />
               </div>
             </div>
           )}
 
-          <div className="border border-gray-200 rounded-lg p-3 space-y-3 bg-gray-50/50">
+          <div className="border border-gray-200 dark:border-slate-700 rounded-lg p-3 space-y-3 bg-gray-50/50 dark:bg-slate-700/30 transition-colors">
             <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              <span className="select-none text-sm font-medium text-gray-700">Повторение</span>
+              <span className="select-none text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors">Повторение</span>
             </div>
 
             <div>
-              <label className="select-none block text-xs text-gray-500 mb-1">Повторять</label>
+              <label className="select-none block text-xs text-gray-500 dark:text-gray-400 mb-1 transition-colors">Повторять</label>
               <select
                 value={recurrence}
                 onChange={(e) => setRecurrence(e.target.value as RecurrenceType | '')}
-                className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
               >
-                <option value="">Не повторяется</option>
-                <option value="daily">{recurrenceLabels.daily}</option>
-                <option value="weekly">{recurrenceLabels.weekly}</option>
-                <option value="biweekly">{recurrenceLabels.biweekly}</option>
-                <option value="monthly">{recurrenceLabels.monthly}</option>
-                <option value="yearly">{recurrenceLabels.yearly}</option>
-                <option value="custom">{recurrenceLabels.custom}</option>
+                <option value="" className="dark:bg-slate-900">Не повторяется</option>
+                <option value="daily" className="dark:bg-slate-900">{recurrenceLabels.daily}</option>
+                <option value="weekly" className="dark:bg-slate-900">{recurrenceLabels.weekly}</option>
+                <option value="biweekly" className="dark:bg-slate-900">{recurrenceLabels.biweekly}</option>
+                <option value="monthly" className="dark:bg-slate-900">{recurrenceLabels.monthly}</option>
+                <option value="yearly" className="dark:bg-slate-900">{recurrenceLabels.yearly}</option>
+                <option value="custom" className="dark:bg-slate-900">{recurrenceLabels.custom}</option>
               </select>
             </div>
 
             {recurrence === 'custom' && (
               <div>
-                <label className="select-none block text-xs text-gray-500 mb-1">Каждые сколько дней?</label>
+                <label className="select-none block text-xs text-gray-500 dark:text-gray-400 mb-1 transition-colors">Каждые сколько дней?</label>
                 <input
                   type="number"
                   min={1}
@@ -472,44 +472,44 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                   value={recurrenceInterval}
                   onChange={(e) => setRecurrenceInterval(e.target.value)}
                   placeholder="28"
-                  className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                 />
               </div>
             )}
 
             {recurrence && (
               <div>
-                <label className="select-none block text-xs text-gray-500 mb-1">Повторять до (необязательно)</label>
+                <label className="select-none block text-xs text-gray-500 dark:text-gray-400 mb-1 transition-colors">Повторять до (необязательно)</label>
                 <input
                   type="date"
                   value={recurrenceEnd}
                   onClick={openPicker} onMouseDown={preventSelect}
                   onChange={(e) => setRecurrenceEnd(e.target.value)}
-                  className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer text-sm"
+                  className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                 />
               </div>
             )}
           </div>
 
-          <div className="border border-gray-200 rounded-lg p-3 space-y-3 bg-gray-50/50">
+          <div className="border border-gray-200 dark:border-slate-700 rounded-lg p-3 space-y-3 bg-gray-50/50 dark:bg-slate-700/30 transition-colors">
             <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
-              <span className="select-none text-sm font-medium text-gray-700">Напоминание</span>
+              <span className="select-none text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors">Напоминание</span>
             </div>
             <div>
               <select
                 value={reminderMinutes}
                 onChange={(e) => setReminderMinutes(e.target.value === '' ? '' : Number(e.target.value))}
-                className="select-none w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
               >
-                <option value="">Без напоминания</option>
-                <option value={5}>За 5 минут</option>
-                <option value={15}>За 15 минут</option>
-                <option value={30}>За 30 минут</option>
-                <option value={60}>За 1 час</option>
-                <option value={1440}>За 1 день</option>
+                <option value="" className="dark:bg-slate-900">Без напоминания</option>
+                <option value={5} className="dark:bg-slate-900">За 5 минут</option>
+                <option value={15} className="dark:bg-slate-900">За 15 минут</option>
+                <option value={30} className="dark:bg-slate-900">За 30 минут</option>
+                <option value={60} className="dark:bg-slate-900">За 1 час</option>
+                <option value={1440} className="dark:bg-slate-900">За 1 день</option>
               </select>
             </div>
           </div>
@@ -518,14 +518,14 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
             <button
               type="submit"
               disabled={loading}
-              className="select-none px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 select-none"
+              className="select-none px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] transition disabled:opacity-50 select-none"
             >
               {loading ? 'Сохранение...' : 'Сохранить'}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="select-none px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition select-none"
+              className="select-none px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition select-none"
             >
               Отмена
             </button>
@@ -533,7 +533,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
               <button
                 type="button"
                 onClick={() => setConfirmOpen(true)}
-                className="select-none px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition ml-auto select-none"
+                className="select-none px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition ml-auto select-none"
               >
                 Удалить
               </button>

@@ -60,17 +60,17 @@ export default function CalendarGrid({ year, month, events, onSelectDate, onSele
   const today = new Date();
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden select-none overflow-x-auto">
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden select-none overflow-x-auto transition-colors">
       {/* Mobile wrapper to allow horizontal scroll on small screens */}
       <div className="min-w-[640px]">
       {/* Заголовок дней недели */}
-      <div className="flex border-b border-gray-200">
-        <div className="w-10 sm:w-12 flex-shrink-0 bg-gray-50 border-r border-gray-200" />
+      <div className="flex border-b border-gray-200 dark:border-slate-700 transition-colors">
+        <div className="w-10 sm:w-12 flex-shrink-0 bg-gray-50 dark:bg-slate-700 border-r border-gray-200 dark:border-slate-700 transition-colors" />
         <div className="flex-1 grid grid-cols-7">
           {weekDays.map((d, idx) => (
             <div
               key={d}
-              className={`py-2 text-center text-sm font-medium bg-gray-50 ${idx >= 5 ? 'text-indigo-500' : 'text-gray-500'}`}
+              className={`py-2 text-center text-sm font-medium bg-gray-50 dark:bg-slate-700 transition-colors ${idx >= 5 ? 'text-[var(--color-primary)]' : 'text-gray-500 dark:text-gray-400'}`}
             >
               {d}
             </div>
@@ -94,7 +94,7 @@ export default function CalendarGrid({ year, month, events, onSelectDate, onSele
               {/* Левая полоска недели */}
               <button
                 onClick={handleWeekClick}
-                className="w-10 sm:w-12 flex-shrink-0 flex flex-col items-center justify-center bg-gray-50 border-r border-b border-gray-200 text-[9px] sm:text-[10px] text-gray-400 hover:bg-indigo-100 hover:text-indigo-700 active:bg-indigo-200 transition cursor-pointer select-none"
+                className="w-10 sm:w-12 flex-shrink-0 flex flex-col items-center justify-center bg-gray-50 dark:bg-slate-700 border-r border-b border-gray-200 dark:border-slate-700 text-[9px] sm:text-[10px] text-gray-400 dark:text-gray-400 hover:bg-[var(--color-primary-light)] dark:hover:bg-slate-600 hover:text-[var(--color-primary)] dark:hover:text-[var(--color-primary-light)] active:bg-[var(--color-primary-light)]/80 transition cursor-pointer select-none"
                 title="Посмотреть неделю"
               >
                 <span className="opacity-70">нед</span>
@@ -105,7 +105,7 @@ export default function CalendarGrid({ year, month, events, onSelectDate, onSele
               <div className="flex-1 grid grid-cols-7 auto-rows-fr">
                 {week.map((day, idx) => {
                   if (!day) {
-                    return <div key={idx} className="min-h-[110px] bg-gray-50/50 border-r border-b border-gray-100 select-none" />;
+                    return <div key={idx} className="min-h-[110px] bg-gray-50/50 dark:bg-slate-800/50 border-r border-b border-gray-100 dark:border-slate-700 select-none transition-colors" />;
                   }
 
                   const isToday = isSameDay(day, today);
@@ -117,11 +117,11 @@ export default function CalendarGrid({ year, month, events, onSelectDate, onSele
                     <div
                       key={idx}
                       onClick={() => onSelectDate(day)}
-                      className={`min-h-[110px] p-2 border-r border-b border-gray-100 cursor-pointer transition select-none ${
-                        isToday ? 'bg-indigo-50/40' : isWeekend ? 'bg-gray-50/30' : 'hover:bg-indigo-50/30'
+                      className={`min-h-[110px] p-2 border-r border-b border-gray-100 dark:border-slate-700 cursor-pointer transition select-none transition-colors ${
+                        isToday ? 'bg-[var(--color-primary-light)]/40 dark:bg-[var(--color-primary)]/10' : isWeekend ? 'bg-gray-50/30 dark:bg-slate-700/20' : 'hover:bg-[var(--color-primary-light)]/30 dark:hover:bg-slate-700/40'
                       }`}
                     >
-                      <div className={`text-sm font-medium mb-1 w-7 h-7 flex items-center justify-center rounded-full ${isToday ? 'bg-indigo-600 text-white' : isWeekend ? 'text-indigo-500' : 'text-gray-700'}`}>
+                      <div className={`text-sm font-medium mb-1 w-7 h-7 flex items-center justify-center rounded-full transition ${isToday ? 'bg-[var(--color-primary)] text-white' : isWeekend ? 'text-[var(--color-primary)]' : 'text-gray-700 dark:text-gray-200'}`}>
                         {day.getDate()}
                       </div>
                       <div className="space-y-1">
