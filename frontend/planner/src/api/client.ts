@@ -75,7 +75,11 @@ export function getBackendUrl(): string {
 
 export function hasBackendUrl(): boolean {
   const stored = localStorage.getItem('backendUrl');
-  return !!(stored && stored.trim() && stored !== 'http://localhost:3001');
+  if (stored && stored.trim()) return true;
+  // In dev mode, localhost backend is assumed available
+  if (isDev) return true;
+  if (envUrl) return true;
+  return false;
 }
 
 initApi();

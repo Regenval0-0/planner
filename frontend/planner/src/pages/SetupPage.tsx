@@ -32,6 +32,34 @@ export default function SetupPage() {
     navigate('/login');
   }
 
+  async function scanLocalNetwork() {
+    setStatus('🔍 Поиск сервера в локальной сети...');
+    const prefixes = ['192.168.0', '192.168.1', '192.168.31', '10.0.0'];
+    for (const prefix of prefixes) {
+      for (let i = 1; i <= 20; i++) {
+        const testUrl = `http://${prefix}.${i}:3001`;
+        try {
+          const controller = new AbortController();
+          const id = setTimeout(() => controller.abort(), 600);
+          const res = await fetch(`${testUrl}/health`, {
+            method: 'GET',
+            signal: controller.signal,
+          });
+          clearTimeout(id);
+          if (res.ok) {
+            setBackendUrl(testUrl);
+            setStatus('✅ Сервер найден! Перенаправляю...');
+            setTimeout(() => navigate('/login'), 800);
+            return;
+          }
+        } catch {
+          // ignore — host unreachable
+        }
+      }
+    }
+    setStatus('❌ Сервер не найден в сети. Попробуйте ввести URL вручную.');
+  }
+
   const isElectron = !!(window as unknown as { electronAPI?: unknown }).electronAPI;
 
   return (
@@ -70,6 +98,15 @@ export default function SetupPage() {
           >
             Подключиться к серверу
           </button>
+
+          {!isElectron && (
+            <button
+              onClick={scanLocalNetwork}
+              className="w-full px-4 py-2.5 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-slate-600 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-slate-600 transition text-sm transition-colors"
+            >
+              🔍 Найти сервер в сети
+            </button>
+          )}
 
           {isElectron && (
             <button

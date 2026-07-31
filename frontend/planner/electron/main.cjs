@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
+const os = require('os');
 const { spawn } = require('child_process');
 
 // ===== Guard: if we were spawned as a Node backend, run server directly =====
@@ -16,7 +17,7 @@ if (process.env.ELECTRON_RUN_AS_NODE === '1') {
 }
 
 // ===== Electron imports =====================================================
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, globalShortcut, nativeImage } = require('electron');
 
 // ===== Single instance lock =================================================
 const gotLock = app.requestSingleInstanceLock();
@@ -26,10 +27,19 @@ if (!gotLock) {
   process.exit(0);
 }
 
+app.on('second-instance', () => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  }
+});
+
 let mainWindow = null;
 let splashWindow = null;
+let tray = null;
 let backendProcess = null;
-const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+const isDev = (process.env.NODE_ENV === 'development' || !app.isPackaged) && !process.env.FORCE_PROD;
 const BACKEND_PORT = 3001;
 const HEALTH_URL = `http://localhost:${BACKEND_PORT}/health`;
 
@@ -57,6 +67,45 @@ ipcMain.handle('set-backend-url', (_event, url) => {
   writeConfig(config);
   return true;
 });
+
+// Window state persistence
+const windowStatePath = path.join(app.getPath('userData'), 'window-state.json');
+function readWindowState() {
+  try {
+    if (fs.existsSync(windowStatePath)) return JSON.parse(fs.readFileSync(windowStatePath, 'utf8'));
+  } catch {}
+  return { width: 1400, height: 900, x: undefined, y: undefined, maximized: false };
+}
+function saveWindowState() {
+  if (!mainWindow) return;
+  const bounds = mainWindow.getBounds();
+  const state = {
+    width: bounds.width,
+    height: bounds.height,
+    x: bounds.x,
+    y: bounds.y,
+    maximized: mainWindow.isMaximized(),
+  };
+  try {
+    fs.writeFileSync(windowStatePath, JSON.stringify(state));
+  } catch (err) {
+    console.error('Failed to save window state:', err);
+  }
+}
+
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal && (iface.address.startsWith('192.168.') || iface.address.startsWith('10.') || iface.address.startsWith('172.'))) {
+        return iface.address;
+      }
+    }
+  }
+  return 'localhost';
+}
+
+ipcMain.handle('get-local-ip', () => getLocalIP());
 
 // Embedded backend paths
 function getBackendDir() {
@@ -264,11 +313,69 @@ function createSplashWindow() {
   });
 }
 
+function createTray() {
+  const iconPath = path.join(__dirname, '..', 'public', 'favicon.svg');
+  let trayIcon;
+  try {
+    trayIcon = nativeImage.createFromPath(iconPath);
+    if (process.platform === 'darwin') {
+      trayIcon = trayIcon.resize({ width: 16, height: 16 });
+    } else {
+      trayIcon = trayIcon.resize({ width: 24, height: 24 });
+    }
+  } catch {
+    trayIcon = nativeImage.createEmpty();
+  }
+  tray = new Tray(trayIcon);
+  tray.setToolTip('Планер');
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Открыть',
+      click: () => {
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.focus();
+        } else {
+          createMainWindow();
+        }
+      },
+    },
+    {
+      label: 'Настройки',
+      click: () => {
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.focus();
+          mainWindow.loadURL(`http://localhost:${BACKEND_PORT}/#/settings`);
+        }
+      },
+    },
+    { type: 'separator' },
+    {
+      label: 'Выход',
+      click: () => {
+        app.isQuiting = true;
+        app.quit();
+      },
+    },
+  ]);
+  tray.setContextMenu(contextMenu);
+  tray.on('double-click', () => {
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+}
+
 function createMainWindow() {
   console.log('Creating main window...');
+  const state = readWindowState();
   mainWindow = new BrowserWindow({
-    width: 1400,
-    height: 900,
+    width: state.width || 1400,
+    height: state.height || 900,
+    x: state.x,
+    y: state.y,
     minWidth: 360,
     minHeight: 600,
     webPreferences: {
@@ -280,6 +387,10 @@ function createMainWindow() {
     show: false,
     icon: path.join(__dirname, '..', 'public', 'favicon.svg'),
   });
+
+  if (state.maximized) {
+    mainWindow.maximize();
+  }
 
   if (isDev) {
     mainWindow.loadURL('http://localhost:5173');
@@ -294,9 +405,33 @@ function createMainWindow() {
     });
   }
 
+  // Save window state on resize/move
+  let saveTimeout;
+  ['resize', 'move'].forEach((evt) => {
+    mainWindow.on(evt, () => {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(saveWindowState, 300);
+    });
+  });
+
+  // Minimize to tray instead of closing
+  mainWindow.on('close', (event) => {
+    if (!app.isQuiting) {
+      event.preventDefault();
+      saveWindowState();
+      mainWindow.hide();
+      if (tray) {
+        tray.displayBalloon({
+          iconType: 'info',
+          title: 'Планер',
+          content: 'Приложение свёрнуто в трей. Двойной клик по иконке — открыть.',
+        });
+      }
+    }
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
-    stopBackend();
   });
 }
 
@@ -317,6 +452,25 @@ app.whenReady().then(async () => {
   }
 
   createMainWindow();
+  createTray();
+
+  // Global shortcut: Ctrl+Shift+P to show window
+  const shortcut = process.platform === 'darwin' ? 'Cmd+Shift+P' : 'Ctrl+Shift+P';
+  const registered = globalShortcut.register(shortcut, () => {
+    if (mainWindow) {
+      if (mainWindow.isVisible()) {
+        mainWindow.focus();
+      } else {
+        mainWindow.show();
+        mainWindow.focus();
+      }
+    } else {
+      createMainWindow();
+    }
+  });
+  if (!registered) {
+    console.warn('Failed to register global shortcut', shortcut);
+  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
@@ -324,8 +478,19 @@ app.whenReady().then(async () => {
 });
 
 app.on('window-all-closed', () => {
+  // Don't quit when closing window — tray keeps app alive
+  if (process.platform !== 'darwin' && !tray) {
+    app.quit();
+  }
+});
+
+app.on('before-quit', () => {
+  app.isQuiting = true;
+});
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
   stopBackend();
-  if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('quit', () => stopBackend());

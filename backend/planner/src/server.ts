@@ -30,9 +30,15 @@ const allowedOrigins = [
   'http://localhost:5175',
   'http://localhost:3001',
   'http://localhost',
+  'https://localhost',
+  'https://localhost:3001',
   'capacitor://localhost',
+  'ionic://localhost',
   'https://*.github.io',
   'https://*.onrender.com',
+  'https://*.loca.lt',
+  'http://192.168.0.103:3001',
+  'https://192.168.0.103:3001',
 ];
 
 if (isDev) {
@@ -65,7 +71,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 
 app.get('/health', (_req, res) => {
-  res.json({ ok: true });
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.json({ ok: true, local: true });
 });
 
 // Serve frontend static files in production

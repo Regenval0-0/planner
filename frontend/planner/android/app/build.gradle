@@ -30,11 +30,17 @@ android {
 
     signingConfigs {
         release {
-            def keystorePath = file('planner.keystore')
+            def keystorePath = file('planner-release.keystore')
+            def keystoreFallback = file('planner.keystore')
             def keystoreProps = file('keystore.properties')
 
             if (keystorePath.exists()) {
                 storeFile keystorePath
+                storePassword 'planner123'
+                keyAlias 'planner'
+                keyPassword 'planner123'
+            } else if (keystoreFallback.exists()) {
+                storeFile keystoreFallback
                 storePassword 'planner123'
                 keyAlias 'planner'
                 keyPassword 'planner123'
@@ -55,9 +61,10 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            def keystorePath = file('planner.keystore')
+            def keystorePath = file('planner-release.keystore')
+            def keystoreFallback = file('planner.keystore')
             def keystoreProps = file('keystore.properties')
-            if (keystorePath.exists() || keystoreProps.exists()) {
+            if (keystorePath.exists() || keystoreFallback.exists() || keystoreProps.exists()) {
                 signingConfig signingConfigs.release
             }
         }
