@@ -58,7 +58,8 @@ export async function scheduleNotification(options: {
         schedule: { at: scheduleAt },
         extra,
         sound: 'default',
-        smallIcon: 'ic_stat_icon_config_sample',
+        // smallIcon omitted — uses system default (avoids crash if custom icon missing)
+        // smallIcon: 'ic_stat_icon_config_sample',
         iconColor: '#4F46E5',
       },
     ],

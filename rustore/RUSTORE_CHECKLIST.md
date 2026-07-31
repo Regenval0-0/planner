@@ -59,12 +59,13 @@ cd frontend/planner
 
 | Файл | Размер | Где разместить |
 |------|--------|----------------|
-| Иконка приложения | 512×512 PNG | `rustore/graphics/icon-512.png` |
-| Feature Graphic | 1024×500 PNG | `rustore/graphics/feature-1024x500.png` |
-| Скриншот 1 (календарь) | 1080×1920 или 1080×2340 | `rustore/screenshots/01-calendar.png` |
-| Скриншот 2 (создание события) | 1080×1920 или 1080×2340 | `rustore/screenshots/02-event.png` |
-| Скриншот 3 (список задач) | 1080×1920 или 1080×2340 | `rustore/screenshots/03-tasks.png` |
-| Скриншот 4 (платежи) | 1080×1920 или 1080×2340 | `rustore/screenshots/04-payments.png` |
+| Иконка приложения | 512×512 PNG | `rustore-assets/icon-512.png` |
+| Feature Graphic | 1400×560 PNG | `rustore-assets/feature-graphic-1400x560.png` |
+| Скриншот 1 (настройка сервера) | 1080×2340 | `rustore-assets/screenshots/01-setup.png` |
+| Скриншот 2 (вход) | 1080×2340 | `rustore-assets/screenshots/02-login.png` |
+| Скриншот 3 (календарь) | 1080×2340 | `rustore-assets/screenshots/03-calendar.png` |
+| Скриншот 4 (настройки) | 1080×2340 | `rustore-assets/screenshots/04-settings.png` |
+| Скриншот 5 (добавление события) | 1080×2340 | `rustore-assets/screenshots/05-add-event.png` |
 
 **Советы по скриншотам:**
 - Снимайте на реальном устройстве или эмуляторе с включённой навигационной панелью Android
@@ -78,11 +79,11 @@ cd frontend/planner
 2. Создайте приложение → **Название:** Планер → **Имя пакета:** com.planner.app
 3. Заполните:
    - **Название:** Планер
-   - **Краткое описание:** (из `rustore/metadata/ru-RU/short_description.txt`)
-   - **Полное описание:** (из `rustore/metadata/ru-RU/full_description.txt`)
-   - **Категория:** Производительность / Органайзеры
-   - **Возрастной рейтинг:** 0+ (если нет платежей внутри) или 12+
-   - **Ссылка на политику конфиденциальности:** https://your-github-pages-url/PRIVACY.md или ссылка на raw GitHub
+   - **Краткое описание:** (из `rustore-assets/description.md`)
+   - **Полное описание:** (из `rustore-assets/description.md`)
+   - **Категория:** Производительность / Инструменты
+   - **Возрастной рейтинг:** 0+
+   - **Ссылка на политику конфиденциальности:** https://github.com/Regenval0-0/planner/blob/main/frontend/planner/rustore-assets/PRIVACY_POLICY.md
 4. Загрузите:
    - AAB файл (`release/planner-rustore.aab`)
    - Иконку 512×512

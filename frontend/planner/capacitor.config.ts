@@ -14,9 +14,8 @@ const config: CapacitorConfig = {
       androidSplashResourceName: 'splash',
     },
     LocalNotifications: {
-      smallIcon: 'ic_stat_icon_config_sample',
+      // smallIcon omitted — uses system default (avoids crash if custom icon missing)
       iconColor: '#4F46E5',
-      sound: 'default',
     },
   },
 };
