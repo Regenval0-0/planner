@@ -7,6 +7,8 @@ on:
 
 jobs:
   deploy:
+    # Включается переменной репозитория RENDER_DEPLOY=true (нужны секреты RENDER_SERVICE_ID и RENDER_API_KEY).
+    if: vars.RENDER_DEPLOY == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -16,6 +16,8 @@ concurrency:
 
 jobs:
   deploy:
+    # Веб-версия на GitHub Pages включается переменной репозитория PAGES_DEPLOY=true.
+    if: vars.PAGES_DEPLOY == 'true'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -27,9 +29,12 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Build Frontend
+        env:
+          VITE_BACKEND_URL: ${{ vars.VITE_BACKEND_URL }}
+          VITE_SUPPORT_EMAIL: ${{ vars.VITE_SUPPORT_EMAIL }}
         run: |
           cd frontend/planner
           npm ci
