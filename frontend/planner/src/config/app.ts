@@ -6,3 +6,7 @@ export const SUPPORT_EMAIL = (import.meta.env.VITE_SUPPORT_EMAIL || 'regenschopf
 /** Публичная ссылка на политику конфиденциальности (для карточки RuStore). */
 export const PRIVACY_URL =
   'https://github.com/Regenval0-0/planner/blob/main/frontend/planner/rustore-assets/PRIVACY_POLICY.md';
+
+/** Веб-версия (GitHub Pages) и страница скачивания программы для компьютера. */
+export const WEB_APP_URL = 'https://regenval0-0.github.io/planner/';
+export const DOWNLOAD_PAGE_URL = `${WEB_APP_URL}download.html`;

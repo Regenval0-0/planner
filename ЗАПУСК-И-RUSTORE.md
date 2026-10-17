@@ -120,6 +120,20 @@ VITE_SUPPORT_EMAIL=ваша-почта@example.ru
 
 ---
 
+## Шаг 3б. Скачивание версии для компьютера и веб-версия
+
+Как люди получают программу для ПК: в приложении «Настройки → Планер на компьютере» → «Отправить ссылку себе» (системное «Поделиться») → на компьютере открывается страница https://regenval0-0.github.io/planner/download.html с двумя вариантами: **веб-версия** (в браузере, устанавливается как приложение через Chrome/Edge) и **программа для Windows**.
+
+Один раз:
+1. `frontend\planner\scripts\publish-web.bat` — собирает веб-версию и выкладывает в ветку `gh-pages`. Затем на GitHub: репозиторий → Settings → Pages → Branch `gh-pages`, папка `/ (root)` → Save.
+2. Нужен GitHub CLI (https://cli.github.com, затем `gh auth login`). Потом `frontend\planner\scripts\publish-release.bat` — создаёт релиз `v1.1.0` с файлами `Planer-Setup.exe` и `Planer-Portable.exe` (имена без версии — чтобы ссылки на странице скачивания не менялись).
+
+После каждой новой версии: сборка Windows → `publish-release.bat`; веб-версия → `publish-web.bat`.
+
+Предупреждение Windows «Защитник предотвратил запуск» бывает, потому что установщик без платной подписи кода; на странице скачивания об этом сказано. Подпись кода стоит примерно от 10 тысяч рублей в год.
+
+---
+
 ## Шаг 4. Android
 
 Нужен Android Studio (в нём есть Java и Android SDK — на компьютере их сейчас нет): https://developer.android.com/studio. После установки откройте Android Studio один раз, чтобы скачались компоненты SDK.

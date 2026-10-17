@@ -12,8 +12,9 @@ import {
   BUILT_IN_BACKEND_URL,
 } from '../api/client.ts';
 import type { EventCreate, EventItem } from '../api/events.ts';
-import { APP_VERSION } from '../config/app.ts';
-import { isNative } from '../lib/platform.ts';
+import { APP_VERSION, DOWNLOAD_PAGE_URL } from '../config/app.ts';
+import { isElectron, isNative, openExternal } from '../lib/platform.ts';
+import { copyText, shareLink } from '../lib/share.ts';
 import ConfirmModal from '../components/ConfirmModal.tsx';
 
 const modeLabels: Record<ThemeMode, string> = {
@@ -82,6 +83,18 @@ export default function SettingsPage() {
 
   const [serverUrl, setServerUrl] = useState(getBackendUrl());
   const [serverMsg, setServerMsg] = useState<Msg>(null);
+
+  const [pcMsg, setPcMsg] = useState<Msg>(null);
+  async function handleSharePc() {
+    const res = await shareLink(DOWNLOAD_PAGE_URL, 'Планер для компьютера', 'Планер для компьютера — программа для Windows и веб-версия:');
+    if (res === 'copied') setPcMsg({ kind: 'ok', text: 'Ссылка скопирована. Вставьте её в сообщение себе и откройте на компьютере.' });
+    else if (res === 'shared') setPcMsg({ kind: 'ok', text: 'Откройте эту ссылку на компьютере.' });
+    else if (res === 'failed') setPcMsg({ kind: 'error', text: 'Не удалось поделиться. Запишите адрес: ' + DOWNLOAD_PAGE_URL });
+  }
+  async function handleCopyPc() {
+    const ok = await copyText(DOWNLOAD_PAGE_URL);
+    setPcMsg(ok ? { kind: 'ok', text: 'Ссылка скопирована.' } : { kind: 'error', text: 'Не удалось скопировать. Адрес: ' + DOWNLOAD_PAGE_URL });
+  }
   const [importMsg, setImportMsg] = useState<Msg>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -348,6 +361,30 @@ export default function SettingsPage() {
           />
           {importMsg && <Message {...importMsg} />}
         </Section>
+
+        {!isElectron() && (
+          <Section title="Планер на компьютере">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              Войдите с тем же логином — события на телефоне и компьютере совпадают. Есть программа для Windows
+              и веб-версия, которая открывается прямо в браузере.
+            </p>
+            <div className="flex gap-2">
+              {isNative() ? (
+                <button onClick={handleSharePc} className={`${primaryBtn} flex-1`}>
+                  📨 Отправить ссылку себе
+                </button>
+              ) : (
+                <button onClick={() => openExternal(DOWNLOAD_PAGE_URL)} className={`${primaryBtn} flex-1`}>
+                  💻 Скачать для Windows
+                </button>
+              )}
+              <button onClick={handleCopyPc} className={`${secondaryBtn} flex-1`}>
+                🔗 Копировать ссылку
+              </button>
+            </div>
+            {pcMsg && <Message {...pcMsg} />}
+          </Section>
+        )}
 
         <Section title="О приложении">
           <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
