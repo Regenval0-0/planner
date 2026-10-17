@@ -28,26 +28,21 @@ android {
         }
     }
 
-    // Подпись релиза. Приоритет: keystore.properties (создаётся scripts/create-keystore.bat
-    // или в GitHub Actions из секретов) → старые файлы ключа с паролем planner123.
+    // Подпись релиза: только из keystore.properties (рядом с этим файлом, в git не попадает).
+    // Создаётся scripts/create-keystore.bat или в GitHub Actions из секретов.
+    // Без него релизная сборка получается неподписанной — в RuStore такую не загрузить.
     def keystoreProps = file('keystore.properties')
-    def legacyKeystore = file('planner-release.keystore').exists() ? file('planner-release.keystore') : file('planner.keystore')
-    def hasSigning = keystoreProps.exists() || legacyKeystore.exists()
+    def hasSigning = keystoreProps.exists()
 
     signingConfigs {
         release {
-            if (keystoreProps.exists()) {
+            if (hasSigning) {
                 def props = new Properties()
                 keystoreProps.withInputStream { props.load(it) }
                 storeFile file(props['STORE_FILE'])
                 storePassword props['STORE_PASSWORD']
                 keyAlias props['KEY_ALIAS']
                 keyPassword props['KEY_PASSWORD']
-            } else if (legacyKeystore.exists()) {
-                storeFile legacyKeystore
-                storePassword 'planner123'
-                keyAlias 'planner'
-                keyPassword 'planner123'
             }
         }
     }

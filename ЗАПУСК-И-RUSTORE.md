@@ -138,9 +138,9 @@ VITE_SUPPORT_EMAIL=ваша-почта@example.ru
 
 Нужен Android Studio (в нём есть Java и Android SDK — на компьютере их сейчас нет): https://developer.android.com/studio. После установки откройте Android Studio один раз, чтобы скачались компоненты SDK.
 
-**Ключ подписи.** У вас уже есть `frontend\planner\android\app\planner-release.keystore` (пароль `planner123`). Им подписываются все версии в RuStore, менять его после первой публикации нельзя.
-- Если приложение ещё **не публиковалось** — лучше создать новый ключ с надёжным паролем: переименуйте старый файл и запустите `scripts\create-keystore.bat`.
-- Сделайте резервную копию ключа и пароля (флешка + менеджер паролей). Потеря ключа = невозможность выпускать обновления.
+**Ключ подписи.** `frontend\android\app\planner-release.keystore` + `keystore.properties` (пароль внутри, случайный). Оба файла не попадают в git. Им подписываются все версии в RuStore — после первой публикации ключ менять нельзя.
+- Резервная копия лежит в `Документы\Планер-ключ-подписи`. Перенесите её на флешку и/или в менеджер паролей и удалите с компьютера лишние копии. Потеря ключа = невозможность выпускать обновления.
+- Старый ключ (пароль `planner123` был в публичном репозитории) переименован в `planner-release-OLD.keystore` и больше не используется.
 
 **Сборка:** дважды щёлкните `frontend\planner\scripts\build-apk.bat`. Результат в `frontend\planner\release\`:
 - `planner-1.1.0.apk` — установить на телефон для проверки;
@@ -148,7 +148,7 @@ VITE_SUPPORT_EMAIL=ваша-почта@example.ru
 
 **Без Android Studio — через GitHub.** На github.com → репозиторий → Settings → Secrets and variables → Actions:
 - Variables: `VITE_BACKEND_URL`, `VITE_SUPPORT_EMAIL`;
-- Secrets: `ANDROID_KEYSTORE_BASE64` (содержимое ключа в base64: `certutil -encode planner-release.keystore key.txt`, взять текст между строками BEGIN/END), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (`planner`), `ANDROID_KEY_PASSWORD`.
+- Secrets: `ANDROID_KEYSTORE_BASE64` (содержимое ключа в base64: `certutil -encode planner-release.keystore key.txt`, взять текст между строками BEGIN/END), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (`planner`), `ANDROID_KEY_PASSWORD` — значения из `keystore.properties`.
 
 Затем Actions → «Сборка приложений» → Run workflow. Через ~15 минут APK, AAB и EXE появятся в разделе Artifacts.
 
