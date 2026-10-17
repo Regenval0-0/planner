@@ -1,65 +1,27 @@
-# 📁 backend/planner/
+# Планер — сервер
 
-**Назначение:** API-сервер для приложения «Персональный планировщик».
+Node.js 20+, Express, Prisma, Socket.IO, Zod.
 
----
+- Разработка: SQLite (`prisma/schema.prisma`), сервер: PostgreSQL (`prisma/postgres/schema.prisma`).
+- `npm run dev` — запуск с автоперезагрузкой (нужен `.env`, см. `.env.example`).
+- `npm test` — тесты API на временной базе.
+- `npm run prod:generate && npm run build && npm run prod:start` — боевой запуск (применяет миграции PostgreSQL).
 
-## Стек
+## API
 
-| Технология | Назначение |
-|-----------|-----------|
-| Node.js 20+ | Runtime |
-| Express.js | Web framework |
-| Prisma ORM | Database access |
-| SQLite | Database (local/desktop) |
-| JWT | Authentication |
-| bcrypt | Password hashing |
-| Nodemailer / Resend | Email sending |
-| Zod | Validation |
+| Метод | Путь | |
+|---|---|---|
+| POST | `/api/auth/register` | регистрация (нужно `acceptPrivacy: true`; логин уникален без учёта регистра) |
+| POST | `/api/auth/login` | вход |
+| GET | `/api/auth/me` | текущий пользователь + продлённый токен |
+| GET | `/api/auth/question/:username` | секретный вопрос |
+| POST | `/api/auth/reset-password` | сброс пароля по ответу |
+| POST | `/api/auth/change-password` | смена пароля (выход на других устройствах) |
+| DELETE | `/api/auth/account` | удаление аккаунта и всех данных |
+| GET | `/api/events` | все события пользователя |
+| POST | `/api/events` | создать (можно передать свой `id` — повторная отправка не создаёт дубликат) |
+| PUT | `/api/events/:id` | изменить (`null` очищает поле) |
+| DELETE | `/api/events/:id` | удалить |
+| GET | `/health` | проверка работы |
 
----
-
-## Запуск
-
-```bash
-npm install
-npx prisma migrate dev
-npm run dev    # localhost:3001
-```
-
----
-
-## API Endpoints
-
-### Auth
-- `POST /api/auth/register` — Регистрация
-- `POST /api/auth/login` — Логин
-- `POST /api/auth/find-user` — Найти логин по телефону
-- `GET /api/auth/question/:username` — Получить секретный вопрос
-- `POST /api/auth/reset-password` — Сброс пароля
-- `GET /api/auth/me` — Текущий пользователь
-
-### Events
-- `GET /api/events?month=&year=` — Список событий (с повторениями)
-- `POST /api/events` — Создать событие
-- `PUT /api/events/:id` — Обновить
-- `DELETE /api/events/:id` — Удалить
-
----
-
-## Структура
-
-```
-src/
-├── server.ts          # Точка входа
-├── config.ts          # Конфигурация (JWT и др.)
-├── prisma.ts          # PrismaClient
-├── routes/
-│   ├── auth.ts
-│   └── events.ts
-├── middleware/
-│   └── auth.ts
-└── utils/
-    ├── rateLimit.ts
-    └── mailer.ts
-```
+Подробно о запуске: [../../ЗАПУСК-И-RUSTORE.md](../../ЗАПУСК-И-RUSTORE.md)

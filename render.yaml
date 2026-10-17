@@ -1,24 +1,26 @@
+# Render Blueprint: бесплатный сервер «Планера».
+# База данных — бесплатный Neon (https://neon.tech): база Render на бесплатном тарифе
+# удаляется через 30 дней, а Neon — бессрочно. Строку подключения Neon Render спросит
+# при создании (переменная DATABASE_URL).
+# Бесплатный сервер засыпает после 15 минут без запросов — его «будит» пинг
+# (UptimeRobot или .github/workflows/keep-alive.yml), см. ЗАПУСК-И-RUSTORE.md.
 services:
   - type: web
     name: planner-backend
     runtime: node
-    repo: https://github.com/Regenval0-0/planner
-    buildCommand: cd backend/planner && npm install && npx prisma generate --schema=prisma/schema.prod.prisma && npx prisma migrate deploy --schema=prisma/schema.prod.prisma && npm run build
-    startCommand: cd backend/planner && node dist/server.js
+    region: frankfurt
+    plan: free
+    rootDir: backend/planner
+    buildCommand: npm ci --include=dev && npm run prod:generate && npm run build
+    startCommand: npm run prod:start
+    healthCheckPath: /health
+    autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
+      - key: NODE_VERSION
+        value: "20"
       - key: JWT_SECRET
         generateValue: true
       - key: DATABASE_URL
-        fromDatabase:
-          name: planner-db
-          property: connectionString
-
-databases:
-  - name: planner-db
-    databaseName: planner
-    user: planner
-    plan: free
+        sync: false

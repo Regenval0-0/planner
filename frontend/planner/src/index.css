@@ -46,3 +46,25 @@ body.dark {
 .dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.5);
 }
+
+/* Вырезы и системные панели телефона (Android edge-to-edge) */
+.safe-area {
+  padding-left: max(env(safe-area-inset-left, 0px), var(--safe-area-inset-left, 0px));
+  padding-right: max(env(safe-area-inset-right, 0px), var(--safe-area-inset-right, 0px));
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
+}
+.safe-top {
+  padding-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+}
+
+/* Убираем синюю вспышку при нажатии на Android */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Поля ввода не меньше 16px — иначе мобильный браузер увеличивает страницу при фокусе */
+@media (max-width: 640px) {
+  input, select, textarea {
+    font-size: 16px;
+  }
+}

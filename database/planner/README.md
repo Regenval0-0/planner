@@ -1,77 +1,9 @@
-# 📁 database/planner/
+# База данных Планера
 
-**Назначение:** Схема базы данных для приложения «Персональный планировщик».
+Схема хранится рядом с сервером:
+- `backend/planner/prisma/schema.prisma` — SQLite для разработки;
+- `backend/planner/prisma/postgres/schema.prisma` и `prisma/postgres/migrations/` — PostgreSQL для сервера.
 
----
+Таблицы: `users` (логин, хеш пароля, телефон, секретный вопрос и хеш ответа, версия токена) и `events` (события, задачи, встречи, платежи; повторяющиеся хранятся одной записью).
 
-## База данных
-
-**Тип:** PostgreSQL  
-**ORM:** Prisma
-
----
-
-## Модели
-
-### User
-```prisma
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String?
-  verified  Boolean  @default(false)
-  events    Event[]
-  tasks     Task[]
-  payments  Payment[]
-}
-```
-
-### Event
-```prisma
-model Event {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String?
-  datetime    DateTime
-  color       String   @default("blue")
-  userId      Int
-  user        User     @relation(fields: [userId], references: [id])
-}
-```
-
-### Task
-```prisma
-model Task {
-  id        Int      @id @default(autoincrement())
-  title     String
-  completed Boolean  @default(false)
-  deadline  DateTime?
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-}
-```
-
-### Payment
-```prisma
-model Payment {
-  id        Int      @id @default(autoincrement())
-  title     String
-  amount    Float
-  date      DateTime
-  recurring Boolean  @default(false)
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-}
-```
-
----
-
-## Команды
-
-```bash
-npx prisma migrate dev     # Новая миграция
-npx prisma studio          # GUI просмотр
-npx prisma generate        # Обновить клиент
-npx prisma db seed         # Заполнить тестовыми данными
-```
+`docker-compose.yml` в этой папке — только для локальных экспериментов с PostgreSQL.

@@ -28,30 +28,26 @@ android {
         }
     }
 
+    // Подпись релиза. Приоритет: keystore.properties (создаётся scripts/create-keystore.bat
+    // или в GitHub Actions из секретов) → старые файлы ключа с паролем planner123.
+    def keystoreProps = file('keystore.properties')
+    def legacyKeystore = file('planner-release.keystore').exists() ? file('planner-release.keystore') : file('planner.keystore')
+    def hasSigning = keystoreProps.exists() || legacyKeystore.exists()
+
     signingConfigs {
         release {
-            def keystorePath = file('planner-release.keystore')
-            def keystoreFallback = file('planner.keystore')
-            def keystoreProps = file('keystore.properties')
-
-            if (keystorePath.exists()) {
-                storeFile keystorePath
-                storePassword 'planner123'
-                keyAlias 'planner'
-                keyPassword 'planner123'
-            } else if (keystoreFallback.exists()) {
-                storeFile keystoreFallback
-                storePassword 'planner123'
-                keyAlias 'planner'
-                keyPassword 'planner123'
-            } else if (keystoreProps.exists()) {
-                // CI/CD: читаем из properties файла (секреты)
+            if (keystoreProps.exists()) {
                 def props = new Properties()
-                props.load(new FileInputStream(keystoreProps))
+                keystoreProps.withInputStream { props.load(it) }
                 storeFile file(props['STORE_FILE'])
                 storePassword props['STORE_PASSWORD']
                 keyAlias props['KEY_ALIAS']
                 keyPassword props['KEY_PASSWORD']
+            } else if (legacyKeystore.exists()) {
+                storeFile legacyKeystore
+                storePassword 'planner123'
+                keyAlias 'planner'
+                keyPassword 'planner123'
             }
         }
     }
@@ -61,10 +57,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            def keystorePath = file('planner-release.keystore')
-            def keystoreFallback = file('planner.keystore')
-            def keystoreProps = file('keystore.properties')
-            if (keystorePath.exists() || keystoreFallback.exists() || keystoreProps.exists()) {
+            if (hasSigning) {
                 signingConfig signingConfigs.release
             }
         }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { EventItem, EventCreate, RecurrenceType } from '../api/events.ts';
 import ConfirmModal from './ConfirmModal.tsx';
+import { fromDateInput } from '../utils/date.ts';
 
 interface Props {
   isOpen: boolean;
@@ -34,9 +35,6 @@ function openPicker(e: React.MouseEvent<HTMLInputElement>) {
   e.currentTarget.showPicker?.();
 }
 
-function preventSelect(e: React.MouseEvent<HTMLInputElement>) {
-  e.preventDefault();
-}
 
 const recurrenceLabels: Record<RecurrenceType, string> = {
   daily: 'Каждый день',
@@ -45,6 +43,13 @@ const recurrenceLabels: Record<RecurrenceType, string> = {
   monthly: 'Каждый месяц',
   yearly: 'Каждый год',
   custom: 'Каждые N дней',
+};
+
+const newTitles: Record<EventCreate['type'], string> = {
+  event: 'Новое событие',
+  task: 'Новая задача',
+  meeting: 'Новая встреча',
+  payment: 'Новый платёж',
 };
 
 const typeLabels: Record<EventCreate['type'], string> = {
@@ -74,6 +79,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
   const [recurrenceInterval, setRecurrenceInterval] = useState('');
   const [amount, setAmount] = useState('');
   const [reminderMinutes, setReminderMinutes] = useState<number | ''>('');
+  const isRecurringEvent = !!event?.recurrence;
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -95,7 +101,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
       setRecurrenceInterval(event.recurrenceInterval ? String(event.recurrenceInterval) : '');
       setReminderMinutes(event.reminderMinutes ?? '');
 
-      setAmount(event.amount ? String(event.amount) : '');
+      setAmount(event.amount != null ? String(event.amount) : '');
 
       if (event.type === 'task') {
         setStartValue(toDateInput(event.startDate));
@@ -128,8 +134,9 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
       setRecurrenceInterval('');
       setReminderMinutes('');
       setAmount('');
-      const base = initialDate || new Date();
-      base.setMinutes(0);
+      // Копия: нельзя менять дату, переданную снаружи.
+      const base = initialDate ? new Date(initialDate) : new Date();
+      base.setMinutes(0, 0, 0);
       if (initialType === 'task') {
         setStartValue(toDateInput(base.toISOString()));
         setEndValue(toDateInput(base.toISOString()));
@@ -160,7 +167,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormError('');
-    if (!title && !isPayment) {
+    if (!title.trim() && !isPayment) {
       setFormError('Введите название');
       setLoading(false);
       return;
@@ -168,7 +175,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
     setLoading(true);
     try {
       let startDate: string;
-      let endDate: string | undefined;
+      let endDate: string | null = null;
 
       if (isTask) {
         if (!startValue) {
@@ -176,16 +183,18 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
           setLoading(false);
           return;
         }
-        const d = new Date(startValue);
-        d.setHours(0, 0, 0, 0);
-        startDate = d.toISOString();
+        startDate = fromDateInput(startValue).toISOString();
         if (!endValue) {
           setFormError('Укажите дедлайн');
           setLoading(false);
           return;
         }
-        const ed = new Date(endValue);
-        ed.setHours(23, 59, 59, 999);
+        const ed = fromDateInput(endValue, true);
+        if (ed.getTime() < new Date(startDate).getTime()) {
+          setFormError('Дедлайн не может быть раньше даты начала');
+          setLoading(false);
+          return;
+        }
         endDate = ed.toISOString();
       } else if (isMeeting) {
         if (!startValue) {
@@ -211,7 +220,10 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
           setLoading(false);
           return;
         }
-        startDate = new Date(`${startDateValue}T00:00`).toISOString();
+        // Платёж — в 09:00, чтобы напоминание «за 1 день» приходило утром, а не в полночь.
+        const d = fromDateInput(startDateValue);
+        d.setHours(9, 0, 0, 0);
+        startDate = d.toISOString();
       } else {
         // event
         if (!startDateValue) {
@@ -228,25 +240,39 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
         }
         const endTimePart = endTimeValue || '23:59';
         endDate = new Date(`${endDateValue}T${endTimePart}`).toISOString();
+        if (new Date(endDate).getTime() < new Date(startDate).getTime()) {
+          setFormError('Окончание не может быть раньше начала');
+          setLoading(false);
+          return;
+        }
       }
 
+      const parsedAmount = amount.trim() ? parseFloat(amount.replace(',', '.').replace(/\s/g, '')) : null;
+      if (parsedAmount !== null && (Number.isNaN(parsedAmount) || parsedAmount < 0)) {
+        setFormError('Проверьте сумму');
+        setLoading(false);
+        return;
+      }
+      const interval = recurrence === 'custom' ? parseInt(recurrenceInterval, 10) : null;
+      if (recurrence === 'custom' && (!interval || interval < 1)) {
+        setFormError('Укажите, через сколько дней повторять');
+        setLoading(false);
+        return;
+      }
+
+      // Все поля передаются явно: null очищает значение при редактировании.
       const payload: EventCreate = {
-        title,
-        description: description || undefined,
+        title: title.trim(),
+        description: description.trim() || null,
         startDate,
         endDate,
         type,
+        amount: isPayment ? parsedAmount : null,
+        reminderMinutes: reminderMinutes === '' ? null : Number(reminderMinutes),
+        recurrence: recurrence || null,
+        recurrenceEnd: recurrence && recurrenceEnd ? fromDateInput(recurrenceEnd, true).toISOString() : null,
+        recurrenceInterval: interval,
       };
-
-      if (amount) payload.amount = parseFloat(amount);
-      if (reminderMinutes !== '') payload.reminderMinutes = Number(reminderMinutes);
-      if (recurrence) {
-        payload.recurrence = recurrence;
-        if (recurrenceEnd) payload.recurrenceEnd = new Date(recurrenceEnd).toISOString();
-        if (recurrence === 'custom' && recurrenceInterval) {
-          payload.recurrenceInterval = parseInt(recurrenceInterval, 10);
-        }
-      }
 
       await onSave(payload);
       onClose();
@@ -256,17 +282,17 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 select-none">
-      <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-slate-700 transition-colors">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-4 select-none">
+      <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-4 sm:p-6 max-h-[92vh] overflow-y-auto border border-gray-200 dark:border-slate-700 transition-colors">
         <h3 className="select-none text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 transition-colors">
-          {event ? 'Редактировать' : 'Новое'} {typeLabels[type] || 'событие'}
+          {event ? `Редактировать: ${(typeLabels[type] || 'событие').toLowerCase()}` : newTitles[type]}
         </h3>
 
         {formError && (
           <div className="select-none mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 text-sm rounded-lg transition-colors">{formError}</div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 select-none">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="select-none block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">Название{isPayment && ' (необязательно)'}</label>
             <input
@@ -274,7 +300,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
               required={!isPayment}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
             />
           </div>
 
@@ -284,7 +310,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
             />
           </div>
 
@@ -295,12 +321,12 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                   Сумма (₽)
                 </label>
                 <input
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.00"
-                  className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                 />
               </div>
             )}
@@ -335,7 +361,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                     setEndValue('');
                   }
                 }}
-                className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
               >
                 <option value="event" className="dark:bg-slate-900">{typeLabels.event}</option>
                 <option value="task" className="dark:bg-slate-900">{typeLabels.task}</option>
@@ -354,9 +380,9 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                     type="date"
                     required
                     value={startDateValue}
-                    onClick={openPicker} onMouseDown={preventSelect}
+                    onClick={openPicker}
                     onChange={(e) => setStartDateValue(e.target.value)}
-                    className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                   />
                 </div>
                 <div>
@@ -364,9 +390,9 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                   <input
                     type="time"
                     value={startTimeValue}
-                    onClick={openPicker} onMouseDown={preventSelect}
+                    onClick={openPicker}
                     onChange={(e) => setStartTimeValue(e.target.value)}
-                    className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                   />
                 </div>
               </div>
@@ -377,9 +403,9 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                     type="date"
                     required
                     value={endDateValue}
-                    onClick={openPicker} onMouseDown={preventSelect}
+                    onClick={openPicker}
                     onChange={(e) => setEndDateValue(e.target.value)}
-                    className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                   />
                 </div>
                 <div>
@@ -387,9 +413,9 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                   <input
                     type="time"
                     value={endTimeValue}
-                    onClick={openPicker} onMouseDown={preventSelect}
+                    onClick={openPicker}
                     onChange={(e) => setEndTimeValue(e.target.value)}
-                    className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                   />
                 </div>
               </div>
@@ -401,9 +427,9 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                 type="date"
                 required
                 value={startDateValue}
-                onClick={openPicker} onMouseDown={preventSelect}
+                onClick={openPicker}
                 onChange={(e) => setStartDateValue(e.target.value)}
-                className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
               />
             </div>
           ) : (
@@ -416,9 +442,9 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                   type={isTask ? 'date' : 'datetime-local'}
                   required
                   value={startValue}
-                  onClick={openPicker} onMouseDown={preventSelect}
+                  onClick={openPicker}
                   onChange={(e) => setStartValue(e.target.value)}
-                  className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                 />
               </div>
               <div>
@@ -429,9 +455,9 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                   type={isTask ? 'date' : 'time'}
                   required={isTask}
                   value={endValue}
-                  onClick={openPicker} onMouseDown={preventSelect}
+                  onClick={openPicker}
                   onChange={(e) => setEndValue(e.target.value)}
-                  className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                 />
               </div>
             </div>
@@ -450,7 +476,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
               <select
                 value={recurrence}
                 onChange={(e) => setRecurrence(e.target.value as RecurrenceType | '')}
-                className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
               >
                 <option value="" className="dark:bg-slate-900">Не повторяется</option>
                 <option value="daily" className="dark:bg-slate-900">{recurrenceLabels.daily}</option>
@@ -472,7 +498,7 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                   value={recurrenceInterval}
                   onChange={(e) => setRecurrenceInterval(e.target.value)}
                   placeholder="28"
-                  className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                 />
               </div>
             )}
@@ -483,9 +509,9 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                 <input
                   type="date"
                   value={recurrenceEnd}
-                  onClick={openPicker} onMouseDown={preventSelect}
+                  onClick={openPicker}
                   onChange={(e) => setRecurrenceEnd(e.target.value)}
-                  className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
                 />
               </div>
             )}
@@ -502,17 +528,26 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
               <select
                 value={reminderMinutes}
                 onChange={(e) => setReminderMinutes(e.target.value === '' ? '' : Number(e.target.value))}
-                className="select-none w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
               >
                 <option value="" className="dark:bg-slate-900">Без напоминания</option>
+                <option value={0} className="dark:bg-slate-900">В момент начала</option>
                 <option value={5} className="dark:bg-slate-900">За 5 минут</option>
                 <option value={15} className="dark:bg-slate-900">За 15 минут</option>
                 <option value={30} className="dark:bg-slate-900">За 30 минут</option>
                 <option value={60} className="dark:bg-slate-900">За 1 час</option>
+                <option value={120} className="dark:bg-slate-900">За 2 часа</option>
                 <option value={1440} className="dark:bg-slate-900">За 1 день</option>
+                <option value={4320} className="dark:bg-slate-900">За 3 дня</option>
               </select>
             </div>
           </div>
+
+          {isRecurringEvent && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Это повторяющееся событие: изменения применятся ко всем повторам.
+            </p>
+          )}
 
           <div className="flex items-center gap-3 pt-2">
             <button
@@ -532,7 +567,11 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
             {event && onDelete && (
               <button
                 type="button"
-                onClick={() => setConfirmOpen(true)}
+                onClick={() => {
+                  // Для повторяющегося события выбор «всю серию / этот и следующие» показывает страница.
+                  if (isRecurringEvent) onDelete();
+                  else setConfirmOpen(true);
+                }}
                 className="select-none px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition ml-auto select-none"
               >
                 Удалить

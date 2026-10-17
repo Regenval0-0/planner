@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { EventItem } from '../api/events.ts';
+import { expandEvents } from '../utils/recurrence.ts';
 import { isSameDay, isEventOnDay, pad } from '../utils/date.ts';
 
 interface Props {
@@ -16,6 +17,10 @@ const monthNames = ['января','февраля','марта','апреля',
 
 export default function WeekModal({ isOpen, weekStart, events, onClose, onSelectEvent, onCreate }: Props) {
   const [offset, setOffset] = useState(0);
+
+  useEffect(() => {
+    setOffset(0);
+  }, [weekStart, isOpen]);
 
   const baseWeek = useMemo(() => {
     if (!weekStart) return null;
@@ -44,13 +49,7 @@ export default function WeekModal({ isOpen, weekStart, events, onClose, onSelect
 
   const weekEvents = useMemo(() => {
     if (!baseWeek || !weekEnd) return [];
-    return events.filter((e) => {
-      const start = new Date(e.startDate);
-      start.setHours(0, 0, 0, 0);
-      const end = e.endDate ? new Date(e.endDate) : start;
-      end.setHours(23, 59, 59, 999);
-      return end >= baseWeek && start <= weekEnd;
-    });
+    return expandEvents(events, baseWeek, weekEnd);
   }, [events, baseWeek, weekEnd]);
 
   const paymentsTotal = useMemo(() => {
@@ -65,8 +64,8 @@ export default function WeekModal({ isOpen, weekStart, events, onClose, onSelect
   const today = new Date();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-6 select-none">
-      <div className="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-4 sm:p-6 max-h-[90vh] flex flex-col border border-gray-200 dark:border-slate-700 transition-colors">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-6 select-none" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-4 sm:p-6 max-h-[90vh] flex flex-col border border-gray-200 dark:border-slate-700 transition-colors">
         {/* Заголовок + навигация */}
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 transition-colors">
@@ -154,7 +153,7 @@ export default function WeekModal({ isOpen, weekStart, events, onClose, onSelect
                         className={`w-full text-left p-2 rounded-lg border transition hover:brightness-95 select-none transition-colors ${colorMap[ev.type] || 'bg-gray-50 dark:bg-slate-700 border-gray-200 dark:border-slate-600 text-gray-800 dark:text-gray-100'}`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">{ev.title}</span>
+                          <span className="text-sm font-medium break-words">{ev.title}</span>
                           {timeLabel && <span className="text-xs opacity-60">{timeLabel}</span>}
                         </div>
                         {(ev.recurrence || ev.isRecurrenceInstance) && (
@@ -176,7 +175,7 @@ export default function WeekModal({ isOpen, weekStart, events, onClose, onSelect
                         >
                           <div className="flex items-center justify-between">
                             <span className="text-xs truncate">{ev.title || 'Платёж'}</span>
-                            {ev.amount && <span className="text-xs font-bold">{ev.amount.toLocaleString('ru-RU')} ₽</span>}
+                            {!!ev.amount && <span className="text-xs font-bold">{ev.amount.toLocaleString('ru-RU')} ₽</span>}
                           </div>
                           {(ev.recurrence || ev.isRecurrenceInstance) && (
                             <div className="text-[9px] opacity-60 mt-0.5">↻ повторяющийся</div>

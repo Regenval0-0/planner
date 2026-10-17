@@ -1,6 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '../config.js';
+import type { Request, Response, NextFunction } from 'express';
+import { verifyToken } from '../lib/tokens.js';
 
 export interface AuthRequest extends Request {
   userId?: string;
@@ -9,16 +8,18 @@ export interface AuthRequest extends Request {
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'Unauthorized' });
+    res.status(401).json({ error: 'Требуется вход' });
     return;
   }
-
-  const token = authHeader.split(' ')[1];
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-    req.userId = decoded.userId;
-    next();
-  } catch {
-    res.status(401).json({ error: 'Invalid token' });
-  }
+  const token = authHeader.slice(7);
+  verifyToken(token)
+    .then((userId) => {
+      if (!userId) {
+        res.status(401).json({ error: 'Сессия истекла, войдите снова' });
+        return;
+      }
+      req.userId = userId;
+      next();
+    })
+    .catch(next);
 }

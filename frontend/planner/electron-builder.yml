@@ -1,4 +1,4 @@
-appId: com.planner.desktop
+appId: ru.planner.desktop
 productName: Планер
 copyright: Copyright © 2026
 directories:
@@ -7,30 +7,27 @@ directories:
 files:
   - dist/**/*
   - electron/**/*
-  - public/**/*
   - package.json
-extraResources:
-  - from: ../../backend/planner/dist
-    to: backend/planner/dist
-  - from: ../../backend/planner/prisma
-    to: backend/planner/prisma
-  - from: ../../backend/planner/package.json
-    to: backend/planner/package.json
-  - from: ../../backend/planner/node_modules
-    to: backend/planner/node_modules
+  - "!**/*.map"
+asar: true
 win:
+  icon: build/icon.png
   target:
-    - target: portable
-      arch: x64
     - target: nsis
       arch: x64
-  signAndEditExecutable: false
-portable:
-  artifactName: ${productName}-Готовый.exe
+    - target: portable
+      arch: x64
+  # Подписи кода нет, но иконка и сведения о программе в .exe записываются.
+  signExecutable: false
 nsis:
   oneClick: false
+  perMachine: false
   allowToChangeInstallationDirectory: true
-  artifactName: ${productName}-Установщик.exe
-  shortcutName: "Планер"
   createDesktopShortcut: always
   createStartMenuShortcut: true
+  shortcutName: Планер
+  artifactName: Planer-Setup-${version}.exe
+  deleteAppDataOnUninstall: false
+portable:
+  artifactName: Planer-Portable-${version}.exe
+publish: null

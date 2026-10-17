@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { EventItem } from '../api/events.ts';
 import { isSameDay, pad, toDateInput } from '../utils/date.ts';
+import { expandEvents } from '../utils/recurrence.ts';
 
 interface Props {
   events: EventItem[];
@@ -26,9 +27,6 @@ function openPicker(e: React.MouseEvent<HTMLInputElement>) {
   e.currentTarget.showPicker?.();
 }
 
-function preventSelect(e: React.MouseEvent<HTMLInputElement>) {
-  e.preventDefault();
-}
 
 export default function UpcomingPanel({ events, onSelectEvent }: Props) {
   const now = new Date();
@@ -39,20 +37,17 @@ export default function UpcomingPanel({ events, onSelectEvent }: Props) {
 
   const [toDate, setToDate] = useState(toDateInput(in7days.toISOString()));
 
-  const upcoming = events
+  const rangeEnd = toDate ? new Date(`${toDate}T23:59:59`) : new Date(in7days);
+  if (!toDate) rangeEnd.setHours(23, 59, 59, 999);
+
+  const upcoming = expandEvents(events, now, rangeEnd)
     .filter((e) => e.type !== 'payment')
-    .filter((e) => {
-      const start = new Date(e.startDate);
-      const end = e.endDate ? new Date(e.endDate) : start;
-      const rangeEnd = toDate ? new Date(toDate) : in7days;
-      rangeEnd.setHours(23, 59, 59, 999);
-      return end >= now && start <= rangeEnd;
-    })
     .sort((a, b) => {
       const aKey = a.type === 'task' && a.endDate ? new Date(a.endDate).getTime() : new Date(a.startDate).getTime();
       const bKey = b.type === 'task' && b.endDate ? new Date(b.endDate).getTime() : new Date(b.startDate).getTime();
       return aKey - bKey;
-    });
+    })
+    .slice(0, 100);
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 select-none transition-colors">
@@ -78,7 +73,6 @@ export default function UpcomingPanel({ events, onSelectEvent }: Props) {
             value={toDate}
             min={todayStr}
             onClick={openPicker}
-            onMouseDown={preventSelect}
             onChange={(e) => setToDate(e.target.value)}
             className="w-full px-2 py-1 text-xs border border-gray-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] cursor-pointer bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors"
           />
@@ -120,7 +114,7 @@ export default function UpcomingPanel({ events, onSelectEvent }: Props) {
                 className={`w-full text-left border-l-4 ${typeColors[ev.type] || 'border-l-gray-500'} bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-r-lg p-2 transition select-none transition-colors`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate transition-colors">{ev.title}</span>
+                  <span className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate transition-colors">{ev.title || 'Без названия'}</span>
                   <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap ml-2 transition-colors">
                     {isTask && end ? (
                       <>{dateLabel} (дедлайн){timeLabel}</>

@@ -45,10 +45,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return 'indigo';
   });
 
+  // Счётчик, чтобы перерисоваться при смене системной темы (setModeState('system') ничего не меняет).
+  const [systemTick, setSystemTick] = useState(0);
   const effectiveMode: 'light' | 'dark' = mode === 'system' ? getSystemTheme() : mode;
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ mode, accent }));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ mode, accent }));
+    } catch {
+      // ignore
+    }
   }, [mode, accent]);
 
   useEffect(() => {
@@ -87,16 +93,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       body.style.background = '#f8fafc';
       body.style.color = '#1f2937';
     }
-  }, [effectiveMode, accent]);
+  }, [effectiveMode, accent, systemTick]);
 
   // Listen for system theme changes when in system mode
   useEffect(() => {
     if (mode !== 'system') return;
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = () => {
-      // Force re-render by toggling state without changing stored value
-      setModeState('system');
-    };
+    const handler = () => setSystemTick((t) => t + 1);
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
   }, [mode]);

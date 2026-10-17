@@ -1,3 +1,5 @@
+// Локальная разработка: SQLite (файл dev.db).
+// Сервер в облаке использует prisma/postgres/schema.prisma — модели должны совпадать.
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,15 +10,17 @@ datasource db {
 }
 
 model User {
-  id                String   @id @default(uuid())
-  username          String   @unique
-  passwordHash      String   @map("password_hash")
-  phone             String   @unique
-  securityQuestion  String   @map("security_question")
-  securityAnswer    String   @map("security_answer")
-  vkId              String?  @unique @map("vk_id")
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
+  id               String   @id @default(uuid())
+  /// Логин как его ввёл пользователь (так и показывается).
+  username         String
+  /// Логин в нижнем регистре — по нему проверяется уникальность («Dasha» и «dasha» — один логин).
+  usernameKey      String   @unique @map("username_key")
+  passwordHash     String   @map("password_hash")
+  securityQuestion String   @map("security_question")
+  securityAnswer   String   @map("security_answer")
+  tokenVersion     Int      @default(0) @map("token_version")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
   events Event[]
 
@@ -31,10 +35,10 @@ model Event {
   startDate          DateTime  @map("start_date")
   endDate            DateTime? @map("end_date")
   type               String    @default("event")
-  recurrence         String?   @map("recurrence")
+  recurrence         String?
   recurrenceEnd      DateTime? @map("recurrence_end")
   recurrenceInterval Int?      @map("recurrence_interval")
-  amount             Float?    @map("amount")
+  amount             Float?
   reminderMinutes    Int?      @map("reminder_minutes")
   createdAt          DateTime  @default(now()) @map("created_at")
   updatedAt          DateTime  @updatedAt @map("updated_at")

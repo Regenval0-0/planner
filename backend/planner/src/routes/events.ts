@@ -2,203 +2,252 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../prisma.js';
-import { authMiddleware, AuthRequest } from '../middleware/auth.js';
-import { io } from '../server.js';
+import { authMiddleware, type AuthRequest } from '../middleware/auth.js';
+import { asyncHandler } from '../lib/asyncHandler.js';
+import { emitToUser } from '../lib/realtime.js';
 
 const router = Router();
+router.use(authMiddleware);
 
-const eventSchema = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  startDate: z.string().datetime(),
-  endDate: z.string().datetime().optional(),
-  type: z.enum(['event', 'task', 'meeting', 'payment']).default('event'),
-  recurrence: z.enum(['daily', 'weekly', 'biweekly', 'monthly', 'yearly', 'custom']).optional(),
-  recurrenceEnd: z.string().datetime().optional(),
-  recurrenceInterval: z.number().int().min(1).optional(),
-  amount: z.number().optional(),
-  reminderMinutes: z.number().int().min(0).optional(),
+const MAX_EVENTS_PER_USER = 20000;
+
+const isoDate = z.string().datetime({ offset: true });
+
+// Повторяющиеся события хранятся одной записью; конкретные даты повторов
+// рассчитывает приложение (так они работают и без интернета).
+const baseFields = {
+  title: z.string().trim().max(200),
+  description: z.string().max(2000).nullable(),
+  startDate: isoDate,
+  endDate: isoDate.nullable(),
+  type: z.enum(['event', 'task', 'meeting', 'payment']),
+  recurrence: z.enum(['daily', 'weekly', 'biweekly', 'monthly', 'yearly', 'custom']).nullable(),
+  recurrenceEnd: isoDate.nullable(),
+  recurrenceInterval: z.number().int().min(1).max(3650).nullable(),
+  amount: z.number().min(0).max(1e12).nullable(),
+  reminderMinutes: z.number().int().min(0).max(60 * 24 * 30).nullable(),
+};
+
+const createSchema = z.object({
+  // Приложение само создаёт id (UUID), чтобы событие, созданное без интернета,
+  // можно было редактировать и удалять до синхронизации.
+  id: z.string().uuid().optional(),
+  title: baseFields.title.default(''),
+  description: baseFields.description.optional(),
+  startDate: baseFields.startDate,
+  endDate: baseFields.endDate.optional(),
+  type: baseFields.type.default('event'),
+  recurrence: baseFields.recurrence.optional(),
+  recurrenceEnd: baseFields.recurrenceEnd.optional(),
+  recurrenceInterval: baseFields.recurrenceInterval.optional(),
+  amount: baseFields.amount.optional(),
+  reminderMinutes: baseFields.reminderMinutes.optional(),
 });
 
-const updateSchema = eventSchema.partial();
+const updateSchema = z.object({
+  title: baseFields.title.optional(),
+  description: baseFields.description.optional(),
+  startDate: baseFields.startDate.optional(),
+  endDate: baseFields.endDate.optional(),
+  type: baseFields.type.optional(),
+  recurrence: baseFields.recurrence.optional(),
+  recurrenceEnd: baseFields.recurrenceEnd.optional(),
+  recurrenceInterval: baseFields.recurrenceInterval.optional(),
+  amount: baseFields.amount.optional(),
+  reminderMinutes: baseFields.reminderMinutes.optional(),
+});
 
-function addRecurrence(date: Date, recurrence: string, interval?: number): Date {
-  const d = new Date(date);
-  switch (recurrence) {
-    case 'daily': d.setDate(d.getDate() + 1); break;
-    case 'weekly': d.setDate(d.getDate() + 7); break;
-    case 'biweekly': d.setDate(d.getDate() + 14); break;
-    case 'monthly': d.setMonth(d.getMonth() + 1); break;
-    case 'yearly': d.setFullYear(d.getFullYear() + 1); break;
-    case 'custom':
-      if (interval && interval > 0) {
-        d.setDate(d.getDate() + interval);
-      }
-      break;
-  }
-  return d;
+type EventInput = z.infer<typeof updateSchema>;
+
+function toDate(v: string | null | undefined): Date | null | undefined {
+  if (v === undefined) return undefined;
+  if (v === null) return null;
+  return new Date(v);
 }
 
-function generateOccurrences(event: any, monthStart: Date, monthEnd: Date): any[] {
-  if (!event.recurrence) return [];
+function toData(input: EventInput) {
+  return {
+    title: input.title,
+    description: input.description === undefined ? undefined : input.description || null,
+    startDate: toDate(input.startDate) ?? undefined,
+    endDate: toDate(input.endDate),
+    type: input.type,
+    recurrence: input.recurrence,
+    recurrenceEnd: toDate(input.recurrenceEnd),
+    recurrenceInterval: input.recurrenceInterval,
+    amount: input.amount,
+    reminderMinutes: input.reminderMinutes,
+  };
+}
 
-  const occurrences: any[] = [];
-  const originalStart = new Date(event.startDate);
-  const originalEnd = event.endDate ? new Date(event.endDate) : null;
-  const duration = originalEnd ? originalEnd.getTime() - originalStart.getTime() : 0;
-
-  const recurrenceEnd = event.recurrenceEnd
-    ? new Date(event.recurrenceEnd)
-    : new Date(originalStart.getFullYear() + 5, originalStart.getMonth(), originalStart.getDate());
-
-  let current = new Date(originalStart);
-  const interval = event.recurrence === 'custom' ? event.recurrenceInterval : undefined;
-
-  let safety = 0;
-  while (current < monthStart && current <= recurrenceEnd && safety < 1000) {
-    current = addRecurrence(current, event.recurrence, interval);
-    safety++;
+/** Проверки, которые зависят от нескольких полей сразу. Возвращает текст ошибки или null. */
+function validateMerged(e: {
+  startDate: Date;
+  endDate: Date | null;
+  recurrence: string | null;
+  recurrenceEnd: Date | null;
+  recurrenceInterval: number | null;
+}): string | null {
+  if (e.endDate && e.endDate.getTime() < e.startDate.getTime()) {
+    return 'Окончание не может быть раньше начала';
   }
+  if (e.recurrence === 'custom' && !e.recurrenceInterval) {
+    return 'Укажите, через сколько дней повторять';
+  }
+  if (e.recurrence && e.recurrenceEnd && e.recurrenceEnd.getTime() < e.startDate.getTime()) {
+    return 'Дата окончания повторов раньше даты начала';
+  }
+  return null;
+}
 
-  safety = 0;
-  while (current <= monthEnd && current <= recurrenceEnd && safety < 1000) {
-    const newStart = new Date(current);
-    const newEnd = originalEnd ? new Date(newStart.getTime() + duration) : null;
+function badRequest(error: z.ZodError) {
+  const issue = error.issues[0];
+  return { error: issue ? `Неверные данные: ${issue.path.join('.') || 'запрос'} — ${issue.message}` : 'Неверные данные' };
+}
 
-    occurrences.push({
-      ...event,
-      id: `rec_${event.id}_${newStart.toISOString().split('T')[0]}`,
-      startDate: newStart.toISOString(),
-      endDate: newEnd?.toISOString() || null,
-      isRecurrenceInstance: true,
-      originId: event.id,
+// Все события пользователя (без раскрытия повторов).
+router.get(
+  '/',
+  asyncHandler<AuthRequest>(async (req, res) => {
+    const events = await prisma.event.findMany({
+      where: { userId: req.userId! },
+      orderBy: { startDate: 'asc' },
     });
+    res.json(events);
+  }),
+);
 
-    current = addRecurrence(current, event.recurrence, interval);
-    safety++;
-  }
-
-  return occurrences;
-}
-
-router.get('/', authMiddleware, async (req: AuthRequest, res) => {
-  const { month, year } = req.query;
-  const userId = req.userId!;
-
-  const where: Prisma.EventWhereInput = { userId };
-
-  if (month && year) {
-    const m = parseInt(month as string, 10);
-    const y = parseInt(year as string, 10);
-    if (isNaN(m) || isNaN(y) || m < 1 || m > 12 || y < 1970) {
-      res.status(400).json({ error: 'Invalid month or year' });
+router.post(
+  '/',
+  asyncHandler<AuthRequest>(async (req, res) => {
+    const parsed = createSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json(badRequest(parsed.error));
       return;
     }
-    const monthStart = new Date(y, m - 1, 1);
-    const monthEnd = new Date(y, m, 0, 23, 59, 59, 999);
+    const userId = req.userId!;
+    const { id, ...fields } = parsed.data;
 
-    where.OR = [
-      {
-        recurrence: null,
-        endDate: null,
-        startDate: { gte: monthStart, lte: monthEnd },
-      },
-      {
-        recurrence: null,
-        endDate: { not: null },
-        AND: [
-          { startDate: { lte: monthEnd } },
-          { endDate: { gte: monthStart } },
-        ],
-      },
-      {
-        recurrence: { not: null },
-      },
-    ];
-  }
-
-  const events = await prisma.event.findMany({
-    where,
-    orderBy: { startDate: 'asc' },
-  });
-
-  if (month && year) {
-    const m = parseInt(month as string, 10);
-    const y = parseInt(year as string, 10);
-    if (isNaN(m) || isNaN(y) || m < 1 || m > 12 || y < 1970) {
-      res.status(400).json({ error: 'Invalid month or year' });
-      return;
-    }
-    const monthStart = new Date(y, m - 1, 1);
-    const monthEnd = new Date(y, m, 0, 23, 59, 59, 999);
-
-    const result: Array<Prisma.EventGetPayload<{}> & { isRecurrenceInstance?: boolean; originId?: string }> = [];
-    for (const event of events) {
-      if (event.recurrence) {
-        result.push(...generateOccurrences(event, monthStart, monthEnd));
-      } else {
-        result.push(event);
+    // Повторная отправка того же события (например, после обрыва связи) — не создаём дубликат.
+    if (id) {
+      const existing = await prisma.event.findUnique({ where: { id } });
+      if (existing) {
+        if (existing.userId !== userId) {
+          res.status(409).json({ error: 'Конфликт идентификатора события' });
+          return;
+        }
+        res.status(200).json(existing);
+        return;
       }
     }
-    res.json(result);
-    return;
-  }
 
-  res.json(events);
-});
+    const data = toData(fields);
+    const merged = {
+      startDate: data.startDate!,
+      endDate: data.endDate ?? null,
+      recurrence: data.recurrence ?? null,
+      recurrenceEnd: data.recurrenceEnd ?? null,
+      recurrenceInterval: data.recurrenceInterval ?? null,
+    };
+    const problem = validateMerged(merged);
+    if (problem) {
+      res.status(400).json({ error: problem });
+      return;
+    }
 
-router.post('/', authMiddleware, async (req: AuthRequest, res) => {
-  const parsed = eventSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: 'Invalid data', details: parsed.error.format() });
-    return;
-  }
+    const count = await prisma.event.count({ where: { userId } });
+    if (count >= MAX_EVENTS_PER_USER) {
+      res.status(400).json({ error: 'Достигнут предел количества событий' });
+      return;
+    }
 
-  const event = await prisma.event.create({
-    data: { ...parsed.data, title: parsed.data.title || '', userId: req.userId! },
-  });
+    try {
+      const event = await prisma.event.create({
+        data: {
+          ...(id ? { id } : {}),
+          userId,
+          title: data.title ?? '',
+          description: data.description ?? null,
+          startDate: merged.startDate,
+          endDate: merged.endDate,
+          type: data.type ?? 'event',
+          recurrence: merged.recurrence,
+          recurrenceEnd: merged.recurrenceEnd,
+          recurrenceInterval: merged.recurrence === 'custom' ? merged.recurrenceInterval : null,
+          amount: data.amount ?? null,
+          reminderMinutes: data.reminderMinutes ?? null,
+        },
+      });
+      emitToUser(userId, 'event:created', event);
+      res.status(201).json(event);
+    } catch (err) {
+      // Два одновременных запроса с одним id.
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002' && id) {
+        const existing = await prisma.event.findUnique({ where: { id } });
+        if (existing && existing.userId === userId) {
+          res.status(200).json(existing);
+          return;
+        }
+      }
+      throw err;
+    }
+  }),
+);
 
-  io.to(`user_${req.userId}`).emit('event:created', event);
-  res.status(201).json(event);
-});
+router.put(
+  '/:id',
+  asyncHandler<AuthRequest>(async (req, res) => {
+    const parsed = updateSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json(badRequest(parsed.error));
+      return;
+    }
+    const userId = req.userId!;
+    const existing = await prisma.event.findFirst({ where: { id: req.params.id, userId } });
+    if (!existing) {
+      res.status(404).json({ error: 'Событие не найдено' });
+      return;
+    }
 
-router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
-  const parsed = updateSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: 'Invalid data', details: parsed.error.format() });
-    return;
-  }
+    const data = toData(parsed.data);
+    const merged = {
+      startDate: data.startDate ?? existing.startDate,
+      endDate: data.endDate === undefined ? existing.endDate : data.endDate,
+      recurrence: data.recurrence === undefined ? existing.recurrence : data.recurrence,
+      recurrenceEnd: data.recurrenceEnd === undefined ? existing.recurrenceEnd : data.recurrenceEnd,
+      recurrenceInterval:
+        data.recurrenceInterval === undefined ? existing.recurrenceInterval : data.recurrenceInterval,
+    };
+    const problem = validateMerged(merged);
+    if (problem) {
+      res.status(400).json({ error: problem });
+      return;
+    }
 
-  const existing = await prisma.event.findFirst({
-    where: { id: req.params.id, userId: req.userId! },
-  });
-  if (!existing) {
-    res.status(404).json({ error: 'Event not found' });
-    return;
-  }
+    const updated = await prisma.event.update({
+      where: { id: existing.id },
+      data: {
+        ...data,
+        recurrenceInterval: merged.recurrence === 'custom' ? merged.recurrenceInterval : null,
+        recurrenceEnd: merged.recurrence ? merged.recurrenceEnd : null,
+      },
+    });
+    emitToUser(userId, 'event:updated', updated);
+    res.json(updated);
+  }),
+);
 
-  const updated = await prisma.event.update({
-    where: { id: req.params.id },
-    data: parsed.data,
-  });
-
-  io.to(`user_${req.userId}`).emit('event:updated', updated);
-  res.json(updated);
-});
-
-router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
-  const existing = await prisma.event.findFirst({
-    where: { id: req.params.id, userId: req.userId! },
-  });
-  if (!existing) {
-    res.status(404).json({ error: 'Event not found' });
-    return;
-  }
-
-  await prisma.event.delete({ where: { id: req.params.id } });
-
-  io.to(`user_${req.userId}`).emit('event:deleted', { id: req.params.id });
-  res.status(204).send();
-});
+router.delete(
+  '/:id',
+  asyncHandler<AuthRequest>(async (req, res) => {
+    const userId = req.userId!;
+    const result = await prisma.event.deleteMany({ where: { id: req.params.id, userId } });
+    if (result.count > 0) {
+      emitToUser(userId, 'event:deleted', { id: req.params.id });
+    }
+    // Удаление уже удалённого события — не ошибка (повторная отправка из очереди).
+    res.status(204).send();
+  }),
+);
 
 export default router;

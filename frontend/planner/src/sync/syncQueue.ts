@@ -1,96 +1,101 @@
-import { setStored, getStored, STORAGE_KEYS } from './storage.ts';
 import type { EventItem, EventCreate } from '../api/events.ts';
+
+// Чистые функции очереди офлайн-изменений (без обращения к хранилищу) — их легко тестировать.
 
 export type PendingAction =
   | { op: 'create'; id: string; payload: EventCreate; ts: number }
   | { op: 'update'; id: string; payload: Partial<EventCreate>; ts: number }
   | { op: 'delete'; id: string; ts: number };
 
-export function getQueue(): PendingAction[] {
-  return getStored<PendingAction[]>(STORAGE_KEYS.QUEUE, []);
-}
+/**
+ * Добавляет действие в очередь, схлопывая лишнее:
+ * - изменение ещё не отправленного события дописывается в его создание;
+ * - удаление ещё не отправленного события просто убирает его из очереди;
+ * - несколько изменений одного события объединяются.
+ */
+export function enqueue(queue: PendingAction[], action: PendingAction): PendingAction[] {
+  const pendingCreate = queue.find((a) => a.op === 'create' && a.id === action.id) as
+    | Extract<PendingAction, { op: 'create' }>
+    | undefined;
 
-export function addToQueue(action: PendingAction): void {
-  const q = getQueue();
-  // Deduplicate: если уже есть update/create для того же id — заменяем
-  const filtered = q.filter((a) => a.id !== action.id || a.op !== action.op);
-  filtered.push(action);
-  setStored(STORAGE_KEYS.QUEUE, filtered);
-}
-
-export function removeFromQueue(actionId: string, op: PendingAction['op']): void {
-  const q = getQueue();
-  setStored(
-    STORAGE_KEYS.QUEUE,
-    q.filter((a) => !(a.id === actionId && a.op === op))
-  );
-}
-
-export function clearQueue(): void {
-  setStored(STORAGE_KEYS.QUEUE, []);
-}
-
-export function getLocalEvents(): EventItem[] {
-  return getStored<EventItem[]>(STORAGE_KEYS.EVENTS, []);
-}
-
-export function setLocalEvents(events: EventItem[]): void {
-  setStored(STORAGE_KEYS.EVENTS, events);
-}
-
-export function upsertLocalEvent(event: EventItem): void {
-  const events = getLocalEvents();
-  const idx = events.findIndex((e) => e.id === event.id);
-  if (idx >= 0) {
-    events[idx] = event;
-  } else {
-    events.push(event);
+  if (action.op === 'create') {
+    return [...queue.filter((a) => a.id !== action.id), action];
   }
-  // Sort by startDate
-  events.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-  setLocalEvents(events);
+
+  if (action.op === 'update') {
+    if (pendingCreate) {
+      return queue.map((a) =>
+        a === pendingCreate ? { ...pendingCreate, payload: { ...pendingCreate.payload, ...action.payload }, ts: action.ts } : a,
+      );
+    }
+    const pendingUpdate = queue.find((a) => a.op === 'update' && a.id === action.id) as
+      | Extract<PendingAction, { op: 'update' }>
+      | undefined;
+    if (pendingUpdate) {
+      return queue.map((a) =>
+        a === pendingUpdate ? { ...pendingUpdate, payload: { ...pendingUpdate.payload, ...action.payload }, ts: action.ts } : a,
+      );
+    }
+    return [...queue, action];
+  }
+
+  // delete
+  const withoutEvent = queue.filter((a) => a.id !== action.id);
+  if (pendingCreate) return withoutEvent;
+  return [...withoutEvent, action];
 }
 
-export function deleteLocalEvent(id: string): void {
-  const events = getLocalEvents().filter((e) => e.id !== id);
-  setLocalEvents(events);
+export function removeAction(queue: PendingAction[], action: PendingAction): PendingAction[] {
+  return queue.filter((a) => !(a.id === action.id && a.op === action.op && a.ts === action.ts));
 }
 
-export function applyPendingToLocal(): void {
-  const q = getQueue();
-  const events = getLocalEvents();
-  for (const action of q) {
+function sortByStart(events: EventItem[]): EventItem[] {
+  return events.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+}
+
+/** Список событий с учётом ещё не отправленных изменений. */
+export function applyQueue(serverEvents: EventItem[], queue: PendingAction[], userId: string): EventItem[] {
+  const map = new Map<string, EventItem>();
+  for (const e of serverEvents) map.set(e.id, e);
+  const now = new Date().toISOString();
+
+  for (const action of queue) {
     if (action.op === 'create') {
-      // optimistic create with temp id
-      const exists = events.find((e) => e.id === action.id);
-      if (!exists) {
-        events.push({
-          id: action.id,
-          userId: getStored<{ id: string }>(STORAGE_KEYS.USER, { id: '' }).id,
-          title: action.payload.title || '',
-          description: action.payload.description || null,
-          startDate: action.payload.startDate,
-          endDate: action.payload.endDate || null,
-          type: action.payload.type,
-          recurrence: action.payload.recurrence || null,
-          recurrenceEnd: action.payload.recurrenceEnd || null,
-          recurrenceInterval: action.payload.recurrenceInterval || null,
-          amount: action.payload.amount ?? null,
-          reminderMinutes: action.payload.reminderMinutes ?? null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
-      }
+      const p = action.payload;
+      map.set(action.id, {
+        id: action.id,
+        userId,
+        title: p.title || '',
+        description: p.description ?? null,
+        startDate: p.startDate,
+        endDate: p.endDate ?? null,
+        type: p.type,
+        recurrence: p.recurrence ?? null,
+        recurrenceEnd: p.recurrenceEnd ?? null,
+        recurrenceInterval: p.recurrenceInterval ?? null,
+        amount: p.amount ?? null,
+        reminderMinutes: p.reminderMinutes ?? null,
+        createdAt: now,
+        updatedAt: now,
+      });
     } else if (action.op === 'update') {
-      const idx = events.findIndex((e) => e.id === action.id);
-      if (idx >= 0) {
-        events[idx] = { ...events[idx], ...action.payload, updatedAt: new Date().toISOString() };
-      }
-    } else if (action.op === 'delete') {
-      const idx = events.findIndex((e) => e.id === action.id);
-      if (idx >= 0) events.splice(idx, 1);
+      const existing = map.get(action.id);
+      if (existing) map.set(action.id, { ...existing, ...action.payload, updatedAt: now });
+    } else {
+      map.delete(action.id);
     }
   }
-  events.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-  setLocalEvents(events);
+  return sortByStart(Array.from(map.values()));
+}
+
+/** Обновить снимок серверных данных после успешной отправки действия. */
+export function applyServerResult(
+  serverEvents: EventItem[],
+  action: PendingAction,
+  result: EventItem | null,
+): EventItem[] {
+  if (action.op === 'delete') return serverEvents.filter((e) => e.id !== action.id);
+  if (!result) return serverEvents;
+  const rest = serverEvents.filter((e) => e.id !== result.id);
+  return sortByStart([...rest, result]);
 }

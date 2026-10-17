@@ -1,0 +1,50 @@
+// Боевой сервер: PostgreSQL.
+// Модели должны совпадать с prisma/schema.prisma (локальная SQLite).
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String   @id @default(uuid())
+  /// Логин как его ввёл пользователь (так и показывается).
+  username         String
+  /// Логин в нижнем регистре — по нему проверяется уникальность («Dasha» и «dasha» — один логин).
+  usernameKey      String   @unique @map("username_key")
+  passwordHash     String   @map("password_hash")
+  securityQuestion String   @map("security_question")
+  securityAnswer   String   @map("security_answer")
+  tokenVersion     Int      @default(0) @map("token_version")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  events Event[]
+
+  @@map("users")
+}
+
+model Event {
+  id                 String    @id @default(uuid())
+  userId             String    @map("user_id")
+  title              String
+  description        String?
+  startDate          DateTime  @map("start_date")
+  endDate            DateTime? @map("end_date")
+  type               String    @default("event")
+  recurrence         String?
+  recurrenceEnd      DateTime? @map("recurrence_end")
+  recurrenceInterval Int?      @map("recurrence_interval")
+  amount             Float?
+  reminderMinutes    Int?      @map("reminder_minutes")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startDate])
+  @@map("events")
+}

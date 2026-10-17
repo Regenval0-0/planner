@@ -51,8 +51,8 @@ export default function DayModal({ isOpen, date, events, onClose, onCreate, onEd
   const dateStr = `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 select-none">
-      <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 max-h-[80vh] flex flex-col border border-gray-200 dark:border-slate-700 transition-colors">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 select-none" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 max-h-[80vh] flex flex-col border border-gray-200 dark:border-slate-700 transition-colors">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 transition-colors">События {dateStr}</h3>
           <button onClick={onClose} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xl select-none transition">×</button>
@@ -102,10 +102,10 @@ export default function DayModal({ isOpen, date, events, onClose, onCreate, onEd
                     <span className="text-xs text-gray-500 dark:text-gray-400 transition-colors">{typeLabels[ev.type] || ev.type}</span>
                     <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto transition-colors">{timeLabel}</span>
                   </div>
-                  <div className="font-medium text-gray-800 dark:text-gray-100 text-sm transition-colors">{ev.title}</div>
-                  {ev.amount && (
+                  <div className="font-medium text-gray-800 dark:text-gray-100 text-sm transition-colors break-words">{ev.title || typeLabels[ev.type]}</div>
+                  {ev.amount ? (
                     <div className="text-xs text-orange-600 dark:text-orange-300 mt-1 font-medium transition-colors">{ev.amount.toLocaleString('ru-RU')} ₽</div>
-                  )}
+                  ) : null}
                   {ev.description && (
                     <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 transition-colors">{ev.description}</div>
                   )}
@@ -137,6 +137,11 @@ export default function DayModal({ isOpen, date, events, onClose, onCreate, onEd
                     </button>
                     <button
                       onClick={() => {
+                        // Для повторяющихся событий страница сама спросит, что удалить.
+                        if (ev.recurrence) {
+                          onDelete(ev);
+                          return;
+                        }
                         setConfirmEvent(ev);
                         setConfirmOpen(true);
                       }}

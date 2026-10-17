@@ -22,3 +22,6 @@ cleanup.js
 *.pma
 backend/planner/dev.db
 backend/planner/dist/
+deploy/.env
+deploy/backups/
+_planner-update/

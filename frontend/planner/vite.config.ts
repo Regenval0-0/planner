@@ -1,29 +1,18 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { readFileSync } from 'node:fs';
+
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string };
 
 export default defineConfig({
+  // Относительные пути — сборка открывается и в Android (Capacitor), и в программе для ПК.
   base: './',
-  plugins: [
-    react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      manifest: {
-        name: 'Планер',
-        short_name: 'Планер',
-        description: 'Персональный планер событий, задач и платежей',
-        theme_color: '#4f46e5',
-        background_color: '#ffffff',
-        display: 'standalone',
-        start_url: './',
-        icons: [
-          {
-            src: './favicon.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
-          },
-        ],
-      },
-    }),
-  ],
-})
+  plugins: [react()],
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
+  build: {
+    target: 'es2020',
+    chunkSizeWarningLimit: 1000,
+  },
+});

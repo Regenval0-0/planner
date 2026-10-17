@@ -1,496 +1,234 @@
+// Программа «Планер» для Windows.
+// Интерфейс открывается из собранных файлов (dist) по адресу app://planner,
+// данные синхронизируются с облачным сервером (адрес встроен в сборку).
+
 const path = require('path');
 const fs = require('fs');
-const http = require('http');
-const os = require('os');
-const { spawn } = require('child_process');
+const {
+  app,
+  BrowserWindow,
+  Menu,
+  Tray,
+  globalShortcut,
+  ipcMain,
+  nativeImage,
+  net,
+  protocol,
+  shell,
+} = require('electron');
 
-// ===== Guard: if we were spawned as a Node backend, run server directly =====
-if (process.env.ELECTRON_RUN_AS_NODE === '1') {
-  const serverPath = process.argv.find((a) => typeof a === 'string' && a.endsWith('server.js'));
-  if (serverPath) {
-    import(serverPath).catch((err) => {
-      console.error('Failed to load backend server:', err);
-      process.exit(1);
-    });
-    return;
-  }
-}
+const APP_ID = 'ru.planner.desktop';
+const SCHEME = 'app';
+const HOST = 'planner';
+const isDev = !app.isPackaged && process.env.NODE_ENV === 'development';
+const distDir = path.join(__dirname, '..', 'dist');
+const iconPath = path.join(__dirname, 'icon.png');
 
-// ===== Electron imports =====================================================
-const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, globalShortcut, nativeImage } = require('electron');
+// Схема app:// ведёт себя как обычный защищённый сайт: работают localStorage, fetch, WebSocket.
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: SCHEME,
+    privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true },
+  },
+]);
 
-// ===== Single instance lock =================================================
-const gotLock = app.requestSingleInstanceLock();
-if (!gotLock) {
-  console.log('Another instance is already running. Exiting.');
+// ----- Один экземпляр программы -----
+if (!app.requestSingleInstanceLock()) {
   app.quit();
   process.exit(0);
 }
 
-app.on('second-instance', () => {
-  if (mainWindow) {
-    if (mainWindow.isMinimized()) mainWindow.restore();
-    mainWindow.show();
-    mainWindow.focus();
-  }
-});
-
 let mainWindow = null;
-let splashWindow = null;
 let tray = null;
-let backendProcess = null;
-const isDev = (process.env.NODE_ENV === 'development' || !app.isPackaged) && !process.env.FORCE_PROD;
-const BACKEND_PORT = 3001;
-const HEALTH_URL = `http://localhost:${BACKEND_PORT}/health`;
+let isQuitting = false;
 
-// Config file for cloud URL
-const configPath = path.join(app.getPath('userData'), 'planner-config.json');
-function readConfig() {
-  try {
-    if (fs.existsSync(configPath)) return JSON.parse(fs.readFileSync(configPath, 'utf8'));
-  } catch {}
-  return {};
-}
-function writeConfig(config) {
-  try {
-    fs.mkdirSync(path.dirname(configPath), { recursive: true });
-    fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-  } catch (err) {
-    console.error('Failed to write config:', err);
-  }
-}
+app.setAppUserModelId(APP_ID); // нужно для уведомлений Windows
 
-ipcMain.handle('get-backend-url', () => readConfig().backendUrl || '');
-ipcMain.handle('set-backend-url', (_event, url) => {
-  const config = readConfig();
-  config.backendUrl = url;
-  writeConfig(config);
-  return true;
-});
+app.on('second-instance', () => showWindow());
 
-// Window state persistence
-const windowStatePath = path.join(app.getPath('userData'), 'window-state.json');
+// ----- Состояние окна -----
+const statePath = () => path.join(app.getPath('userData'), 'window-state.json');
+
 function readWindowState() {
   try {
-    if (fs.existsSync(windowStatePath)) return JSON.parse(fs.readFileSync(windowStatePath, 'utf8'));
-  } catch {}
-  return { width: 1400, height: 900, x: undefined, y: undefined, maximized: false };
-}
-function saveWindowState() {
-  if (!mainWindow) return;
-  const bounds = mainWindow.getBounds();
-  const state = {
-    width: bounds.width,
-    height: bounds.height,
-    x: bounds.x,
-    y: bounds.y,
-    maximized: mainWindow.isMaximized(),
-  };
-  try {
-    fs.writeFileSync(windowStatePath, JSON.stringify(state));
-  } catch (err) {
-    console.error('Failed to save window state:', err);
-  }
-}
-
-function getLocalIP() {
-  const interfaces = os.networkInterfaces();
-  for (const name of Object.keys(interfaces)) {
-    for (const iface of interfaces[name]) {
-      if (iface.family === 'IPv4' && !iface.internal && (iface.address.startsWith('192.168.') || iface.address.startsWith('10.') || iface.address.startsWith('172.'))) {
-        return iface.address;
-      }
-    }
-  }
-  return 'localhost';
-}
-
-ipcMain.handle('get-local-ip', () => getLocalIP());
-
-// Embedded backend paths
-function getBackendDir() {
-  if (isDev) {
-    return path.join(__dirname, '..', '..', '..', 'backend', 'planner');
-  }
-  return path.join(process.resourcesPath, 'backend', 'planner');
-}
-
-function isBackendRunning() {
-  return new Promise((resolve) => {
-    const req = http.get(HEALTH_URL, { timeout: 800 }, (res) => resolve(res.statusCode === 200));
-    req.on('error', () => resolve(false));
-    req.setTimeout(800, () => { req.destroy(); resolve(false); });
-  });
-}
-
-function waitForBackend(maxMs = 30000) {
-  const start = Date.now();
-  return new Promise((resolve) => {
-    function check() {
-      const req = http.get(HEALTH_URL, { timeout: 800 }, (res) => {
-        if (res.statusCode === 200) resolve(true); else retry();
-      });
-      req.on('error', retry);
-      req.setTimeout(800, () => { req.destroy(); retry(); });
-    }
-    function retry() {
-      if (Date.now() - start > maxMs) { resolve(false); return; }
-      setTimeout(check, 400);
-    }
-    check();
-  });
-}
-
-async function runDbMigrate(backendDir, env) {
-  const prismaBin = path.join(backendDir, 'node_modules', '.bin', process.platform === 'win32' ? 'prisma.cmd' : 'prisma');
-  if (!fs.existsSync(prismaBin)) {
-    console.warn('Prisma CLI not found, skipping migration. DB may fail if not initialized.');
-    return false;
-  }
-  return new Promise((resolve) => {
-    console.log('Running prisma migrate deploy...');
-    const proc = spawn(prismaBin, ['migrate', 'deploy'], {
-      cwd: backendDir,
-      env,
-      stdio: 'pipe',
-      shell: process.platform === 'win32',
-      windowsHide: true,
-    });
-    let stderr = '';
-    proc.stdout?.on('data', (d) => console.log('[prisma]', d.toString().trim()));
-    proc.stderr?.on('data', (d) => { stderr += d.toString(); });
-    proc.on('error', (err) => {
-      console.error('Migration spawn error:', err);
-      resolve(false);
-    });
-    proc.on('close', (code) => {
-      console.log('Migration exited with code:', code);
-      if (code !== 0) console.error('Migration stderr:', stderr);
-      resolve(code === 0);
-    });
-  });
-}
-
-async function startEmbeddedBackend() {
-  const portReady = await isBackendRunning();
-  if (portReady) {
-    console.log('Backend already running on port', BACKEND_PORT);
-    return true;
-  }
-
-  const backendDir = getBackendDir();
-  const serverPath = path.join(backendDir, 'dist', 'server.js');
-
-  if (!fs.existsSync(serverPath)) {
-    console.error('Backend server not found:', serverPath);
-    return false;
-  }
-
-  // Ensure userData dir exists (for DB and config)
-  const userData = app.getPath('userData');
-  fs.mkdirSync(userData, { recursive: true });
-
-  const env = {
-    ...process.env,
-    NODE_ENV: 'production',
-    PORT: String(BACKEND_PORT),
-    DATABASE_URL: `file:${path.join(userData, 'planner.db')}`,
-    JWT_SECRET: 'embedded-local-jwt-secret-change-me-32-chars-long-enough',
-    ELECTRON_RUN_AS_NODE: '1',
-  };
-
-  // Always migrate DB before starting backend.
-  // Prisma creates an empty SQLite file on first connect,
-  // so checking file existence is unreliable — tables may still be missing.
-  let migrated = await runDbMigrate(backendDir, env);
-
-  // If migration failed because an old DB exists with incompatible schema,
-  // delete it and retry once.
-  if (!migrated) {
-    const dbPath = path.join(userData, 'planner.db');
-    if (fs.existsSync(dbPath)) {
-      console.log('Migration failed. Removing old DB and retrying...');
-      try {
-        fs.unlinkSync(dbPath);
-      } catch (err) {
-        console.error('Failed to delete old DB:', err);
-      }
-      migrated = await runDbMigrate(backendDir, env);
-    }
-  }
-
-  if (!migrated) {
-    console.error('DB migration failed. Cannot start backend.');
-    return false;
-  }
-
-  console.log('Starting embedded backend from:', serverPath);
-
-  backendProcess = spawn(isDev ? 'node' : process.execPath, [serverPath], {
-    cwd: backendDir,
-    env,
-    stdio: 'pipe',
-    windowsHide: true,
-  });
-
-  backendProcess.stdout?.on('data', (d) => console.log('[backend]', d.toString().trim()));
-  backendProcess.stderr?.on('data', (d) => console.error('[backend]', d.toString().trim()));
-
-  backendProcess.on('error', (err) => console.error('Backend error:', err));
-  backendProcess.on('exit', (code) => {
-    console.log('Backend exited with code:', code);
-    backendProcess = null;
-  });
-
-  return await waitForBackend(30000);
-}
-
-function stopBackend() {
-  if (!backendProcess) return;
-  if (process.platform === 'win32') {
-    try {
-      spawn('taskkill', ['/pid', String(backendProcess.pid), '/T', '/F'], {
-        shell: true, detached: true, windowsHide: true,
-      });
-    } catch {
-      // ignore
-    }
-    try {
-      backendProcess.kill('SIGTERM');
-    } catch {
-      try { backendProcess.kill('SIGKILL'); } catch {}
-    }
-  } else {
-    try {
-      backendProcess.kill('SIGTERM');
-    } catch {
-      try { backendProcess.kill('SIGKILL'); } catch {}
-    }
-  }
-  backendProcess = null;
-}
-
-function createSplashWindow() {
-  console.log('Creating splash window...');
-  splashWindow = new BrowserWindow({
-    width: 400,
-    height: 300,
-    frame: false,
-    alwaysOnTop: true,
-    transparent: true,
-    webPreferences: { contextIsolation: true },
-    show: false,
-  });
-
-  splashWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body { margin:0; display:flex; align-items:center; justify-content:center;
-               height:100vh; background:#ffffff; font-family:system-ui,sans-serif; }
-        .box { text-align:center; }
-        .spinner { width:40px; height:40px; border:3px solid #e5e7eb;
-                    border-top-color:#4f46e5; border-radius:50%;
-                    animation:spin 1s linear infinite; margin:0 auto 16px; }
-        @keyframes spin { to { transform:rotate(360deg); } }
-        h2 { margin:0 0 8px; font-size:18px; color:#111827; }
-        p { margin:0; font-size:13px; color:#6b7280; }
-      </style>
-    </head>
-    <body>
-      <div class="box">
-        <div class="spinner"></div>
-        <h2>Планер</h2>
-        <p>Запуск сервера...</p>
-      </div>
-    </body>
-    </html>
-  `)}`);
-
-  splashWindow.once('ready-to-show', () => {
-    splashWindow.show();
-  });
-}
-
-function createTray() {
-  const iconPath = path.join(__dirname, '..', 'public', 'favicon.svg');
-  let trayIcon;
-  try {
-    trayIcon = nativeImage.createFromPath(iconPath);
-    if (process.platform === 'darwin') {
-      trayIcon = trayIcon.resize({ width: 16, height: 16 });
-    } else {
-      trayIcon = trayIcon.resize({ width: 24, height: 24 });
-    }
+    return JSON.parse(fs.readFileSync(statePath(), 'utf8'));
   } catch {
-    trayIcon = nativeImage.createEmpty();
+    return { width: 1300, height: 860, maximized: false };
   }
-  tray = new Tray(trayIcon);
-  tray.setToolTip('Планер');
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: 'Открыть',
-      click: () => {
-        if (mainWindow) {
-          mainWindow.show();
-          mainWindow.focus();
-        } else {
-          createMainWindow();
-        }
-      },
-    },
-    {
-      label: 'Настройки',
-      click: () => {
-        if (mainWindow) {
-          mainWindow.show();
-          mainWindow.focus();
-          mainWindow.loadURL(`http://localhost:${BACKEND_PORT}/#/settings`);
-        }
-      },
-    },
-    { type: 'separator' },
-    {
-      label: 'Выход',
-      click: () => {
-        app.isQuiting = true;
-        app.quit();
-      },
-    },
-  ]);
-  tray.setContextMenu(contextMenu);
-  tray.on('double-click', () => {
-    if (mainWindow) {
-      mainWindow.show();
-      mainWindow.focus();
-    }
+}
+
+function saveWindowState() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  try {
+    const b = mainWindow.getNormalBounds();
+    fs.writeFileSync(statePath(), JSON.stringify({ ...b, maximized: mainWindow.isMaximized() }));
+  } catch {
+    // ignore
+  }
+}
+
+function isSafeExternal(url) {
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' || u.protocol === 'mailto:';
+  } catch {
+    return false;
+  }
+}
+
+// ----- Раздача файлов интерфейса по app://planner/... -----
+function registerAppProtocol() {
+  protocol.handle(SCHEME, (request) => {
+    const { host, pathname } = new URL(request.url);
+    if (host !== HOST) return new Response('Not found', { status: 404 });
+    const rel = decodeURIComponent(pathname).replace(/^\/+/, '') || 'index.html';
+    const filePath = path.normalize(path.join(distDir, rel));
+    // Не выпускаем запросы за пределы папки dist.
+    if (!filePath.startsWith(distDir)) return new Response('Forbidden', { status: 403 });
+    const target = fs.existsSync(filePath) && fs.statSync(filePath).isFile() ? filePath : path.join(distDir, 'index.html');
+    return net.fetch(require('url').pathToFileURL(target).toString());
   });
 }
 
-function createMainWindow() {
-  console.log('Creating main window...');
+function createWindow() {
   const state = readWindowState();
   mainWindow = new BrowserWindow({
-    width: state.width || 1400,
-    height: state.height || 900,
+    width: state.width || 1300,
+    height: state.height || 860,
     x: state.x,
     y: state.y,
-    minWidth: 360,
-    minHeight: 600,
-    webPreferences: {
-      contextIsolation: true,
-      preload: path.join(__dirname, 'preload.cjs'),
-    },
+    minWidth: 380,
+    minHeight: 560,
     title: 'Планер',
+    icon: iconPath,
     autoHideMenuBar: true,
     show: false,
-    icon: path.join(__dirname, '..', 'public', 'favicon.svg'),
+    backgroundColor: '#f8fafc',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+      spellcheck: true,
+    },
   });
+  if (state.maximized) mainWindow.maximize();
 
-  if (state.maximized) {
-    mainWindow.maximize();
-  }
+  // Внешние ссылки — в браузере, а не внутри программы.
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (isSafeExternal(url)) shell.openExternal(url);
+    return { action: 'deny' };
+  });
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    const allowed = url.startsWith(`${SCHEME}://${HOST}/`) || (isDev && url.startsWith('http://localhost:5173'));
+    if (!allowed) {
+      event.preventDefault();
+      if (isSafeExternal(url)) shell.openExternal(url);
+    }
+  });
 
   if (isDev) {
     mainWindow.loadURL('http://localhost:5173');
-    mainWindow.webContents.openDevTools();
-    mainWindow.show();
-    if (splashWindow) { splashWindow.close(); splashWindow = null; }
+    mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
-    mainWindow.loadURL(`http://localhost:${BACKEND_PORT}`);
-    mainWindow.once('ready-to-show', () => {
-      if (splashWindow) { splashWindow.close(); splashWindow = null; }
-      mainWindow.show();
+    mainWindow.loadURL(`${SCHEME}://${HOST}/index.html`);
+  }
+
+  mainWindow.once('ready-to-show', () => mainWindow.show());
+
+  let saveTimer;
+  for (const evt of ['resize', 'move']) {
+    mainWindow.on(evt, () => {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveWindowState, 400);
     });
   }
 
-  // Save window state on resize/move
-  let saveTimeout;
-  ['resize', 'move'].forEach((evt) => {
-    mainWindow.on(evt, () => {
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(saveWindowState, 300);
-    });
-  });
-
-  // Minimize to tray instead of closing
+  // Закрытие окна сворачивает программу в трей, чтобы приходили напоминания.
+  let trayHintShown = false;
   mainWindow.on('close', (event) => {
-    if (!app.isQuiting) {
-      event.preventDefault();
-      saveWindowState();
-      mainWindow.hide();
-      if (tray) {
-        tray.displayBalloon({
-          iconType: 'info',
-          title: 'Планер',
-          content: 'Приложение свёрнуто в трей. Двойной клик по иконке — открыть.',
-        });
-      }
+    saveWindowState();
+    if (isQuitting) return;
+    event.preventDefault();
+    mainWindow.hide();
+    if (tray && !trayHintShown && process.platform === 'win32') {
+      trayHintShown = true;
+      tray.displayBalloon({
+        iconType: 'info',
+        title: 'Планер работает в фоне',
+        content: 'Напоминания будут приходить. Открыть — двойной клик по значку у часов, выйти — правый клик → «Выход».',
+      });
     }
   });
-
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
 }
 
-app.whenReady().then(async () => {
-  // In production, start embedded backend first with splash screen
-  if (!isDev) {
-    createSplashWindow();
-    const ready = await startEmbeddedBackend();
-    if (!ready) {
-      if (splashWindow) { splashWindow.close(); splashWindow = null; }
-      dialog.showErrorBox(
-        'Ошибка запуска',
-        'Не удалось запустить встроенный сервер. Попробуйте перезапустить приложение.'
-      );
-      app.quit();
-      return;
-    }
+function showWindow() {
+  if (!mainWindow) {
+    createWindow();
+    return;
   }
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.show();
+  mainWindow.focus();
+}
 
-  createMainWindow();
-  createTray();
+function createTray() {
+  let image = nativeImage.createFromPath(iconPath);
+  if (!image.isEmpty()) image = image.resize({ width: 16, height: 16 });
+  tray = new Tray(image);
+  tray.setToolTip('Планер');
+  tray.setContextMenu(
+    Menu.buildFromTemplate([
+      { label: 'Открыть Планер', click: showWindow },
+      {
+        label: 'Запускать при входе в Windows',
+        type: 'checkbox',
+        checked: app.getLoginItemSettings().openAtLogin,
+        click: (item) => app.setLoginItemSettings({ openAtLogin: item.checked, args: ['--hidden'] }),
+      },
+      { type: 'separator' },
+      {
+        label: 'Выход',
+        click: () => {
+          isQuitting = true;
+          app.quit();
+        },
+      },
+    ]),
+  );
+  tray.on('click', showWindow);
+  tray.on('double-click', showWindow);
+}
 
-  // Global shortcut: Ctrl+Shift+P to show window
-  const shortcut = process.platform === 'darwin' ? 'Cmd+Shift+P' : 'Ctrl+Shift+P';
-  const registered = globalShortcut.register(shortcut, () => {
-    if (mainWindow) {
-      if (mainWindow.isVisible()) {
-        mainWindow.focus();
-      } else {
-        mainWindow.show();
-        mainWindow.focus();
-      }
-    } else {
-      createMainWindow();
-    }
-  });
-  if (!registered) {
-    console.warn('Failed to register global shortcut', shortcut);
-  }
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
-  });
+ipcMain.handle('open-external', (_event, url) => {
+  if (typeof url === 'string' && isSafeExternal(url)) return shell.openExternal(url);
+  return undefined;
 });
 
-app.on('window-all-closed', () => {
-  // Don't quit when closing window — tray keeps app alive
-  if (process.platform !== 'darwin' && !tray) {
-    app.quit();
+app.whenReady().then(() => {
+  registerAppProtocol();
+  createWindow();
+  createTray();
+
+  // При автозапуске с Windows окно не показываем — программа сразу в трее.
+  if (process.argv.includes('--hidden') && mainWindow) {
+    mainWindow.once('ready-to-show', () => mainWindow.hide());
   }
+
+  globalShortcut.register('CommandOrControl+Shift+P', showWindow);
 });
 
 app.on('before-quit', () => {
-  app.isQuiting = true;
+  isQuitting = true;
 });
 
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
-  stopBackend();
 });
 
-app.on('quit', () => stopBackend());
+app.on('window-all-closed', () => {
+  // Программа остаётся в трее.
+});

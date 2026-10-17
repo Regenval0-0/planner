@@ -1,10 +1,14 @@
 export const STORAGE_KEYS = {
-  EVENTS: 'planner_events',
+  /** Последний полученный с сервера список событий. */
+  SERVER_EVENTS: 'planner_server_events',
+  /** Изменения, ещё не отправленные на сервер. */
   QUEUE: 'planner_queue',
   LAST_SYNC: 'planner_last_sync',
   USER: 'planner_user',
-  TOKEN: 'token',
 } as const;
+
+/** Ключи прежних версий — удаляются при выходе. */
+const LEGACY_KEYS = ['planner_events'];
 
 export function getStored<T>(key: string, defaultValue: T): T {
   try {
@@ -20,16 +24,25 @@ export function setStored<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // storage full
+    // хранилище переполнено или недоступно
   }
 }
 
 export function removeStored(key: string): void {
-  localStorage.removeItem(key);
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+}
+
+/** Удалить все локальные данные пользователя (при выходе или удалении аккаунта). */
+export function clearUserData() {
+  for (const key of [...Object.values(STORAGE_KEYS), ...LEGACY_KEYS]) removeStored(key);
 }
 
 export function isOnline(): boolean {
-  return navigator.onLine;
+  return typeof navigator === 'undefined' ? true : navigator.onLine !== false;
 }
 
 export function listenOnline(callback: (online: boolean) => void) {

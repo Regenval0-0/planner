@@ -1,112 +1,48 @@
 @echo off
 chcp 65001 >nul
-echo === Сборка Android для RuStore ===
-echo.
-
+setlocal EnableDelayedExpansion
 cd /d "%~dp0\.."
+echo === Сборка «Планера» для Android (RuStore) ===
+echo.
 
-set "KEystoreFile=android\app\planner-release.keystore"
-set "KEY_ALIAS=planner"
-
-:: Проверка наличия production keystore
-if not exist "%KEystoreFile%" (
-    echo.
-    echo ВНИМАНИЕ: Production keystore не найден: %KEystoreFile%
-    echo.
-    echo Для публикации в RuStore нужен production keystore.
-    echo Если у вас его нет, скрипт создаст временный (ТОЛЬКО ДЛЯ ТЕСТИРОВАНИЯ).
-    echo.
-    echo Чтобы создать production keystore:
-    echo   keytool -genkey -v -keystore planner-release.keystore -alias planner -keyalg RSA -keysize 2048 -validity 10000
-    echo.
-    choice /C YN /M "Создать временный keystore для тестирования"
-    if errorlevel 2 exit /b 1
-
-    echo.
-    echo Создание временного keystore...
-    for /f "delims=" %%i in ('where keytool 2^>nul') do set KEYTOOL=%%i
-    if "!KEYTOOL!"=="" (
-        echo keytool не найден. Убедитесь что установлен JDK.
-        pause
-        exit /b 1
-    )
-    "%KEYTOOL%" -genkey -v -keystore "%KEystoreFile%" -alias %KEY_ALIAS% -keyalg RSA -keysize 2048 -validity 10000 -storepass planner123 -keypass planner123 -dname "CN=Planner App, OU=Dev, O=Planner, L=Moscow, ST=Russia, C=RU"
-    if errorlevel 1 (
-        echo ОШИБКА создания keystore
-        pause
-        exit /b 1
-    )
+if not exist "android\app\keystore.properties" if not exist "android\app\planner-release.keystore" if not exist "android\app\planner.keystore" (
+  echo Нет ключа подписи. Сначала запустите scripts\create-keystore.bat
+  echo ВАЖНО: этим ключом подписываются ВСЕ будущие обновления в RuStore. Потеряете ключ — не сможете обновлять приложение.
+  pause
+  exit /b 1
 )
 
-echo [1/6] Сборка веб-assets...
-call npx vite build --mode production
-if errorlevel 1 (
-    echo ОШИБКА: Сборка Vite не удалась
-    pause
-    exit /b 1
-)
+echo [1/5] Установка зависимостей...
+call npm install --no-audit --no-fund || goto :error
+
+echo [2/5] Проверка настроек...
+call npm run check-env || goto :error
+
+echo [3/5] Сборка интерфейса...
+call npm run build || goto :error
+
+echo [4/5] Перенос в Android-проект...
+call npx cap sync android || goto :error
+
+echo [5/5] Сборка APK и AAB...
+pushd android
+call gradlew.bat assembleRelease bundleRelease || (popd & goto :error)
+popd
+
+if not exist release mkdir release
+for /f "tokens=2 delims=:, " %%v in ('findstr /c:"\"version\"" package.json') do set VER=%%~v
+copy /Y "android\app\build\outputs\apk\release\app-release.apk" "release\planner-!VER!.apk" >nul
+copy /Y "android\app\build\outputs\bundle\release\app-release.aab" "release\planner-!VER!.aab" >nul
 
 echo.
-echo [2/6] Синхронизация Capacitor...
-call npx cap sync android
-if errorlevel 1 (
-    echo ОШИБКА: Синхронизация Capacitor не удалась
-    pause
-    exit /b 1
-)
-
-cd android
-
-echo.
-echo [3/6] Сборка Release APK...
-call .\gradlew assembleRelease
-if errorlevel 1 (
-    echo ОШИБКА: Сборка APK не удалась
-    pause
-    exit /b 1
-)
-
-echo.
-echo [4/6] Сборка Release AAB...
-call .\gradlew bundleRelease
-if errorlevel 1 (
-    echo ОШИБКА: Сборка AAB не удалась
-    pause
-    exit /b 1
-)
-
-cd ..
-
-echo.
-echo [5/6] Копирование артефактов...
-if not exist "release" mkdir "release"
-copy "android\app\build\outputs\apk\release\app-release.apk" "release\planner-rustore.apk" /Y
-copy "android\app\build\outputs\bundle\release\app-release.aab" "release\planner-rustore.aab" /Y
-
-echo.
-echo [6/6] Проверка подписи APK...
-for /f "delims=" %%i in ('where apksigner 2^>nul') do set APK_SIGNER=%%i
-if "!APK_SIGNER!"=="" (
-    echo apksigner не найден, пропускаю проверку подписи
-) else (
-    "!APK_SIGNER!" verify release\planner-rustore.apk
-    if errorlevel 1 (
-        echo ВНИМАНИЕ: APK не подписан или подпись невалидна!
-    ) else (
-        echo Подпись APK валидна.
-    )
-)
-
-echo.
-echo === УСПЕХ ===
-echo APK: release\planner-rustore.apk
-echo AAB: release\planner-rustore.aab
-echo.
-echo Следующие шаги для RuStore:
-echo 1. Перейдите на https://console.rustore.ru
-echo 2. Создайте приложение с именем пакета: com.planner.app
-echo 3. Загрузите AAB (рекомендуется) или APK
-echo 4. Заполните данные приложения (название, описание, скриншоты)
-echo 5. Отправьте на модерацию
-echo.
+echo === Готово ===
+echo APK (установить на телефон): release\planner-!VER!.apk
+echo AAB (загрузить в RuStore):   release\planner-!VER!.aab
 pause
+exit /b 0
+
+:error
+echo.
+echo *** Сборка остановлена из-за ошибки (см. выше) ***
+pause
+exit /b 1

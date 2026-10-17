@@ -22,8 +22,16 @@ export function pad(n: number): string {
   return n.toString().padStart(2, '0');
 }
 
+/** Дата для <input type="date"> в МЕСТНОМ времени (iso.slice(0, 10) дал бы дату по UTC — в UTC+7 это вчерашний день до 07:00). */
 export function toDateInput(iso: string): string {
-  return iso.slice(0, 10);
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/** Местная полночь указанной даты из <input type="date"> (YYYY-MM-DD). */
+export function fromDateInput(value: string, endOfDay = false): Date {
+  const [y, m, d] = value.split('-').map(Number);
+  return endOfDay ? new Date(y, m - 1, d, 23, 59, 59, 999) : new Date(y, m - 1, d, 0, 0, 0, 0);
 }
 
 export function toTimeInput(iso: string): string {
